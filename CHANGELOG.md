@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] - 2026-03-17
+
+### Added
+
+- Schema.org `WebSite` JSON-LD structured data
+- `<meta name="author">` and publisher info in JSON-LD
+- `article:published_time` and `article:modified_time` meta tags
+- `datePublished` and `dateModified` in JSON-LD
+- `/llms.txt` for LLM consumption per [llmstxt.org](https://llmstxt.org) spec
+- `/robots.txt` allowing all crawlers
+- SEO & AI Readiness section in README
+
+### Fixed
+
+- Meta description shortened from 184 to under 160 characters
+- Canonical URL added (`<link rel="canonical">`)
+
 ## [0.2.0] - 2026-03-17
 
 ### Added

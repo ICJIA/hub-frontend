@@ -4,7 +4,7 @@
 
 [![Nuxt UI](https://img.shields.io/badge/Made%20with-Nuxt%20UI-00DC82?logo=nuxt&labelColor=020420)](https://ui.nuxt.com)
 
-The frontend for the ICJIA Research Hub version 2.0, built with [Nuxt 4](https://nuxt.com) and [Nuxt UI](https://ui.nuxt.com). Deployed as a statically generated site on Netlify. Includes pre-configured SEO with Open Graph and Twitter Card meta tags via Nuxt's `useSeoMeta()`.
+The frontend for the ICJIA Research Hub version 2.0, built with [Nuxt 4](https://nuxt.com) and [Nuxt UI](https://ui.nuxt.com). Deployed as a statically generated site on Netlify.
 
 - [Hub 2.0 development site](https://v2hub.netlify.app/)
 
@@ -13,6 +13,18 @@ The frontend for the ICJIA Research Hub version 2.0, built with [Nuxt 4](https:/
 The Research & Analysis Unit serves as Illinois' Statistical Analysis Center (SAC). State SACs provide objective analysis of criminal justice data for informing statewide policy and practice. The Illinois SAC is affiliated with and supported by the Justice Information Resource Network (JIRN), a national nonprofit organization that promotes collaboration and exchange of information among state SACs, and acts as a liaison between state agencies and the U.S. Department of Justice.
 
 R&A has taken a leadership role in convening policymakers and practitioners to coordinate and improve system response to crime and to promote the use of evidence-based and promising practices at the state and local level. The unit staffs statutorily created criminal justice initiatives. It also develops statistical methodologies and provides statistical advice and interpretation to support criminal justice decision-making and information needs.
+
+## SEO & AI Readiness
+
+This project includes comprehensive SEO and AI discoverability out of the box:
+
+- **Open Graph & Twitter Cards** — social sharing previews via Nuxt's `useSeoMeta()`
+- **JSON-LD structured data** — Schema.org `WebSite` markup with publisher, dates, and language
+- **Canonical URL** — `<link rel="canonical">` for proper URL attribution
+- **Authorship & freshness** — `meta author`, `article:published_time`, and `article:modified_time`
+- **[llms.txt](https://llmstxt.org)** — `/llms.txt` describes the site for LLM consumption (ChatGPT, Claude, Perplexity, etc.)
+- **robots.txt** — allows all crawlers with no AI-blocking directives
+- **Custom OG image** — 1200x630 branded image for link previews
 
 ## Accessibility
 
