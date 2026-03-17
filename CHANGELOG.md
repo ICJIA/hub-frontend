@@ -8,10 +8,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Added
 
-- axe-core accessibility testing via Playwright (`pnpm a11y` and `pnpm a11y:test`)
-- Vitest test runner with e2e accessibility test suite
-- Manual a11y audit script (`scripts/a11y-audit.ts`)
-- Accessibility section in README
+- axe-core + Playwright automated WCAG AA testing (`pnpm test`, `pnpm a11y:test`)
+- Manual a11y audit script against any URL (`pnpm a11y`)
+- Vitest test runner with verbose reporter and per-page pass/fail output
+- Auto-discovery of all routes from `app/pages/` — new pages are tested automatically
+- Vitest config (`vitest.config.ts`) with verbose reporter and 60s timeout
+- Testing section in README
+
+### Changed
+
+- README section order: About R&A Unit → Accessibility → Tech Stack
+- Accessibility section promoted to `## Accessibility` heading
+
+### Fixed
+
+- Footer color-contrast WCAG violation (`text-dimmed` → `text-muted`)
+- LICENSE copyright year typo (22026 → 2026)
 
 ## [0.1.0] - 2026-03-17
 
