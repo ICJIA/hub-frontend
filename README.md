@@ -4,7 +4,7 @@
 
 [![Nuxt UI](https://img.shields.io/badge/Made%20with-Nuxt%20UI-00DC82?logo=nuxt&labelColor=020420)](https://ui.nuxt.com)
 
-The frontend for the ICJIA Research Hub version 2.0, built with [Nuxt 4](https://nuxt.com) and [Nuxt UI](https://ui.nuxt.com). Deployed as a statically generated site on Netlify.
+The frontend for the ICJIA Research Hub version 2.0, built with [Nuxt 4](https://nuxt.com) and [Nuxt UI](https://ui.nuxt.com). Deployed as a statically generated site on Netlify. Includes pre-configured SEO with Open Graph and Twitter Card meta tags via Nuxt's `useSeoMeta()`.
 
 - [Live URL](https://v2hub.netlify.app/)
 - [Documentation](https://ui.nuxt.com/docs/getting-started/installation/nuxt)
