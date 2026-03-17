@@ -112,6 +112,5 @@
 
   <!-- Bottom accent -->
   <rect x="0" y="555" width="1200" height="75" fill="#0f172a" opacity="0.5"/>
-  <text x="80" y="598" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#475569">v2hub.netlify.app</text>
   <text x="1120" y="598" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#475569" text-anchor="end">Illinois Statistical Analysis Center</text>
 </svg>
