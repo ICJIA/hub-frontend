@@ -33,9 +33,13 @@ useSeoMeta({
 
 <template>
   <UApp>
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-primary focus:text-white">
+      Skip to main content
+    </a>
+
     <UHeader>
       <template #left>
-        <NuxtLink to="/">
+        <NuxtLink to="/" aria-label="ICJIA Research Hub home">
           <AppLogo class="w-auto h-6 shrink-0" />
         </NuxtLink>
 
@@ -46,35 +50,35 @@ useSeoMeta({
         <UColorModeButton />
 
         <UButton
-          to="https://github.com/nuxt-ui-templates/starter"
+          to="https://github.com/ICJIA/hub-frontend"
           target="_blank"
           icon="i-simple-icons-github"
-          aria-label="GitHub"
+          aria-label="GitHub repository"
           color="neutral"
           variant="ghost"
         />
       </template>
     </UHeader>
 
-    <UMain>
+    <UMain id="main-content">
       <NuxtPage />
     </UMain>
 
-    <USeparator icon="i-simple-icons-nuxtdotjs" />
+    <USeparator aria-hidden="true" icon="i-simple-icons-nuxtdotjs" />
 
     <UFooter>
       <template #left>
-        <p class="text-sm text-muted">
-          Built with Nuxt UI • © {{ new Date().getFullYear() }}
+        <p class="text-sm text-(--ui-text-dimmed)">
+          Built with Nuxt UI &bull; &copy; {{ new Date().getFullYear() }} Illinois Criminal Justice Information Authority
         </p>
       </template>
 
       <template #right>
         <UButton
-          to="https://github.com/nuxt-ui-templates/starter"
+          to="https://github.com/ICJIA/hub-frontend"
           target="_blank"
           icon="i-simple-icons-github"
-          aria-label="GitHub"
+          aria-label="GitHub repository"
           color="neutral"
           variant="ghost"
         />
