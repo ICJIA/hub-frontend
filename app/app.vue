@@ -68,7 +68,7 @@ useSeoMeta({
 
     <UFooter>
       <template #left>
-        <p class="text-sm text-(--ui-text-dimmed)">
+        <p class="text-sm text-(--ui-text-muted)">
           Built with Nuxt UI &bull; &copy; {{ new Date().getFullYear() }} Illinois Criminal Justice Information Authority
         </p>
       </template>
