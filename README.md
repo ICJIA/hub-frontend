@@ -6,7 +6,15 @@
 
 The frontend for the ICJIA Research Hub version 2.0, built with [Nuxt 4](https://nuxt.com) and [Nuxt UI](https://ui.nuxt.com). Deployed as a statically generated site on Netlify. Includes pre-configured SEO with Open Graph and Twitter Card meta tags via Nuxt's `useSeoMeta()`.
 
-### Accessibility is a key priority
+- [Hub 2.0 development site](https://v2hub.netlify.app/)
+
+## About the Research & Analysis Unit
+
+The Research & Analysis Unit serves as Illinois' Statistical Analysis Center (SAC). State SACs provide objective analysis of criminal justice data for informing statewide policy and practice. The Illinois SAC is affiliated with and supported by the Justice Information Resource Network (JIRN), a national nonprofit organization that promotes collaboration and exchange of information among state SACs, and acts as a liaison between state agencies and the U.S. Department of Justice.
+
+R&A has taken a leadership role in convening policymakers and practitioners to coordinate and improve system response to crime and to promote the use of evidence-based and promising practices at the state and local level. The unit staffs statutorily created criminal justice initiatives. It also develops statistical methodologies and provides statistical advice and interpretation to support criminal justice decision-making and information needs.
+
+## Accessibility
 
 This project is built to meet **WCAG AA 2.1** standards. Accessibility is enforced through automated testing and baked into the development workflow:
 
@@ -15,8 +23,6 @@ This project is built to meet **WCAG AA 2.1** standards. Accessibility is enforc
 - Skip-to-content navigation for keyboard users
 - Semantic HTML, ARIA labels, and proper focus management throughout
 - Dark mode default with high-contrast color system
-
-- [Hub 2.0 development site](https://v2hub.netlify.app/)
 
 ## Tech Stack
 
@@ -36,12 +42,6 @@ This project is built to meet **WCAG AA 2.1** standards. Accessibility is enforc
 | [Vitest](https://vitest.dev) | 4.x | Unit and integration test runner |
 | [Playwright](https://playwright.dev) | 1.x | Browser automation for e2e and a11y tests |
 | [Netlify](https://www.netlify.com) | — | Static site hosting (Nitro `static` preset) |
-
-## About the Research & Analysis Unit
-
-The Research & Analysis Unit serves as Illinois' Statistical Analysis Center (SAC). State SACs provide objective analysis of criminal justice data for informing statewide policy and practice. The Illinois SAC is affiliated with and supported by the Justice Information Resource Network (JIRN), a national nonprofit organization that promotes collaboration and exchange of information among state SACs, and acts as a liaison between state agencies and the U.S. Department of Justice.
-
-R&A has taken a leadership role in convening policymakers and practitioners to coordinate and improve system response to crime and to promote the use of evidence-based and promising practices at the state and local level. The unit staffs statutorily created criminal justice initiatives. It also develops statistical methodologies and provides statistical advice and interpretation to support criminal justice decision-making and information needs.
 
 ## Testing
 
