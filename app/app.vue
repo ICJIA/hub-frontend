@@ -11,17 +11,23 @@ useHead({
   }
 })
 
-const title = 'Nuxt Starter Template'
-const description = 'A production-ready starter template powered by Nuxt UI. Build beautiful, accessible, and performant applications in minutes, not hours.'
+const title = 'ICJIA Research Hub v2.0'
+const description = 'The ICJIA Research Hub provides access to research articles, datasets, and interactive applications from the Illinois Criminal Justice Information Authority\'s Research & Analysis Unit.'
 
 useSeoMeta({
   title,
   description,
   ogTitle: title,
   ogDescription: description,
-  ogImage: 'https://ui.nuxt.com/assets/templates/nuxt/starter-light.png',
-  twitterImage: 'https://ui.nuxt.com/assets/templates/nuxt/starter-light.png',
-  twitterCard: 'summary_large_image'
+  ogImage: 'https://v2hub.netlify.app/og-image.png',
+  ogImageWidth: 1200,
+  ogImageHeight: 630,
+  ogType: 'website',
+  ogSiteName: 'ICJIA Research Hub',
+  twitterImage: 'https://v2hub.netlify.app/og-image.png',
+  twitterCard: 'summary_large_image',
+  twitterTitle: title,
+  twitterDescription: description
 })
 </script>
 

@@ -1,5 +1,7 @@
 # ICJIA Research Hub v2.0 — Frontend
 
+![ICJIA Research Hub v2.0](public/og-image.png)
+
 [![Nuxt UI](https://img.shields.io/badge/Made%20with-Nuxt%20UI-00DC82?logo=nuxt&labelColor=020420)](https://ui.nuxt.com)
 
 The frontend for the ICJIA Research Hub version 2.0, built with [Nuxt 4](https://nuxt.com) and [Nuxt UI](https://ui.nuxt.com). Deployed as a statically generated site on Netlify.
