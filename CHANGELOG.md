@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - 2026-03-17
+
+### Added
+
+- axe-core accessibility testing via Playwright (`pnpm a11y` and `pnpm a11y:test`)
+- Vitest test runner with e2e accessibility test suite
+- Manual a11y audit script (`scripts/a11y-audit.ts`)
+- Accessibility section in README
+
 ## [0.1.0] - 2026-03-17
 
 ### Added
