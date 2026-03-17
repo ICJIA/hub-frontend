@@ -10,8 +10,8 @@ The frontend for the ICJIA Research Hub version 2.0, built with [Nuxt 4](https:/
 
 This project is built to meet **WCAG AA 2.1** standards. Accessibility is enforced through automated testing and baked into the development workflow:
 
-- **[axe-core](https://github.com/dequelabs/axe-core)** runs WCAG AA audits against rendered pages via Playwright
-- **[@nuxt/a11y](https://github.com/nuxt/a11y)** provides real-time accessibility warnings during development
+- **[@nuxt/a11y](https://github.com/nuxt/a11y)** provides real-time accessibility warnings in the browser overlay during development — catch issues early as you build
+- **[axe-core](https://github.com/dequelabs/axe-core)** runs full WCAG AA audits against rendered pages via Playwright — produces pass/fail results for CI pipelines, the test suite (`pnpm test`), or manual checks (`pnpm a11y`)
 - Skip-to-content navigation for keyboard users
 - Semantic HTML, ARIA labels, and proper focus management throughout
 - Dark mode default with high-contrast color system
