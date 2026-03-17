@@ -4,7 +4,7 @@
 
 Use this template to get started with [Nuxt UI](https://ui.nuxt.com) quickly.
 
-- [Live demo](https://starter-template.nuxt.dev/)
+- [Live URL](https://v2hub.netlify.app/)
 - [Documentation](https://ui.nuxt.com/docs/getting-started/installation/nuxt)
 
 <a href="https://starter-template.nuxt.dev/" target="_blank">
