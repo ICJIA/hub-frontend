@@ -11,12 +11,12 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
-  routeRules: {
-    '/': { prerender: true }
-  },
-
   colorMode: {
     preference: 'dark'
+  },
+
+  routeRules: {
+    '/': { prerender: true }
   },
 
   compatibilityDate: '2025-01-15',

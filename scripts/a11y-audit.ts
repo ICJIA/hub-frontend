@@ -2,7 +2,7 @@ import { chromium } from 'playwright-core'
 import AxeBuilder from '@axe-core/playwright'
 
 const baseUrl = process.argv[2] || 'http://localhost:3000'
-const paths = ['/' ]
+const paths = ['/']
 
 async function run() {
   const browser = await chromium.launch()

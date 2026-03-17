@@ -32,8 +32,8 @@ describe('Accessibility (axe-core)', async () => {
   const pageResults: PageResult[] = []
 
   afterAll(() => {
-    const passed = pageResults.filter((r) => r.status === 'pass').length
-    const failed = pageResults.filter((r) => r.status === 'fail').length
+    const passed = pageResults.filter(r => r.status === 'pass').length
+    const failed = pageResults.filter(r => r.status === 'fail').length
     console.log(`\n  a11y summary: ${passed} passed, ${failed} failed (${pageResults.length} pages)\n`)
     for (const r of pageResults) {
       const icon = r.status === 'pass' ? 'PASS' : 'FAIL'
@@ -56,7 +56,7 @@ describe('Accessibility (axe-core)', async () => {
         .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
         .analyze()
 
-      const violations = axeResults.violations.map((v) => ({
+      const violations = axeResults.violations.map(v => ({
         id: v.id,
         impact: v.impact,
         description: v.description,
@@ -68,7 +68,7 @@ describe('Accessibility (axe-core)', async () => {
       const status = violations.length === 0 ? 'pass' as const : 'fail' as const
       pageResults.push({ route, status, violationCount: violations.length })
 
-      expect(violations, violations.map((v) => `[${v.impact}] ${v.id}: ${v.description} (${v.nodes} elements)`).join('\n')).toHaveLength(0)
+      expect(violations, violations.map(v => `[${v.impact}] ${v.id}: ${v.description} (${v.nodes} elements)`).join('\n')).toHaveLength(0)
     })
   }
 })

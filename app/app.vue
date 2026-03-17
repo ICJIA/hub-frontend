@@ -33,13 +33,19 @@ useSeoMeta({
 
 <template>
   <UApp>
-    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-primary focus:text-white">
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-primary focus:text-white"
+    >
       Skip to main content
     </a>
 
     <UHeader>
       <template #left>
-        <NuxtLink to="/" aria-label="ICJIA Research Hub home">
+        <NuxtLink
+          to="/"
+          aria-label="ICJIA Research Hub home"
+        >
           <AppLogo class="w-auto h-6 shrink-0" />
         </NuxtLink>
 
@@ -64,7 +70,10 @@ useSeoMeta({
       <NuxtPage />
     </UMain>
 
-    <USeparator aria-hidden="true" icon="i-simple-icons-nuxtdotjs" />
+    <USeparator
+      aria-hidden="true"
+      icon="i-simple-icons-nuxtdotjs"
+    />
 
     <UFooter>
       <template #left>
