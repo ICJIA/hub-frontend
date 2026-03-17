@@ -7,6 +7,7 @@
 The frontend for the ICJIA Research Hub version 2.0, built with [Nuxt 4](https://nuxt.com) and [Nuxt UI](https://ui.nuxt.com). Deployed as a statically generated site on Netlify.
 
 - [Hub 2.0 development site](https://v2hub.netlify.app/)
+- [Changelog](CHANGELOG.md)
 
 ## About the Research & Analysis Unit
 
