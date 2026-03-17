@@ -12,19 +12,27 @@ useHead({
 })
 
 const title = 'ICJIA Research Hub v2.0'
-const description = 'The ICJIA Research Hub provides access to research articles, datasets, and interactive applications from the Illinois Criminal Justice Information Authority\'s Research & Analysis Unit.'
+const siteUrl = 'https://v2hub.netlify.app'
+const description = 'Access ICJIA research articles, datasets, and interactive applications from Illinois\' Statistical Analysis Center.'
+
+useHead({
+  link: [
+    { rel: 'canonical', href: siteUrl }
+  ]
+})
 
 useSeoMeta({
   title,
   description,
   ogTitle: title,
   ogDescription: description,
-  ogImage: 'https://v2hub.netlify.app/og-image.png',
+  ogUrl: siteUrl,
+  ogImage: `${siteUrl}/og-image.png`,
   ogImageWidth: 1200,
   ogImageHeight: 630,
   ogType: 'website',
   ogSiteName: 'ICJIA Research Hub',
-  twitterImage: 'https://v2hub.netlify.app/og-image.png',
+  twitterImage: `${siteUrl}/og-image.png`,
   twitterCard: 'summary_large_image',
   twitterTitle: title,
   twitterDescription: description
