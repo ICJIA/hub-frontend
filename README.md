@@ -1,116 +1,131 @@
-# ICJIA Research Hub v2.0 — Frontend
+# Hub Frontend
 
-![ICJIA Research Hub v2.0](public/og-image.png)
+A Nuxt 4 frontend for browsing and managing research content — articles, apps, and datasets — powered by a Strapi 5 CMS backend. Built with Nuxt UI v3.
 
-[![Nuxt UI](https://img.shields.io/badge/Made%20with-Nuxt%20UI-00DC82?logo=nuxt&labelColor=020420)](https://ui.nuxt.com)
+## Prerequisites
 
-The frontend for the ICJIA Research Hub version 2.0, built with [Nuxt 4](https://nuxt.com) and [Nuxt UI](https://ui.nuxt.com). Deployed as a statically generated site on Netlify.
+- [Node.js](https://nodejs.org/) 18 or later
+- A running Strapi 5 backend (default: `http://localhost:1338`)
 
-- [Hub 2.0 development site](https://v2hub.netlify.app/)
-- [Changelog](CHANGELOG.md)
+## Installation
 
-## About the Research & Analysis Unit
+```bash
 
-The Research & Analysis Unit serves as Illinois' Statistical Analysis Center (SAC). State SACs provide objective analysis of criminal justice data for informing statewide policy and practice. The Illinois SAC is affiliated with and supported by the Justice Information Resource Network (JIRN), a national nonprofit organization that promotes collaboration and exchange of information among state SACs, and acts as a liaison between state agencies and the U.S. Department of Justice.
+# Install dependencies
+npm install
+```
 
-R&A has taken a leadership role in convening policymakers and practitioners to coordinate and improve system response to crime and to promote the use of evidence-based and promising practices at the state and local level. The unit staffs statutorily created criminal justice initiatives. It also develops statistical methodologies and provides statistical advice and interpretation to support criminal justice decision-making and information needs.
+Create a `.env` file at the project root:
 
-## SEO & AI Readiness
+```
+VITE_API_BASE_URL=http://localhost:1338
+VITE_API_BEARER_TOKEN=<your-strapi-bearer-token>
+```
 
-This project includes comprehensive SEO and AI discoverability out of the box:
+- `VITE_API_BASE_URL` — URL of your Strapi backend
+- `VITE_API_BEARER_TOKEN` — API token for authenticated operations (editing, publishing, media upload). Public browsing works without it.
 
-- **Open Graph & Twitter Cards** — social sharing previews via Nuxt's `useSeoMeta()`
-- **JSON-LD structured data** — Schema.org `WebSite` markup with publisher, dates, and language
-- **Canonical URL** — `<link rel="canonical">` for proper URL attribution
-- **Authorship & freshness** — `meta author`, `article:published_time`, and `article:modified_time`
-- **[llms.txt](https://llmstxt.org)** — `/llms.txt` describes the site for LLM consumption (ChatGPT, Claude, Perplexity, etc.)
-- **robots.txt** — allows all crawlers with no AI-blocking directives
-- **Custom OG image** — 1200x630 branded image for link previews
+## Running the Development Server
 
-## Accessibility
+```bash
+npm run dev
+```
 
-This project is built to meet **WCAG AA 2.1** standards. Accessibility is enforced through automated testing and baked into the development workflow:
+The app will be available at `http://localhost:3000`.
 
-- **[@nuxt/a11y](https://github.com/nuxt/a11y)** provides real-time accessibility warnings in the browser overlay during development — catch issues early as you build
-- **[axe-core](https://github.com/dequelabs/axe-core)** runs full WCAG AA audits against rendered pages via Playwright — produces pass/fail results for CI pipelines, the test suite (`pnpm test`), or manual checks (`pnpm a11y`)
-- Skip-to-content navigation for keyboard users
-- Semantic HTML, ARIA labels, and proper focus management throughout
-- Dark mode default with high-contrast color system
+## Building for Production
 
-## Tech Stack
+```bash
+# Create an optimized build
+npm run build
 
-| Technology | Version | Description |
+# Preview the production build locally
+npm run preview
+```
+
+The build output is written to the `.output/` directory.
+
+## Usage
+
+### Browsing Content
+
+Open `http://localhost:3000`. Use the tabs to switch between Articles, Apps, and Datasets. Filter by category, author, or year, or use the search box. Toggle between grid and list view with the view controls.
+
+### Editing & Publishing
+
+Each content type has its own preview and publish workflow:
+
+| Content type | Live Preview route | Preview route |
 |---|---|---|
-| [Nuxt](https://nuxt.com) | 4.x | Vue-based full-stack framework |
-| [Vue](https://vuejs.org) | 3.x | Reactive UI framework (bundled with Nuxt) |
-| [Nuxt UI](https://ui.nuxt.com) | 4.x | Component library for Nuxt |
-| [Nuxt Content](https://content.nuxt.com) | 3.x | File-based CMS module |
-| [Tailwind CSS](https://tailwindcss.com) | 4.x | Utility-first CSS framework |
-| [TypeScript](https://www.typescriptlang.org) | 5.x | Type-safe JavaScript |
-| [ESLint](https://eslint.org) | 10.x | Code linting |
-| [pnpm](https://pnpm.io) | 10.x | Fast, disk-efficient package manager |
-| [Iconify](https://iconify.design) | — | Icon sets (Lucide, Simple Icons) |
-| [Nuxt A11y](https://github.com/nuxt/a11y) | 1.0.0-alpha | Accessibility auditing module |
-| [axe-core](https://github.com/dequelabs/axe-core) | 4.x | WCAG AA automated accessibility testing |
-| [Vitest](https://vitest.dev) | 4.x | Unit and integration test runner |
-| [Playwright](https://playwright.dev) | 1.x | Browser automation for e2e and a11y tests |
-| [Netlify](https://www.netlify.com) | — | Static site hosting (Nitro `static` preset) |
+| Articles | `/preview/[id]?status=draft` | `/previewreadonly/[id]?status=draft` |
+| Apps | `/appspreview/[id]?status=draft` | `/appspreviewreadonly/[id]?status=draft` |
+| Datasets | `/datasetpreview/[id]?status=draft` | `/datasetpreviewreadonly/[id]?status=draft` |
 
-## Testing
+These routes are typically opened from within the Strapi admin panel. When opened standalone (not in an iframe), access requires a signed token passed as `?token=` in the query string.
 
-Run the full test suite (includes accessibility):
+## Project Structure
 
-```bash
-pnpm test
+```
+app/
+├── app.vue                          # Root app component
+├── assets/
+│   └── style.css                    # Global styles
+├── components/
+│   └── RichTextEditor.vue           # WYSIWYG editor (Quill-based)
+├── middleware/
+│   └── preview-access.ts            # Token/iframe auth for preview routes
+├── pages/
+│   ├── index.vue                    # Home: tabbed Articles / Apps / Datasets listing
+│   ├── article/
+│   │   └── [id].vue                 # Article detail view
+│   ├── preview/
+│   │   └── [id].vue                 # Article editor (draft preview)
+│   ├── previewreadonly/
+│   │   └── [id].vue                 # Article publish view
+│   ├── apps/
+│   │   ├── index.vue                # Apps listing
+│   │   └── [id].vue                 # App detail view
+│   ├── appspreview/
+│   │   └── [id].vue                 # App editor (draft preview)
+│   ├── appspreviewreadonly/
+│   │   └── [id].vue                 # App publish view
+│   ├── datasets/
+│   │   ├── index.vue                # Datasets listing
+│   │   └── [id].vue                 # Dataset detail view
+│   ├── datasetpreview/
+│   │   └── [id].vue                 # Dataset editor (draft preview)
+│   └── datasetpreviewreadonly/
+│       └── [id].vue                 # Dataset publish view
+├── services/
+│   └── api.js                       # Strapi API service layer
+└── utils/
+    └── previewToken.js              # Signed token utilities
+nuxt.config.ts
 ```
 
-Run only the accessibility tests:
+## Troubleshooting
+
+**`EACCES` permission error on Ubuntu**
+
+If `npm install` fails with a permissions error, avoid using `sudo`. Instead, configure npm to use a local directory:
 
 ```bash
-pnpm a11y:test
+mkdir -p ~/.npm-global
+npm config set prefix '~/.npm-global'
+echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
+source ~/.bashrc
 ```
 
-Run a manual accessibility audit against a running dev server:
+**Port 3000 already in use**
 
-```bash
-pnpm dev          # in one terminal
-pnpm a11y         # in another terminal
+Kill the process using the port, or change the dev server port in `nuxt.config.ts`:
+
+```ts
+devServer: {
+  port: 3001
+}
 ```
 
-You can also pass a custom URL:
+**Cannot connect to Strapi**
 
-```bash
-pnpm a11y http://localhost:3000
-```
-
-## Setup
-
-Make sure to install the dependencies:
-
-```bash
-pnpm install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-pnpm dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-pnpm build
-```
-
-Locally preview production build:
-
-```bash
-pnpm preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+Make sure your Strapi backend is running and that `VITE_API_BASE_URL` in `.env` points to the correct address.
