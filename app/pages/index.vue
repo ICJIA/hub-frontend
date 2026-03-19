@@ -80,7 +80,7 @@
         >
           <img
             v-if="article.Splash?.url"
-            :src="'http://localhost:1338' + article.Splash.url"
+            :src="API_BASE_URL + article.Splash.url"
             :alt="article.Title"
             :class="viewMode === 'list' ? 'w-44 min-w-[180px] object-cover' : 'w-full h-48 object-cover'"
           />
@@ -127,7 +127,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchArticles } from '~/services/api'
+import { fetchArticles, API_BASE_URL } from '~/services/api'
 
 const router = useRouter()
 
