@@ -1,41 +1,24 @@
 {
-  "name": "hub-frontend",
+  "name": "article-viewer",
   "private": true,
+  "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "build": "nuxt build",
     "dev": "nuxt dev",
-    "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
-    "lint": "eslint .",
-    "typecheck": "nuxt typecheck",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "a11y": "npx tsx scripts/a11y-audit.ts",
-    "a11y:test": "vitest run tests/a11y"
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview"
   },
   "dependencies": {
-    "@iconify-json/lucide": "^1.2.98",
-    "@iconify-json/simple-icons": "^1.2.74",
-    "@nuxt/a11y": "1.0.0-alpha.1",
-    "@nuxt/content": "3.12.0",
-    "@nuxt/test-utils": "4.0.0",
-    "@nuxt/ui": "^4.5.1",
-    "nuxt": "^4.4.2",
-    "tailwindcss": "^4.2.1"
+    "@nuxt/ui": "^3.0.0",
+    "@vuepic/vue-datepicker": "^12.1.0",
+    "@vueup/vue-quill": "^1.2.0",
+    "marked": "^17.0.1",
+    "marked-footnote": "^1.4.0",
+    "nuxt": "^4.0.0",
+    "quill-better-table": "^1.2.10",
+    "turndown": "^7.2.2",
+    "turndown-plugin-gfm": "^1.0.2"
   },
-  "devDependencies": {
-    "@axe-core/playwright": "^4.11.1",
-    "@nuxt/eslint": "^1.15.2",
-    "@playwright/test": "^1.58.2",
-    "@vue/test-utils": "^2.4.6",
-    "axe-core": "^4.11.1",
-    "eslint": "^10.0.3",
-    "happy-dom": "^20.8.4",
-    "playwright-core": "^1.58.2",
-    "typescript": "^5.9.3",
-    "vitest": "^4.1.0",
-    "vue-tsc": "^3.2.5"
-  },
-  "packageManager": "pnpm@10.32.1"
+  "devDependencies": {}
 }

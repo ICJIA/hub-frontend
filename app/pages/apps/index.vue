@@ -6,7 +6,7 @@
         <UButton variant="ghost" to="/apps" size="sm">Apps</UButton>
         <UButton variant="ghost" to="/datasets" size="sm">Datasets</UButton>
       </div>
-      <h1 class="text-2xl font-bold">Research Articles</h1>
+      <h1 class="text-2xl font-bold">Apps</h1>
     </div>
 
     <div class="bg-gray-100 border border-gray-200 rounded-lg p-3 mb-6">
@@ -64,24 +64,24 @@
 
     <div v-if="loading" class="flex flex-col items-center py-16">
       <UIcon name="i-heroicons-arrow-path" class="w-10 h-10 animate-spin text-primary-500" />
-      <p class="mt-4 text-gray-500">Loading articles...</p>
+      <p class="mt-4 text-gray-500">Loading apps...</p>
     </div>
 
-    <div v-else-if="articles.length > 0" class="grid grid-cols-12 gap-4">
+    <div v-else-if="apps.length > 0" class="grid grid-cols-12 gap-4">
       <div
-        v-for="article in articles"
-        :key="article.documentId"
+        v-for="app in apps"
+        :key="app.documentId"
         :class="viewMode === 'list' ? 'col-span-12' : 'col-span-12 sm:col-span-6 md:col-span-4'"
       >
         <div
-          @click="goToArticle(article.documentId)"
+          @click="goToApp(app.documentId)"
           class="bg-white border border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow h-full"
           :class="viewMode === 'list' ? 'flex' : ''"
         >
           <img
-            v-if="article.Splash?.url"
-            :src="'http://localhost:1338' + article.Splash.url"
-            :alt="article.Title"
+            v-if="appImageUrl(app)"
+            :src="appImageUrl(app)"
+            :alt="app.Title"
             :class="viewMode === 'list' ? 'w-44 min-w-[180px] object-cover' : 'w-full h-48 object-cover'"
           />
           <div
@@ -92,12 +92,12 @@
             <span class="text-white text-sm">No Image</span>
           </div>
           <div class="p-4">
-            <div class="text-lg font-semibold mb-1 leading-snug">{{ article.Title }}</div>
-            <div v-if="article.Date" class="text-xs text-gray-500 mb-2">{{ formatDate(article.Date) }}</div>
-            <p v-if="article.Abstract" class="text-sm text-gray-500 mb-3">{{ truncate(article.Abstract, 150) }}</p>
-            <div v-if="article.Categories?.length" class="flex flex-wrap gap-1">
+            <div class="text-lg font-semibold mb-1 leading-snug">{{ app.Title }}</div>
+            <div v-if="app.Date" class="text-xs text-gray-500 mb-2">{{ formatDate(app.Date) }}</div>
+            <p v-if="app.description" class="text-sm text-gray-500 mb-3">{{ truncate(app.description, 150) }}</p>
+            <div v-if="app.categories?.length" class="flex flex-wrap gap-1">
               <UBadge
-                v-for="category in article.Categories"
+                v-for="category in app.categories"
                 :key="category"
                 color="primary"
                 variant="subtle"
@@ -110,7 +110,7 @@
     </div>
 
     <div v-else-if="!loading" class="text-center py-16 text-gray-500">
-      <p>No articles found.</p>
+      <p>No apps found.</p>
     </div>
 
     <div v-if="pagination.pageCount > 1" class="flex justify-center mt-6">
@@ -127,11 +127,11 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchArticles } from '~/services/api'
+import { fetchApps, API_BASE_URL } from '~/services/api'
 
 const router = useRouter()
 
-const articles = ref([])
+const apps = ref([])
 const loading = ref(false)
 const error = ref(null)
 const searchQuery = ref('')
@@ -151,24 +151,30 @@ const pagination = reactive({
   total: 0
 })
 
-const loadArticles = async () => {
+const appImageUrl = (app) => {
+  const img = Array.isArray(app.image) ? app.image[0] : app.image
+  if (!img?.url) return null
+  return img.url.startsWith('/') ? `${API_BASE_URL}${img.url}` : img.url
+}
+
+const loadApps = async () => {
   loading.value = true
   error.value = null
   try {
-    const data = await fetchArticles(
+    const data = await fetchApps(
       pagination.page,
       pagination.pageSize,
       'Date:desc',
       searchQuery.value,
       { category: filterTopic.value || '', author: filterAuthor.value || '', year: filterYear.value || '' }
     )
-    articles.value = data.data
+    apps.value = data.data
     pagination.page = data.meta.pagination.page
     pagination.pageCount = data.meta.pagination.pageCount
     pagination.total = data.meta.pagination.total
   } catch (err) {
-    error.value = `Failed to load articles: ${err.message}`
-    articles.value = []
+    error.value = `Failed to load apps: ${err.message}`
+    apps.value = []
   } finally {
     loading.value = false
   }
@@ -176,24 +182,22 @@ const loadArticles = async () => {
 
 const loadFilterOptions = async () => {
   try {
-    const data = await fetchArticles(1, 100, 'Date:desc', '', {})
+    const data = await fetchApps(1, 100, 'Date:desc', '', {})
     const topics = new Set()
-    const authorsMap = new Map()
+    const authors = new Set()
     const years = new Set()
     data.data.forEach(item => {
-      if (Array.isArray(item.Categories)) item.Categories.forEach(c => { if (c) topics.add(c) })
-      if (Array.isArray(item.Authors)) {
-        item.Authors.forEach(a => {
-          const name = (typeof a === 'string' ? a : (a?.title || a?.name || a?.Name))?.trim()
-          if (name && !authorsMap.has(name.toLowerCase())) {
-            authorsMap.set(name.toLowerCase(), name)
-          }
+      if (Array.isArray(item.categories)) item.categories.forEach(c => { if (c) topics.add(c) })
+      if (Array.isArray(item.contributors)) {
+        item.contributors.forEach(a => {
+          const name = typeof a === 'string' ? a : (a?.name || a?.Name)
+          if (name) authors.add(name)
         })
       }
       if (item.Date) years.add(String(new Date(item.Date).getFullYear()))
     })
     availableTopics.value = [...topics].sort()
-    availableAuthors.value = [...authorsMap.values()].sort()
+    availableAuthors.value = [...authors].sort()
     availableYears.value = [...years].sort((a, b) => b - a)
   } catch (_) { /* filter options are non-critical */ }
 }
@@ -202,22 +206,22 @@ const onSearchInput = () => {
   clearTimeout(searchTimeout)
   searchTimeout = setTimeout(() => {
     pagination.page = 1
-    loadArticles()
+    loadApps()
   }, 300)
 }
 
 const onFilterChange = () => {
   pagination.page = 1
-  loadArticles()
+  loadApps()
 }
 
 const changePage = async (page) => {
   pagination.page = page
-  await loadArticles()
+  await loadApps()
 }
 
-const goToArticle = (id) => {
-  router.push(`/article/${id}`)
+const goToApp = (id) => {
+  router.push(`/apps/${id}`)
 }
 
 const formatDate = (dateString) => {
@@ -233,7 +237,7 @@ const truncate = (text, length) => {
 }
 
 onMounted(() => {
-  loadArticles()
+  loadApps()
   loadFilterOptions()
 })
 </script>
