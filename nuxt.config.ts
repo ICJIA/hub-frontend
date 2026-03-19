@@ -1,5 +1,5 @@
 export default defineNuxtConfig({
-  modules: ['@nuxt/ui'],
+  modules: ['@nuxt/ui','@nuxt/eslint'],
   ssr: false,
 
   colorMode: {
@@ -8,6 +8,10 @@ export default defineNuxtConfig({
   },
 
   css: ['~/assets/style.css'],
+
+  devtools: {
+    enabled: true
+  },
 
   devServer: {
     port: 3000,
@@ -27,6 +31,7 @@ export default defineNuxtConfig({
       dedupe: ['vue', '@vue/runtime-core', '@vue/runtime-dom']
     }
   },
+  compatibilityDate: '2025-01-15',
 
   routeRules: {
     '/**': {
