@@ -10,7 +10,7 @@ const getHeadersWithAuth = () => ({
   ...(bearerToken && { 'Authorization': `Bearer ${bearerToken}` })
 })
 
-export const fetchArticles = async (page = 1, pageSize = 10, sort = 'Date:desc', search = '', filters = {}) => {
+export const fetchArticles = async (page = 1, pageSize = 10, sort = 'date:desc', search = '', filters = {}) => {
   const params = new URLSearchParams({
     'populate': '*',
     'pagination[page]': page,
@@ -33,8 +33,8 @@ export const fetchArticles = async (page = 1, pageSize = 10, sort = 'Date:desc',
     params.append('filters[Authors][$containsi]', filters.author)
   }
   if (filters.year) {
-    params.append('filters[Date][$gte]', `${filters.year}-01-01`)
-    params.append('filters[Date][$lte]', `${filters.year}-12-31`)
+    params.append('filters[date][$gte]', `${filters.year}-01-01`)
+    params.append('filters[date][$lte]', `${filters.year}-12-31`)
   }
 
   const response = await fetch(
@@ -372,7 +372,7 @@ export const publishApp = async (id) => {
   return data.data
 }
 
-export const fetchApps = async (page = 1, pageSize = 10, sort = 'Date:desc', search = '', filters = {}) => {
+export const fetchApps = async (page = 1, pageSize = 10, sort = 'date:desc', search = '', filters = {}) => {
   const params = new URLSearchParams({
     'populate': '*',
     'pagination[page]': page,
@@ -392,8 +392,8 @@ export const fetchApps = async (page = 1, pageSize = 10, sort = 'Date:desc', sea
     params.append('filters[contributors][$containsi]', filters.author)
   }
   if (filters.year) {
-    params.append('filters[Date][$gte]', `${filters.year}-01-01`)
-    params.append('filters[Date][$lte]', `${filters.year}-12-31`)
+    params.append('filters[date][$gte]', `${filters.year}-01-01`)
+    params.append('filters[date][$lte]', `${filters.year}-12-31`)
   }
   const response = await fetch(`${API_BASE_URL}/api/apps?${params}`, { headers: getHeaders() })
   if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
