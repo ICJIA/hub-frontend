@@ -27,12 +27,12 @@
 
           <div class="mb-6">
             <label class="field-label">Title</label>
-            <UInput v-model="editableApp.Title" @input="markChanged" placeholder="App title" />
+            <UInput v-model="editableApp.title" @input="markChanged" placeholder="App title" />
           </div>
 
           <div class="mb-6">
             <label class="field-label">Slug</label>
-            <UInput v-model="editableApp.Slug" @input="markChanged" placeholder="app-slug" />
+            <UInput v-model="editableApp.slug" @input="markChanged" placeholder="app-slug" />
           </div>
 
           <div class="mb-6">
@@ -217,10 +217,10 @@ const markChanged = () => { hasChanges.value = true }
 
 const formattedDate = computed({
   get() {
-    if (!editableApp.value?.Date) return ''
-    return new Date(editableApp.value.Date).toISOString().split('T')[0]
+    if (!editableApp.value?.date) return ''
+    return new Date(editableApp.value.date).toISOString().split('T')[0]
   },
-  set(value) { editableApp.value.Date = value; markChanged() }
+  set(value) { editableApp.value.date = value; markChanged() }
 })
 
 const openPreview = () => {
@@ -312,7 +312,7 @@ const saveApp = async () => {
   try {
     const id = route.params.id
     const dataToSave = {
-      Title: editableApp.value.Title, Slug: editableApp.value.Slug, Date: editableApp.value.Date,
+      title: editableApp.value.title, slug: editableApp.value.slug, date: editableApp.value.date,
       external: editableApp.value.external, url: editableApp.value.url,
       categories: editableApp.value.categories?.filter(c => c.trim() !== ''),
       tags: editableApp.value.tags?.filter(t => t.trim() !== ''),

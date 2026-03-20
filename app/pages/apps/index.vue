@@ -81,7 +81,7 @@
           <img
             v-if="appImageUrl(app)"
             :src="appImageUrl(app)"
-            :alt="app.Title"
+            :alt="app.title"
             :class="viewMode === 'list' ? 'w-44 min-w-[180px] object-cover' : 'w-full h-48 object-cover'"
           />
           <div
@@ -92,8 +92,8 @@
             <span class="text-white text-sm">No Image</span>
           </div>
           <div class="p-4">
-            <div class="text-lg font-semibold mb-1 leading-snug">{{ app.Title }}</div>
-            <div v-if="app.Date" class="text-xs text-gray-500 mb-2">{{ formatDate(app.Date) }}</div>
+            <div class="text-lg font-semibold mb-1 leading-snug">{{ app.title }}</div>
+            <div v-if="app.date" class="text-xs text-gray-500 mb-2">{{ formatDate(app.date) }}</div>
             <p v-if="app.description" class="text-sm text-gray-500 mb-3">{{ truncate(app.description, 150) }}</p>
             <div v-if="app.categories?.length" class="flex flex-wrap gap-1">
               <UBadge
@@ -164,7 +164,7 @@ const loadApps = async () => {
     const data = await fetchApps(
       pagination.page,
       pagination.pageSize,
-      'Date:desc',
+      'date:desc',
       searchQuery.value,
       { category: filterTopic.value || '', author: filterAuthor.value || '', year: filterYear.value || '' }
     )
@@ -182,7 +182,7 @@ const loadApps = async () => {
 
 const loadFilterOptions = async () => {
   try {
-    const data = await fetchApps(1, 100, 'Date:desc', '', {})
+    const data = await fetchApps(1, 100, 'date:desc', '', {})
     const topics = new Set()
     const authors = new Set()
     const years = new Set()
@@ -194,7 +194,7 @@ const loadFilterOptions = async () => {
           if (name) authors.add(name)
         })
       }
-      if (item.Date) years.add(String(new Date(item.Date).getFullYear()))
+      if (item.date) years.add(String(new Date(item.date).getFullYear()))
     })
     availableTopics.value = [...topics].sort()
     availableAuthors.value = [...authors].sort()

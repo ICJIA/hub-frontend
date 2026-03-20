@@ -73,7 +73,7 @@
         >
           <div class="text-lg font-semibold mb-1 leading-snug">{{ dataset.title }}</div>
           <div v-if="dataset.date" class="text-xs text-gray-500 mb-2">{{ formatDate(dataset.date) }}</div>
-          <p v-if="dataset.Description" class="text-sm text-gray-500 mb-3">{{ truncate(dataset.Description, 150) }}</p>
+          <p v-if="dataset.description" class="text-sm text-gray-500 mb-3">{{ truncate(dataset.description, 150) }}</p>
           <div v-if="dataset.categories?.length" class="flex flex-wrap gap-1">
             <UBadge
               v-for="category in dataset.categories"

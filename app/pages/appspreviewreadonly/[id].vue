@@ -26,14 +26,14 @@
             </div>
             <div v-else-if="app" class="p-4">
               <div v-if="app.image" class="mb-3">
-                <img :src="resolveImageUrl(app.image)" :alt="app.Title" class="w-full rounded-lg" />
+                <img :src="resolveImageUrl(app.image)" :alt="app.title" class="w-full rounded-lg" />
               </div>
               <div v-if="app.categories?.length" class="flex flex-wrap gap-1 mb-2">
                 <UBadge v-for="cat in app.categories" :key="cat" color="primary" variant="subtle" size="sm">{{ cat }}</UBadge>
               </div>
-              <h1 class="text-xl font-bold mb-2" style="line-height:1.3">{{ app.Title }}</h1>
+              <h1 class="text-xl font-bold mb-2" style="line-height:1.3">{{ app.title }}</h1>
               <div class="flex gap-2 mb-2 text-xs text-gray-500 flex-wrap">
-                <span v-if="app.Date">{{ formatDate(app.Date) }}</span>
+                <span v-if="app.date">{{ formatDate(app.date) }}</span>
                 <UBadge v-if="app.external" color="warning" variant="subtle" size="sm">External</UBadge>
               </div>
               <div v-if="app.contributors?.length" class="flex flex-wrap gap-1 mb-2">
@@ -70,13 +70,13 @@
             <UIcon name="i-heroicons-arrow-path" class="w-10 h-10 animate-spin text-primary-500" />
           </div>
           <div v-else-if="app" class="bg-white rounded-xl shadow-md p-8">
-            <img v-if="app.image" :src="resolveImageUrl(app.image)" :alt="app.Title" class="w-full rounded-lg mb-6 object-cover max-h-[400px]" />
+            <img v-if="app.image" :src="resolveImageUrl(app.image)" :alt="app.title" class="w-full rounded-lg mb-6 object-cover max-h-[400px]" />
             <div v-if="app.categories?.length" class="flex flex-wrap gap-2 mb-4">
               <UBadge v-for="cat in app.categories" :key="cat" color="primary" variant="subtle">{{ cat }}</UBadge>
             </div>
-            <h1 class="text-3xl font-bold mb-3" style="line-height:1.3">{{ app.Title }}</h1>
+            <h1 class="text-3xl font-bold mb-3" style="line-height:1.3">{{ app.title }}</h1>
             <div class="flex flex-wrap items-center gap-3 mb-4 text-sm text-gray-500">
-              <span v-if="app.Date">{{ formatDate(app.Date) }}</span>
+              <span v-if="app.date">{{ formatDate(app.date) }}</span>
               <UBadge v-if="app.external" color="warning" variant="subtle">External</UBadge>
             </div>
             <div v-if="app.contributors?.length" class="flex flex-wrap gap-2 mb-4">

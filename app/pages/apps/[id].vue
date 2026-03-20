@@ -18,7 +18,7 @@
       <img
         v-if="imageUrl"
         :src="imageUrl"
-        :alt="app.Title"
+        :alt="app.title"
         class="w-full rounded-lg mb-6 object-cover max-h-[400px]"
       />
 
@@ -26,10 +26,10 @@
         <UBadge v-for="cat in app.categories" :key="cat" color="primary" variant="subtle">{{ cat }}</UBadge>
       </div>
 
-      <h1 class="text-3xl font-bold mb-3" style="line-height:1.3">{{ app.Title }}</h1>
+      <h1 class="text-3xl font-bold mb-3" style="line-height:1.3">{{ app.title }}</h1>
 
       <div class="flex flex-wrap items-center gap-3 mb-4 text-sm text-gray-500">
-        <span v-if="app.Date">{{ formatDate(app.Date) }}</span>
+        <span v-if="app.date">{{ formatDate(app.date) }}</span>
         <UBadge v-if="app.external" color="warning" variant="subtle">External</UBadge>
       </div>
 

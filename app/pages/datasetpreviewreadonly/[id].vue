@@ -31,7 +31,7 @@
               <h1 class="text-xl font-bold mb-2" style="line-height:1.3">{{ dataset.title }}</h1>
               <div class="flex gap-2 mb-2 text-xs text-gray-500 flex-wrap">
                 <span v-if="dataset.date">{{ formatDate(dataset.date) }}</span>
-                <span v-if="dataset.Unit">Unit: {{ dataset.Unit }}</span>
+                <span v-if="dataset.unit">Unit: {{ dataset.unit }}</span>
                 <UBadge v-if="dataset.external" color="warning" variant="subtle" size="sm">External</UBadge>
                 <UBadge v-if="dataset.project" color="info" variant="subtle" size="sm">Project</UBadge>
               </div>
@@ -39,26 +39,26 @@
                 <span class="text-xs font-bold mr-1">Tags:</span>
                 <UBadge v-for="tag in dataset.tags" :key="tag" variant="subtle" size="sm" class="mr-1">{{ tag }}</UBadge>
               </div>
-              <div v-if="dataset.Timeperiod" class="p-3 mb-3 bg-gray-100 rounded">
+              <div v-if="dataset.timeperiod" class="p-3 mb-3 bg-gray-100 rounded">
                 <p class="text-xs font-bold mb-1">Time Period</p>
                 <div class="text-xs">
-                  <div>Year Type: {{ dataset.Timeperiod.yeartype || '—' }}</div>
-                  <div>From: {{ dataset.Timeperiod.yearmin || '—' }}</div>
-                  <div>To: {{ dataset.Timeperiod.yearmax || '—' }}</div>
+                  <div>Year Type: {{ dataset.timeperiod.yeartype || '—' }}</div>
+                  <div>From: {{ dataset.timeperiod.yearmin || '—' }}</div>
+                  <div>To: {{ dataset.timeperiod.yearmax || '—' }}</div>
                 </div>
               </div>
-              <div v-if="dataset.Sources?.length" class="mb-3">
+              <div v-if="dataset.sources?.length" class="mb-3">
                 <p class="text-xs font-bold mb-1">Sources</p>
-                <div v-for="(source, i) in dataset.Sources" :key="i" class="mb-1">
+                <div v-for="(source, i) in dataset.sources" :key="i" class="mb-1">
                   <strong class="text-xs">{{ source.title }}</strong>
                   <div v-if="source.url && source.url !== 'undefined'">
                     <a :href="source.url" target="_blank" rel="noopener noreferrer" class="text-blue-600 text-xs">{{ source.url }}</a>
                   </div>
                 </div>
               </div>
-              <div v-if="dataset.Description" class="p-3 mb-3 bg-gray-100 rounded">
+              <div v-if="dataset.description" class="p-3 mb-3 bg-gray-100 rounded">
                 <p class="text-xs font-bold mb-1">Description</p>
-                <p class="text-xs">{{ dataset.Description }}</p>
+                <p class="text-xs">{{ dataset.description }}</p>
               </div>
               <div v-if="notesList.length" class="mb-3">
                 <p class="text-xs font-bold mb-1">Notes</p>
@@ -66,25 +66,25 @@
                   <li v-for="(note, i) in notesList" :key="i" class="mb-1">{{ note }}</li>
                 </ol>
               </div>
-              <div v-if="dataset.Variables?.length" class="mb-3">
-                <p class="text-xs font-bold mb-1">Variables ({{ dataset.Variables.length }})</p>
-                <div v-for="(v, i) in dataset.Variables" :key="i" class="p-2 mb-1 bg-gray-100 rounded text-xs">
+              <div v-if="dataset.variables?.length" class="mb-3">
+                <p class="text-xs font-bold mb-1">Variables ({{ dataset.variables.length }})</p>
+                <div v-for="(v, i) in dataset.variables" :key="i" class="p-2 mb-1 bg-gray-100 rounded text-xs">
                   <strong>{{ v.name }}</strong><span v-if="v.type"> · {{ v.type }}</span>
                   <div v-if="v.definition" class="text-gray-500">{{ v.definition }}</div>
                 </div>
               </div>
-              <div v-if="dataset.Funding" class="p-3 mb-2 bg-gray-100 rounded">
+              <div v-if="dataset.funding" class="p-3 mb-2 bg-gray-100 rounded">
                 <p class="text-xs font-bold mb-1">Funding</p>
-                <p class="text-xs" v-html="dataset.Funding"></p>
+                <p class="text-xs" v-html="dataset.funding"></p>
               </div>
-              <div v-if="dataset.Citation" class="p-3 mb-2 bg-gray-100 rounded">
+              <div v-if="dataset.citation" class="p-3 mb-2 bg-gray-100 rounded">
                 <p class="text-xs font-bold mb-1">Citation</p>
-                <p class="text-xs" v-html="dataset.Citation"></p>
+                <p class="text-xs" v-html="dataset.citation"></p>
               </div>
-              <div v-if="dataset.Datafile?.length" class="mb-3">
+              <div v-if="datafileList.length" class="mb-3">
                 <p class="text-xs font-bold mb-1">Data Files</p>
                 <div class="flex flex-wrap gap-1">
-                  <UButton v-for="file in dataset.Datafile" :key="file.id" :to="datafileUrl(file)" :download="file.name" target="_blank" rel="noopener noreferrer" icon="i-heroicons-arrow-down-tray" variant="soft" size="xs">{{ file.name }}</UButton>
+                  <UButton v-for="file in datafileList" :key="file.id" :to="datafileUrl(file)" :download="file.name" target="_blank" rel="noopener noreferrer" icon="i-heroicons-arrow-down-tray" variant="soft" size="xs">{{ file.name }}</UButton>
                 </div>
               </div>
               <div v-if="Array.isArray(dataset.apps) && dataset.apps.length" class="mb-2">
@@ -116,7 +116,7 @@
             <h1 class="text-3xl font-bold mb-3" style="line-height:1.3">{{ dataset.title }}</h1>
             <div class="flex flex-wrap items-center gap-3 mb-4 text-sm text-gray-500">
               <span v-if="dataset.date">{{ formatDate(dataset.date) }}</span>
-              <span v-if="dataset.Unit">Unit: {{ dataset.Unit }}</span>
+              <span v-if="dataset.unit">Unit: {{ dataset.unit }}</span>
               <UBadge v-if="dataset.external" color="warning" variant="subtle">External</UBadge>
               <UBadge v-if="dataset.project" color="info" variant="subtle">Project</UBadge>
             </div>
@@ -124,18 +124,18 @@
               <span class="font-bold mr-3 text-sm">Tags:</span>
               <UBadge v-for="tag in dataset.tags" :key="tag" variant="subtle" class="mr-2 mb-2">{{ tag }}</UBadge>
             </div>
-            <div v-if="dataset.Timeperiod" class="border border-gray-200 rounded-lg mb-6 max-w-[400px]">
+            <div v-if="dataset.timeperiod" class="border border-gray-200 rounded-lg mb-6 max-w-[400px]">
               <div class="px-4 py-3 border-b border-gray-200 font-semibold text-base">Time Period</div>
               <div class="p-4 flex flex-wrap gap-4 text-sm">
-                <div><span class="font-medium text-gray-500">Year Type:</span> {{ dataset.Timeperiod.yeartype || '—' }}</div>
-                <div><span class="font-medium text-gray-500">From:</span> {{ dataset.Timeperiod.yearmin || '—' }}</div>
-                <div><span class="font-medium text-gray-500">To:</span> {{ dataset.Timeperiod.yearmax || '—' }}</div>
+                <div><span class="font-medium text-gray-500">Year Type:</span> {{ dataset.timeperiod.yeartype || '—' }}</div>
+                <div><span class="font-medium text-gray-500">From:</span> {{ dataset.timeperiod.yearmin || '—' }}</div>
+                <div><span class="font-medium text-gray-500">To:</span> {{ dataset.timeperiod.yearmax || '—' }}</div>
               </div>
             </div>
-            <template v-if="dataset.Sources?.length">
+            <template v-if="dataset.sources?.length">
               <h3 class="text-base font-bold mb-3">Sources</h3>
               <div class="mb-6">
-                <div v-for="(source, i) in dataset.Sources" :key="i" class="mb-3">
+                <div v-for="(source, i) in dataset.sources" :key="i" class="mb-3">
                   <strong class="text-sm">{{ source.title }}</strong>
                   <div v-if="source.url && source.url !== 'undefined'">
                     <a :href="source.url" target="_blank" rel="noopener noreferrer" class="text-blue-600 text-sm">{{ source.url }}</a>
@@ -143,9 +143,9 @@
                 </div>
               </div>
             </template>
-            <div v-if="dataset.Description" class="border border-gray-200 rounded-lg p-5 mb-4">
+            <div v-if="dataset.description" class="border border-gray-200 rounded-lg p-5 mb-4">
               <h3 class="text-base font-bold mb-2">Description</h3>
-              <p class="text-sm leading-relaxed">{{ dataset.Description }}</p>
+              <p class="text-sm leading-relaxed">{{ dataset.description }}</p>
             </div>
             <template v-if="notesList.length">
               <h3 class="text-base font-bold mb-3">Notes</h3>
@@ -153,8 +153,8 @@
                 <li v-for="(note, i) in notesList" :key="i" class="mb-2">{{ note }}</li>
               </ol>
             </template>
-            <template v-if="dataset.Variables?.length">
-              <h3 class="text-base font-bold mb-3">Variables ({{ dataset.Variables.length }})</h3>
+            <template v-if="dataset.variables?.length">
+              <h3 class="text-base font-bold mb-3">Variables ({{ dataset.variables.length }})</h3>
               <div class="overflow-x-auto mb-6">
                 <table class="w-full text-sm border-collapse">
                   <thead class="bg-gray-100">
@@ -166,7 +166,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(v, i) in dataset.Variables" :key="i" class="hover:bg-gray-50">
+                    <tr v-for="(v, i) in dataset.variables" :key="i" class="hover:bg-gray-50">
                       <td class="p-3 border border-gray-200"><strong>{{ v.name }}</strong></td>
                       <td class="p-3 border border-gray-200">{{ v.type }}</td>
                       <td class="p-3 border border-gray-200">{{ v.definition }}</td>
@@ -176,18 +176,18 @@
                 </table>
               </div>
             </template>
-            <div v-if="dataset.Funding" class="bg-gray-100 rounded p-4 mb-4">
+            <div v-if="dataset.funding" class="bg-gray-100 rounded p-4 mb-4">
               <h4 class="text-sm font-bold mb-2">Funding</h4>
-              <p class="text-sm leading-relaxed" v-html="dataset.Funding"></p>
+              <p class="text-sm leading-relaxed" v-html="dataset.funding"></p>
             </div>
-            <div v-if="dataset.Citation" class="bg-gray-100 rounded p-4 mb-4">
+            <div v-if="dataset.citation" class="bg-gray-100 rounded p-4 mb-4">
               <h4 class="text-sm font-bold mb-2">Citation</h4>
-              <p class="text-sm leading-relaxed" v-html="dataset.Citation"></p>
+              <p class="text-sm leading-relaxed" v-html="dataset.citation"></p>
             </div>
-            <template v-if="dataset.Datafile?.length">
+            <template v-if="datafileList.length">
               <h3 class="text-base font-bold mb-3">Data Files</h3>
               <div class="flex flex-wrap gap-2 mb-6">
-                <UButton v-for="file in dataset.Datafile" :key="file.id" :to="datafileUrl(file)" :download="file.name" target="_blank" rel="noopener noreferrer" icon="i-heroicons-arrow-down-tray" variant="soft" size="sm">{{ file.name }}</UButton>
+                <UButton v-for="file in datafileList" :key="file.id" :to="datafileUrl(file)" :download="file.name" target="_blank" rel="noopener noreferrer" icon="i-heroicons-arrow-down-tray" variant="soft" size="sm">{{ file.name }}</UButton>
               </div>
             </template>
             <template v-if="Array.isArray(dataset.apps) && dataset.apps.length">
@@ -239,10 +239,18 @@ const formatDate = (dateString) => {
 }
 
 const notesList = computed(() => {
-  const n = dataset.value?.Notes
+  const n = dataset.value?.notes
   if (!n) return []
   if (Array.isArray(n)) return n
   if (typeof n === 'string') { try { return JSON.parse(n) } catch { return [n] } }
+  return []
+})
+
+const datafileList = computed(() => {
+  const df = dataset.value?.datafile
+  if (!df) return []
+  if (Array.isArray(df)) return df
+  if (typeof df === 'object' && df.id) return [df]
   return []
 })
 
