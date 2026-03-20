@@ -79,9 +79,9 @@
           :class="viewMode === 'list' ? 'flex' : ''"
         >
           <img
-            v-if="article.Splash?.url"
-            :src="API_BASE_URL + article.Splash.url"
-            :alt="article.Title"
+            v-if="article.splash?.url"
+            :src="API_BASE_URL + article.splash.url"
+            :alt="article.title"
             :class="viewMode === 'list' ? 'w-44 min-w-[180px] object-cover' : 'w-full h-48 object-cover'"
           />
           <div
@@ -92,12 +92,12 @@
             <span class="text-white text-sm">No Image</span>
           </div>
           <div class="p-4">
-            <div class="text-lg font-semibold mb-1 leading-snug">{{ article.Title }}</div>
-            <div v-if="article.Date" class="text-xs text-gray-500 mb-2">{{ formatDate(article.Date) }}</div>
-            <p v-if="article.Abstract" class="text-sm text-gray-500 mb-3">{{ truncate(article.Abstract, 150) }}</p>
-            <div v-if="article.Categories?.length" class="flex flex-wrap gap-1">
+            <div class="text-lg font-semibold mb-1 leading-snug">{{ article.title }}</div>
+            <div v-if="article.date" class="text-xs text-gray-500 mb-2">{{ formatDate(article.date) }}</div>
+            <p v-if="article.abstract" class="text-sm text-gray-500 mb-3">{{ truncate(article.abstract, 150) }}</p>
+            <div v-if="article.categories?.length" class="flex flex-wrap gap-1">
               <UBadge
-                v-for="category in article.Categories"
+                v-for="category in article.categories"
                 :key="category"
                 color="primary"
                 variant="subtle"
@@ -158,7 +158,7 @@ const loadArticles = async () => {
     const data = await fetchArticles(
       pagination.page,
       pagination.pageSize,
-      'Date:desc',
+      'date:desc',
       searchQuery.value,
       { category: filterTopic.value || '', author: filterAuthor.value || '', year: filterYear.value || '' }
     )
@@ -176,21 +176,21 @@ const loadArticles = async () => {
 
 const loadFilterOptions = async () => {
   try {
-    const data = await fetchArticles(1, 100, 'Date:desc', '', {})
+    const data = await fetchArticles(1, 100, 'date:desc', '', {})
     const topics = new Set()
     const authorsMap = new Map()
     const years = new Set()
     data.data.forEach(item => {
-      if (Array.isArray(item.Categories)) item.Categories.forEach(c => { if (c) topics.add(c) })
-      if (Array.isArray(item.Authors)) {
-        item.Authors.forEach(a => {
+      if (Array.isArray(item.categories)) item.categories.forEach(c => { if (c) topics.add(c) })
+      if (Array.isArray(item.authors)) {
+        item.authors.forEach(a => {
           const name = (typeof a === 'string' ? a : (a?.title || a?.name || a?.Name))?.trim()
           if (name && !authorsMap.has(name.toLowerCase())) {
             authorsMap.set(name.toLowerCase(), name)
           }
         })
       }
-      if (item.Date) years.add(String(new Date(item.Date).getFullYear()))
+      if (item.date) years.add(String(new Date(item.date).getFullYear()))
     })
     availableTopics.value = [...topics].sort()
     availableAuthors.value = [...authorsMap.values()].sort()

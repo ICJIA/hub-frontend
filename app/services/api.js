@@ -10,7 +10,7 @@ const getHeadersWithAuth = () => ({
   ...(bearerToken && { 'Authorization': `Bearer ${bearerToken}` })
 })
 
-export const fetchArticles = async (page = 1, pageSize = 10, sort = 'Date:desc', search = '', filters = {}) => {
+export const fetchArticles = async (page = 1, pageSize = 10, sort = 'date:desc', search = '', filters = {}) => {
   const params = new URLSearchParams({
     'populate': '*',
     'pagination[page]': page,
@@ -18,23 +18,23 @@ export const fetchArticles = async (page = 1, pageSize = 10, sort = 'Date:desc',
     'sort': sort
   });
   if (search) {
-    params.append('filters[$or][0][Title][$containsi]', search)
-    params.append('filters[$or][1][Abstract][$containsi]', search)
-    params.append('filters[$or][2][Authors][$containsi]', search)
-    params.append('filters[$or][3][Categories][$containsi]', search)
-    params.append('filters[$or][4][Markdown][$containsi]', search)
-    params.append('filters[$or][5][Citation][$containsi]', search)
-    params.append('filters[$or][6][Funding][$containsi]', search)
+    params.append('filters[$or][0][title][$containsi]', search)
+    params.append('filters[$or][1][abstract][$containsi]', search)
+    params.append('filters[$or][2][authors][$containsi]', search)
+    params.append('filters[$or][3][categories][$containsi]', search)
+    params.append('filters[$or][4][markdown][$containsi]', search)
+    params.append('filters[$or][5][citation][$containsi]', search)
+    params.append('filters[$or][6][funding][$containsi]', search)
   }
   if (filters.category) {
-    params.append('filters[Categories][$containsi]', filters.category)
+    params.append('filters[categories][$containsi]', filters.category)
   }
   if (filters.author) {
-    params.append('filters[Authors][$containsi]', filters.author)
+    params.append('filters[authors][$containsi]', filters.author)
   }
   if (filters.year) {
-    params.append('filters[Date][$gte]', `${filters.year}-01-01`)
-    params.append('filters[Date][$lte]', `${filters.year}-12-31`)
+    params.append('filters[date][$gte]', `${filters.year}-01-01`)
+    params.append('filters[date][$lte]', `${filters.year}-12-31`)
   }
 
   const response = await fetch(
@@ -234,8 +234,8 @@ export const updateDataset = async (id, datasetData, statusOverride) => {
 
   // Media field: send array of numeric IDs (empty array clears the field).
   // Never send null or full media objects — Strapi 5 rejects 'related' (polymorphic backref).
-  dataToSend.Datafile = Array.isArray(dataToSend.Datafile)
-    ? dataToSend.Datafile.map(f => (typeof f === 'number' ? f : f?.id)).filter(Boolean)
+  dataToSend.datafile = Array.isArray(dataToSend.datafile)
+    ? dataToSend.datafile.map(f => (typeof f === 'number' ? f : f?.id)).filter(Boolean)
     : []
   if (Array.isArray(dataToSend.apps)) {
     dataToSend.apps = dataToSend.apps.map(a => (typeof a === 'number' ? a : a.id)).filter(Boolean)
@@ -372,7 +372,7 @@ export const publishApp = async (id) => {
   return data.data
 }
 
-export const fetchApps = async (page = 1, pageSize = 10, sort = 'Date:desc', search = '', filters = {}) => {
+export const fetchApps = async (page = 1, pageSize = 10, sort = 'date:desc', search = '', filters = {}) => {
   const params = new URLSearchParams({
     'populate': '*',
     'pagination[page]': page,
@@ -380,7 +380,7 @@ export const fetchApps = async (page = 1, pageSize = 10, sort = 'Date:desc', sea
     'sort': sort
   })
   if (search) {
-    params.append('filters[$or][0][Title][$containsi]', search)
+    params.append('filters[$or][0][title][$containsi]', search)
     params.append('filters[$or][1][description][$containsi]', search)
     params.append('filters[$or][2][contributors][$containsi]', search)
     params.append('filters[$or][3][categories][$containsi]', search)
@@ -392,8 +392,8 @@ export const fetchApps = async (page = 1, pageSize = 10, sort = 'Date:desc', sea
     params.append('filters[contributors][$containsi]', filters.author)
   }
   if (filters.year) {
-    params.append('filters[Date][$gte]', `${filters.year}-01-01`)
-    params.append('filters[Date][$lte]', `${filters.year}-12-31`)
+    params.append('filters[date][$gte]', `${filters.year}-01-01`)
+    params.append('filters[date][$lte]', `${filters.year}-12-31`)
   }
   const response = await fetch(`${API_BASE_URL}/api/apps?${params}`, { headers: getHeaders() })
   if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
@@ -417,7 +417,7 @@ export const fetchDatasets = async (page = 1, pageSize = 10, sort = 'date:desc',
   })
   if (search) {
     params.append('filters[$or][0][title][$containsi]', search)
-    params.append('filters[$or][1][Description][$containsi]', search)
+    params.append('filters[$or][1][description][$containsi]', search)
     params.append('filters[$or][2][categories][$containsi]', search)
   }
   if (filters.category) {
@@ -460,7 +460,7 @@ export const fetchDatasetsBasic = async (search = '') => {
 
 export const fetchAppsBasic = async (search = '') => {
   const params = new URLSearchParams({ 'status': 'draft' })
-  if (search) params.append('filters[Title][$containsi]', search)
+  if (search) params.append('filters[title][$containsi]', search)
 
   const response = await fetch(`${API_BASE_URL}/api/apps?${params}`, {
     headers: getHeadersWithAuth()
@@ -478,7 +478,7 @@ export const fetchArticlesBasic = async (search = '') => {
     'fields[2]': 'documentId',
     'pagination[pageSize]': 50,
   })
-  if (search) params.append('filters[Title][$containsi]', search)
+  if (search) params.append('filters[title][$containsi]', search)
 
   const response = await fetch(`${API_BASE_URL}/api/articles?${params}`, {
     headers: getHeadersWithAuth()

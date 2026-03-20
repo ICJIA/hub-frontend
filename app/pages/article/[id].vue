@@ -21,7 +21,7 @@
             <div class="w-10 h-10 bg-blue-700 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
               <UIcon name="i-heroicons-document-text" class="w-6 h-6 text-white" />
             </div>
-            <h1 class="text-2xl font-bold text-gray-900 leading-tight">{{ article.Title }}</h1>
+            <h1 class="text-2xl font-bold text-gray-900 leading-tight">{{ article.title }}</h1>
           </div>
           <div class="flex items-center gap-2 flex-shrink-0">
             <button v-if="prevArticle" @click="navigateToArticle(prevArticle)" class="flex items-center gap-1 border border-blue-700 text-blue-700 px-3 py-2 rounded hover:bg-blue-50 text-sm font-medium">
@@ -37,7 +37,7 @@
         <div class="flex items-center gap-5 mb-6 text-sm text-gray-500 ml-[52px]">
           <span class="flex items-center gap-1.5">
             <UIcon name="i-heroicons-calendar-days" class="w-4 h-4" />
-            Last Updated: {{ formatDate(article.Date) }}
+            Last Updated: {{ formatDate(article.date) }}
           </span>
           <a href="#" class="flex items-center gap-1.5 hover:text-blue-600 transition-colors">
             <UIcon name="i-heroicons-document" class="w-4 h-4" /> View PDF
@@ -60,31 +60,31 @@
                 <h2 class="text-lg font-bold">Overview</h2>
                 <p v-if="authorsString" class="text-sm text-blue-200 mt-1">Authors: {{ authorsString }}</p>
               </div>
-              <img v-if="splashImageUrl" :src="splashImageUrl" :alt="article.Title" class="w-full object-cover max-h-[450px]" />
+              <img v-if="splashImageUrl" :src="splashImageUrl" :alt="article.title" class="w-full object-cover max-h-[450px]" />
             </div>
 
             <!-- Summary -->
-            <div v-if="article.Abstract" class="mb-6">
+            <div v-if="article.abstract" class="mb-6">
               <div class="flex items-center gap-2 mb-3">
                 <UIcon name="i-heroicons-information-circle" class="w-6 h-6 text-blue-700" />
                 <h3 class="text-lg font-bold text-gray-800">Summary</h3>
               </div>
-              <p class="text-gray-700 leading-relaxed" v-html="fixAssetUrls(article.Abstract)"></p>
+              <p class="text-gray-700 leading-relaxed" v-html="fixAssetUrls(article.abstract)"></p>
             </div>
 
             <!-- Markdown Content -->
             <div class="markdown-content" v-html="renderedMarkdown"></div>
 
             <!-- Citation -->
-            <div v-if="article.Citation" class="mt-8">
+            <div v-if="article.citation" class="mt-8">
               <h4 class="font-bold text-gray-800 mb-2">Citation:</h4>
-              <p class="text-gray-700 text-sm leading-relaxed" v-html="fixAssetUrls(article.Citation)"></p>
+              <p class="text-gray-700 text-sm leading-relaxed" v-html="fixAssetUrls(article.citation)"></p>
             </div>
 
             <!-- Keywords & Tags -->
-            <div v-if="article.Tags?.length" class="mt-6 flex items-center flex-wrap gap-2">
+            <div v-if="article.tags?.length" class="mt-6 flex items-center flex-wrap gap-2">
               <span class="font-bold text-gray-700">Keywords &amp; Tags:</span>
-              <UBadge v-for="tag in article.Tags" :key="tag" variant="subtle" class="mr-1">{{ tag }}</UBadge>
+              <UBadge v-for="tag in article.tags" :key="tag" variant="subtle" class="mr-1">{{ tag }}</UBadge>
             </div>
           </div>
 
@@ -105,7 +105,7 @@
             <div v-if="authorArticles.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
               <h4 class="font-bold text-gray-800 mb-3">More Articles from Author(s)</h4>
               <div class="space-y-2">
-                <a v-for="a in authorArticles" :key="a.id" href="#" @click.prevent="navigateToArticle(a)" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.Title }}</a>
+                <a v-for="a in authorArticles" :key="a.id" href="#" @click.prevent="navigateToArticle(a)" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title }}</a>
               </div>
             </div>
 
@@ -119,9 +119,9 @@
             </div>
 
             <!-- Funding Acknowledgement -->
-            <div v-if="article.Funding" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+            <div v-if="article.funding" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
               <h4 class="font-bold text-gray-800 mb-2">Funding Acknowledgement</h4>
-              <p class="text-sm text-gray-600 leading-relaxed" v-html="article.Funding"></p>
+              <p class="text-sm text-gray-600 leading-relaxed" v-html="article.funding"></p>
             </div>
           </div>
         </div>
@@ -160,16 +160,16 @@ const nextArticle = ref(null)
 const authorArticles = ref([])
 
 const splashImageUrl = computed(() => {
-  if (!article.value?.Splash) return null
-  if (typeof article.value.Splash === 'object' && article.value.Splash.url) {
-    if (article.value.Splash.url.startsWith('/')) return `${API_BASE_URL}${article.value.Splash.url}`
-    return article.value.Splash.url
+  if (!article.value?.splash) return null
+  if (typeof article.value.splash === 'object' && article.value.splash.url) {
+    if (article.value.splash.url.startsWith('/')) return `${API_BASE_URL}${article.value.splash.url}`
+    return article.value.splash.url
   }
-  if (typeof article.value.Splash === 'string') return article.value.Splash
+  if (typeof article.value.splash === 'string') return article.value.splash
   return null
 })
 
-const authorsString = computed(() => article.value?.Authors?.map(a => a.title).join(', ') || '')
+const authorsString = computed(() => article.value?.authors?.map(a => a.title).join(', ') || '')
 
 const relatedDatasets = computed(() => {
   const d = article.value?.datasets
@@ -196,8 +196,8 @@ const slugify = (text) =>
   text.toLowerCase().replace(/<[^>]+>/g, '').replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').trim()
 
 const tocItems = computed(() => {
-  if (!article.value?.Markdown) return []
-  return article.value.Markdown
+  if (!article.value?.markdown) return []
+  return article.value.markdown
     .split('\n')
     .filter(line => /^##\s+/.test(line))
     .map(line => {
@@ -212,8 +212,8 @@ const scrollToSection = (id) => {
 }
 
 const renderedMarkdown = computed(() => {
-  if (!article.value?.Markdown) return ''
-  let md = fixFootnotes(article.value.Markdown)
+  if (!article.value?.markdown) return ''
+  let md = fixFootnotes(article.value.markdown)
   let html = marked(md)
   html = html.replace(/ title="_blank"/g, ' target="_blank" rel="noopener noreferrer"')
   html = html.replace(/<h2>(.*?)<\/h2>/g, (_, inner) => {
@@ -239,7 +239,7 @@ const navigateToArticle = (a) => {
 
 const loadNavigation = async () => {
   try {
-    const data = await fetchArticles(1, 100, 'Date:desc')
+    const data = await fetchArticles(1, 100, 'date:desc')
     const articles = data.data || []
     const currentId = route.params.id
     const currentIndex = articles.findIndex(a =>
@@ -253,10 +253,10 @@ const loadNavigation = async () => {
 }
 
 const loadAuthorArticles = async () => {
-  const firstAuthor = article.value?.Authors?.[0]?.title
+  const firstAuthor = article.value?.authors?.[0]?.title
   if (!firstAuthor) return
   try {
-    const data = await fetchArticles(1, 5, 'Date:desc', '', { author: firstAuthor })
+    const data = await fetchArticles(1, 5, 'date:desc', '', { author: firstAuthor })
     const currentId = route.params.id
     authorArticles.value = (data.data || [])
       .filter(a => String(a.id) !== String(currentId) && a.documentId !== currentId)

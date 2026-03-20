@@ -74,7 +74,7 @@
 
           <div class="mb-6">
             <label class="field-label">Unit</label>
-            <UInput v-model="editableDataset.Unit" @input="markChanged" placeholder="e.g. state, county, city" />
+            <UInput v-model="editableDataset.unit" @input="markChanged" placeholder="e.g. state, county, city" />
           </div>
 
           <div class="mb-6">
@@ -82,15 +82,15 @@
             <div class="flex flex-wrap gap-4">
               <div>
                 <label class="sub-label">Year Type</label>
-                <UInput v-model="editableDataset.Timeperiod.yeartype" @input="markChanged" size="sm" placeholder="e.g. calendar, fiscal" class="w-[200px]" />
+                <UInput v-model="editableDataset.timeperiod.yeartype" @input="markChanged" size="sm" placeholder="e.g. calendar, fiscal" class="w-[200px]" />
               </div>
               <div>
                 <label class="sub-label">Year Min</label>
-                <UInput v-model="editableDataset.Timeperiod.yearmin" @input="markChanged" size="sm" placeholder="e.g. 2019" class="w-[140px]" />
+                <UInput v-model="editableDataset.timeperiod.yearmin" @input="markChanged" size="sm" placeholder="e.g. 2019" class="w-[140px]" />
               </div>
               <div>
                 <label class="sub-label">Year Max</label>
-                <UInput v-model="editableDataset.Timeperiod.yearmax" @input="markChanged" size="sm" placeholder="e.g. 2024" class="w-[140px]" />
+                <UInput v-model="editableDataset.timeperiod.yearmax" @input="markChanged" size="sm" placeholder="e.g. 2024" class="w-[140px]" />
               </div>
             </div>
           </div>
@@ -98,7 +98,7 @@
           <div class="mb-6">
             <label class="field-label">Sources</label>
             <div class="flex flex-col gap-3">
-              <div v-for="(source, index) in editableDataset.Sources" :key="index" class="border border-gray-200 rounded-lg p-3">
+              <div v-for="(source, index) in editableDataset.sources" :key="index" class="border border-gray-200 rounded-lg p-3">
                 <div class="flex flex-wrap gap-3 items-start">
                   <div class="flex-1">
                     <label class="sub-label">Title</label>
@@ -117,14 +117,14 @@
 
           <div class="mb-6">
             <label class="field-label">Description</label>
-            <UTextarea v-model="editableDataset.Description" @input="markChanged" :rows="8" placeholder="Dataset description..." />
+            <UTextarea v-model="editableDataset.description" @input="markChanged" :rows="8" placeholder="Dataset description..." />
           </div>
 
           <div class="mb-6">
             <label class="field-label">Notes</label>
             <div class="flex flex-col gap-2">
-              <div v-for="(_, index) in editableDataset.Notes" :key="index" class="flex items-start gap-2">
-                <UTextarea v-model="editableDataset.Notes[index]" @input="markChanged" :rows="2" placeholder="Note text..." class="flex-1" />
+              <div v-for="(_, index) in editableDataset.notes" :key="index" class="flex items-start gap-2">
+                <UTextarea v-model="editableDataset.notes[index]" @input="markChanged" :rows="2" placeholder="Note text..." class="flex-1" />
                 <UButton icon="i-heroicons-x-mark" size="sm" variant="ghost" color="error" @click="removeNote(index)" class="mt-1" />
               </div>
               <div><UButton size="sm" variant="soft" icon="i-heroicons-plus" @click="addNote">Add Note</UButton></div>
@@ -135,7 +135,7 @@
             <label class="field-label">Variables</label>
             <div class="flex flex-col gap-2 mb-3">
               <details
-                v-for="(variable, index) in editableDataset.Variables"
+                v-for="(variable, index) in editableDataset.variables"
                 :key="index"
                 class="border border-gray-200 rounded-lg"
               >
@@ -168,12 +168,12 @@
 
           <div class="mb-6">
             <label class="field-label">Funding</label>
-            <RichTextEditor v-model="editableDataset.Funding" @update:modelValue="markChanged" :minHeight="150" :showAllTools="false" />
+            <RichTextEditor v-model="editableDataset.funding" @update:modelValue="markChanged" :minHeight="150" :showAllTools="false" />
           </div>
 
           <div class="mb-6">
             <label class="field-label">Citation</label>
-            <RichTextEditor v-model="editableDataset.Citation" @update:modelValue="markChanged" :minHeight="150" :showAllTools="false" />
+            <RichTextEditor v-model="editableDataset.citation" @update:modelValue="markChanged" :minHeight="150" :showAllTools="false" />
           </div>
 
           <!-- Related Apps -->
@@ -220,7 +220,7 @@
           <div class="mb-6">
             <label class="field-label">Data Files</label>
             <div class="flex flex-col gap-2 mb-3">
-              <div v-for="(file, index) in editableDataset.Datafile" :key="file.id || index" class="flex items-center gap-2">
+              <div v-for="(file, index) in editableDataset.datafile" :key="file.id || index" class="flex items-center gap-2">
                 <UIcon name="i-heroicons-document" class="w-4 h-4 text-gray-400" />
                 <span class="text-sm">{{ file.name || `File ${index + 1}` }}</span>
                 <span v-if="file.size" class="text-xs text-gray-400">({{ formatFileSize(file.size) }})</span>
@@ -285,12 +285,12 @@ const addCategory = () => { if (!editableDataset.value.categories) editableDatas
 const removeCategory = (index) => { editableDataset.value.categories.splice(index, 1); markChanged() }
 const addTag = () => { if (!editableDataset.value.tags) editableDataset.value.tags = []; editableDataset.value.tags.push(''); markChanged() }
 const removeTag = (index) => { editableDataset.value.tags.splice(index, 1); markChanged() }
-const addNote = () => { if (!editableDataset.value.Notes) editableDataset.value.Notes = []; editableDataset.value.Notes.push(''); markChanged() }
-const removeNote = (index) => { editableDataset.value.Notes.splice(index, 1); markChanged() }
-const addSource = () => { if (!editableDataset.value.Sources) editableDataset.value.Sources = []; editableDataset.value.Sources.push({ title: '', url: '' }); markChanged() }
-const removeSource = (index) => { editableDataset.value.Sources.splice(index, 1); markChanged() }
-const addVariable = () => { if (!editableDataset.value.Variables) editableDataset.value.Variables = []; editableDataset.value.Variables.push({ name: '', type: '', definition: '', values: '' }); markChanged() }
-const removeVariable = (index) => { editableDataset.value.Variables.splice(index, 1); markChanged() }
+const addNote = () => { if (!editableDataset.value.notes) editableDataset.value.notes = []; editableDataset.value.notes.push(''); markChanged() }
+const removeNote = (index) => { editableDataset.value.notes.splice(index, 1); markChanged() }
+const addSource = () => { if (!editableDataset.value.sources) editableDataset.value.sources = []; editableDataset.value.sources.push({ title: '', url: '' }); markChanged() }
+const removeSource = (index) => { editableDataset.value.sources.splice(index, 1); markChanged() }
+const addVariable = () => { if (!editableDataset.value.variables) editableDataset.value.variables = []; editableDataset.value.variables.push({ name: '', type: '', definition: '', values: '' }); markChanged() }
+const removeVariable = (index) => { editableDataset.value.variables.splice(index, 1); markChanged() }
 
 const filteredAppResults = computed(() => {
   const selectedIds = new Set((editableDataset.value?.apps || []).map(a => a.documentId || a.id))
@@ -333,16 +333,16 @@ const handleDatafileUpload = async (event) => {
   uploading.value = true
   try {
     const uploadedMedia = await uploadMedia(file)
-    if (!editableDataset.value.Datafile) editableDataset.value.Datafile = []
+    if (!editableDataset.value.datafile) editableDataset.value.datafile = []
     const { related: _r, ...cleanMedia } = uploadedMedia
-    editableDataset.value.Datafile.push(cleanMedia)
+    editableDataset.value.datafile.push(cleanMedia)
     markChanged()
     toast.add({ title: 'File uploaded successfully!', color: 'green' })
   } catch (err) {
     toast.add({ title: `Failed to upload file: ${err.message}`, color: 'red' })
   } finally { uploading.value = false; if (datafileInput.value) datafileInput.value.value = '' }
 }
-const removeDatafile = (index) => { editableDataset.value.Datafile.splice(index, 1); markChanged() }
+const removeDatafile = (index) => { editableDataset.value.datafile.splice(index, 1); markChanged() }
 
 const formatFileSize = (bytes) => {
   if (bytes < 1024) return `${bytes} B`
@@ -359,14 +359,14 @@ const saveDataset = async () => {
       external: editableDataset.value.external, project: editableDataset.value.project,
       categories: editableDataset.value.categories?.filter(c => c.trim() !== ''),
       tags: editableDataset.value.tags?.filter(t => t.trim() !== ''),
-      Unit: editableDataset.value.Unit, Timeperiod: editableDataset.value.Timeperiod,
-      Sources: editableDataset.value.Sources?.filter(s => s.title || s.url),
-      Description: editableDataset.value.Description,
-      Notes: editableDataset.value.Notes?.filter(n => n.trim() !== ''),
-      Variables: editableDataset.value.Variables?.filter(v => v.name || v.definition),
-      Funding: editableDataset.value.Funding, Citation: editableDataset.value.Citation,
+      unit: editableDataset.value.unit, timeperiod: editableDataset.value.timeperiod,
+      sources: editableDataset.value.sources?.filter(s => s.title || s.url),
+      description: editableDataset.value.description,
+      notes: editableDataset.value.notes?.filter(n => n.trim() !== ''),
+      variables: editableDataset.value.variables?.filter(v => v.name || v.definition),
+      funding: editableDataset.value.funding, citation: editableDataset.value.citation,
       apps: editableDataset.value.apps, articles: editableDataset.value.articles,
-      Datafile: editableDataset.value.Datafile,
+      datafile: editableDataset.value.datafile,
     }
     const updated = await updateDataset(id, dataToSave, 'draft')
     originalDataset.value = JSON.parse(JSON.stringify(updated))
@@ -382,12 +382,16 @@ const normalizeDataset = (data) => {
   const d = { ...data }
   if (!d.categories) d.categories = []
   if (!d.tags) d.tags = []
-  if (!d.Sources) d.Sources = []
-  if (!d.Variables) d.Variables = []
-  if (!Array.isArray(d.Notes)) d.Notes = d.Notes ? [String(d.Notes)] : []
-  if (!d.Datafile) d.Datafile = []
-  else d.Datafile = d.Datafile.map(({ related: _r, ...rest }) => rest)
-  if (!d.Timeperiod) d.Timeperiod = { yeartype: '', yearmin: '', yearmax: '' }
+  if (!d.sources) d.sources = []
+  if (!d.variables) d.variables = []
+  if (!Array.isArray(d.notes)) d.notes = d.notes ? [String(d.notes)] : []
+  // datafile is now a single media object from the API; normalize to array for the edit form
+  if (!d.datafile) d.datafile = []
+  else if (!Array.isArray(d.datafile)) {
+    const { related: _r, ...rest } = d.datafile
+    d.datafile = [rest]
+  } else d.datafile = d.datafile.map(({ related: _r, ...rest }) => rest)
+  if (!d.timeperiod) d.timeperiod = { yeartype: '', yearmin: '', yearmax: '' }
   if (!Array.isArray(d.apps)) d.apps = []
   if (!Array.isArray(d.articles)) d.articles = []
   return d
