@@ -59,132 +59,146 @@
       </div>
 
       <!-- Desktop View -->
-      <div v-else class="max-w-[1300px] mx-auto py-6 px-6">
-        <div v-if="loading" class="flex justify-center py-16">
+      <div v-else>
+        <div v-if="loading" class="flex justify-center py-16 bg-gray-100">
           <UIcon name="i-heroicons-arrow-path" class="w-10 h-10 animate-spin text-primary-500" />
         </div>
 
-        <div v-else-if="article">
-          <!-- Title Row -->
-          <div class="flex items-start justify-between mb-3">
-            <div class="flex items-start gap-3 flex-1 mr-4">
-              <div class="w-10 h-10 bg-blue-700 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
-                <UIcon name="i-heroicons-document-text" class="w-6 h-6 text-white" />
-              </div>
-              <h1 class="text-2xl font-bold text-gray-900 leading-tight">{{ article.title }}</h1>
-            </div>
-            <div class="flex items-center gap-2 flex-shrink-0">
-              <button v-if="prevArticle" @click="navigateToArticle(prevArticle)" class="flex items-center gap-1 border border-blue-700 text-blue-700 px-3 py-2 rounded hover:bg-blue-50 text-sm font-medium">
-                <UIcon name="i-heroicons-chevron-left" class="w-4 h-4" /> Prev Article
-              </button>
-              <button v-if="nextArticle" @click="navigateToArticle(nextArticle)" class="flex items-center gap-1 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 text-sm font-medium">
-                Next Article <UIcon name="i-heroicons-chevron-right" class="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          <!-- Meta Row -->
-          <div class="flex items-center gap-5 mb-6 text-sm text-gray-500 ml-[52px]">
-            <span class="flex items-center gap-1.5">
-              <UIcon name="i-heroicons-calendar-days" class="w-4 h-4" />
-              Last Updated: {{ formatDate(article.date) }}
-            </span>
-            <a href="#" class="flex items-center gap-1.5 hover:text-blue-600 transition-colors">
-              <UIcon name="i-heroicons-document" class="w-4 h-4" /> View PDF
-            </a>
-            <a href="#" class="flex items-center gap-1.5 hover:text-blue-600 transition-colors">
-              <UIcon name="i-heroicons-arrow-down-tray" class="w-4 h-4" /> Download PDF
-            </a>
-            <a href="#" class="flex items-center gap-1.5 hover:text-blue-600 transition-colors">
-              <UIcon name="i-heroicons-bookmark" class="w-4 h-4" /> Cite Article
-            </a>
-          </div>
-
-          <!-- Two Column Layout -->
-          <div class="flex gap-6 items-start">
-            <!-- Main Content -->
-            <div class="flex-1 min-w-0">
-              <!-- Overview Card -->
-              <div class="bg-white rounded-lg overflow-hidden shadow-sm mb-6">
-                <div class="bg-[#1a3a5c] text-white px-6 py-4">
-                  <h2 class="text-lg font-bold">Overview</h2>
-                  <p v-if="authorsString" class="text-sm text-blue-200 mt-1">Authors: {{ authorsString }}</p>
-                </div>
-                <img v-if="splashImageUrl" :src="splashImageUrl" :alt="article.title" class="w-full object-cover max-h-[450px]" />
-              </div>
-
-              <!-- Summary -->
-              <div v-if="article.abstract" class="mb-6">
-                <div class="flex items-center gap-2 mb-3">
-                  <UIcon name="i-heroicons-information-circle" class="w-6 h-6 text-blue-700" />
-                  <h3 class="text-lg font-bold text-gray-800">Summary</h3>
-                </div>
-                <p class="text-gray-700 leading-relaxed" v-html="fixAssetUrls(article.abstract)"></p>
-              </div>
-
-              <!-- Markdown Content -->
-              <div class="markdown-content" v-html="renderedMarkdown"></div>
-
-              <!-- Citation -->
-              <div v-if="article.citation" class="mt-8">
-                <h4 class="font-bold text-gray-800 mb-2">Citation:</h4>
-                <p class="text-gray-700 text-sm leading-relaxed" v-html="fixAssetUrls(article.citation)"></p>
-              </div>
-
-              <!-- Keywords & Tags -->
-              <div v-if="article.tags?.length" class="mt-6 flex items-center flex-wrap gap-2">
-                <span class="font-bold text-gray-700">Keywords &amp; Tags:</span>
-                <UBadge v-for="tag in article.tags" :key="tag" variant="subtle" class="mr-1">{{ tag }}</UBadge>
-              </div>
-            </div>
-
-            <!-- Right Sidebar -->
-            <div class="w-[260px] flex-shrink-0 space-y-4">
-              <!-- Table of Contents -->
-              <div v-if="tocItems.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-                <h4 class="font-bold text-gray-800 mb-3">Table Of Contents</h4>
-                <ol class="space-y-2">
-                  <li v-for="(item, idx) in tocItems" :key="item.id" class="flex items-start gap-2">
-                    <span class="text-sm text-gray-500 flex-shrink-0">{{ idx + 1 }}.</span>
-                    <a href="#" @click.prevent="scrollToSection(item.id)" class="text-sm text-blue-600 hover:underline leading-snug">{{ item.text }}</a>
-                  </li>
-                </ol>
-              </div>
-
-              <!-- More Articles from Author(s) -->
-              <div v-if="authorArticles.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-                <h4 class="font-bold text-gray-800 mb-3">More Articles from Author(s)</h4>
-                <div class="space-y-2">
-                  <a v-for="a in authorArticles" :key="a.id" href="#" @click.prevent="navigateToArticle(a)" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title }}</a>
-                </div>
-              </div>
-
-              <!-- Related Content -->
-              <div v-if="relatedDatasets.length || relatedApps.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-                <h4 class="font-bold text-gray-800 mb-3">Related Content</h4>
-                <div class="space-y-2">
-                  <a v-for="d in relatedDatasets" :key="d.id" :href="`/datasets/${d.documentId || d.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ d.title || d.Title }}</a>
-                  <a v-for="a in relatedApps" :key="a.id" :href="`/apps/${a.documentId || a.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title || a.Title }}</a>
-                </div>
-              </div>
-
-              <!-- Funding Acknowledgement -->
-              <div v-if="article.funding" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-                <h4 class="font-bold text-gray-800 mb-2">Funding Acknowledgement</h4>
-                <p class="text-sm text-gray-600 leading-relaxed" v-html="article.funding"></p>
-              </div>
-
-              <!-- View Article Version -->
-              <button @click="viewPublishedArticle" class="w-full bg-blue-700 text-white py-2.5 rounded font-medium hover:bg-blue-800 transition-colors">
-                View Article Version
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div v-else-if="error" class="text-center py-16">
+        <div v-else-if="error" class="text-center py-16 bg-gray-100">
           <UAlert color="error" :description="error" class="mb-4" />
         </div>
+
+        <template v-else-if="article">
+          <!-- White header section -->
+          <div class="bg-white">
+            <div class="max-w-[1300px] mx-auto pt-4 px-4 pb-3 sm:pt-6 sm:px-6 sm:pb-4">
+              <!-- Title Row -->
+              <div class="flex flex-col gap-3 mb-3 sm:flex-row sm:items-start sm:justify-between">
+                <div class="flex items-start gap-3">
+                  <div class="w-10 h-10 bg-blue-700 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <UIcon name="i-heroicons-document-text" class="w-6 h-6 text-white" />
+                  </div>
+                  <h1 class="text-xl font-bold text-gray-900 leading-tight sm:text-2xl">{{ article.title }}</h1>
+                </div>
+                <div class="flex items-center gap-2 sm:flex-shrink-0">
+                  <button v-if="prevArticle" @click="navigateToArticle(prevArticle)" class="flex items-center gap-1 border border-blue-700 text-blue-700 px-3 py-2 rounded hover:bg-blue-50 text-sm font-medium">
+                    <UIcon name="i-heroicons-chevron-left" class="w-4 h-4" /> Prev Article
+                  </button>
+                  <button v-if="nextArticle" @click="navigateToArticle(nextArticle)" class="flex items-center gap-1 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 text-sm font-medium">
+                    Next Article <UIcon name="i-heroicons-chevron-right" class="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              <!-- Meta Row -->
+              <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 ml-0 sm:ml-[52px]">
+                <span class="flex items-center gap-1.5">
+                  <UIcon name="i-heroicons-calendar-days" class="w-4 h-4" />
+                  Last Updated: {{ formatDate(article.date) }}
+                </span>
+                <a href="#" class="flex items-center gap-1.5 hover:text-blue-600 transition-colors">
+                  <UIcon name="i-heroicons-document" class="w-4 h-4" /> View PDF
+                </a>
+                <a href="#" class="flex items-center gap-1.5 hover:text-blue-600 transition-colors">
+                  <UIcon name="i-heroicons-arrow-down-tray" class="w-4 h-4" /> Download PDF
+                </a>
+                <a href="#" class="flex items-center gap-1.5 hover:text-blue-600 transition-colors">
+                  <UIcon name="i-heroicons-bookmark" class="w-4 h-4" /> Cite Article
+                </a>
+              </div>
+            </div>
+            <!-- Green accent line -->
+            <div class="h-[1px] w-full bg-gray-200"></div>
+          </div>
+
+          <!-- Gray content area -->
+          <div class="flex-1 bg-gray-100">
+            <div class="max-w-[1300px] mx-auto py-4 px-4 sm:py-6 sm:px-6">
+              <!-- Two Column Layout -->
+              <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
+                <!-- Main Content -->
+                <div class="flex-1 min-w-0 bg-white rounded-lg border border-gray-200 shadow-sm">
+                  <!-- Overview Card -->
+                  <div class="bg-white rounded-tl-lg rounded-tr-lg overflow-hidden shadow-sm mb-6">
+                    <div class="bg-[#1a3a5c] text-white px-6 py-4">
+                      <h2 class="text-lg font-bold">Overview</h2>
+                      <p v-if="authorsString" class="text-sm text-blue-200 mt-1">Authors: {{ authorsString }}</p>
+                    </div>
+                    <img v-if="splashImageUrl" :src="splashImageUrl" :alt="article.title" class="w-full object-cover max-h-[450px]" />
+                  </div>
+
+                  <div class="p-6">
+                  <!-- Summary -->
+                  <div v-if="article.abstract" class="mb-6">
+                    <div class="flex items-center gap-2 mb-3">
+                      <UIcon name="i-heroicons-information-circle" class="w-6 h-6 text-blue-700" />
+                      <h3 class="text-lg font-bold text-gray-800">Summary</h3>
+                    </div>
+                    <p class="text-gray-700 leading-relaxed" v-html="fixAssetUrls(article.abstract)"></p>
+                  </div>
+
+                  <!-- Markdown Content -->
+                  <div class="markdown-content" v-html="renderedMarkdown"></div>
+
+                  <!-- Citation -->
+                  <div v-if="article.citation" class="mt-8">
+                    <h4 class="font-bold text-gray-800 mb-2">Citation:</h4>
+                    <p class="text-gray-700 text-sm leading-relaxed" v-html="fixAssetUrls(article.citation)"></p>
+                  </div>
+
+                  <!-- Keywords & Tags -->
+                  <div v-if="article.tags?.length" class="mt-6 flex items-center flex-wrap gap-2">
+                    <span class="font-bold text-gray-700">Keywords &amp; Tags:</span>
+                    <UBadge v-for="tag in article.tags" :key="tag" variant="subtle" class="mr-1">{{ tag }}</UBadge>
+                  </div>
+                  </div>
+                </div>
+
+                <!-- Right Sidebar -->
+                <div class="w-full lg:w-[260px] lg:flex-shrink-0 space-y-4">
+                  <!-- Table of Contents -->
+                  <div v-if="tocItems.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                    <h4 class="font-bold text-gray-800 mb-3">Table Of Contents</h4>
+                    <ol class="space-y-2">
+                      <li v-for="(item, idx) in tocItems" :key="item.id" class="flex items-start gap-2">
+                        <span class="text-sm text-gray-500 flex-shrink-0">{{ idx + 1 }}.</span>
+                        <a href="#" @click.prevent="scrollToSection(item.id)" class="text-sm text-blue-600 hover:underline leading-snug">{{ item.text }}</a>
+                      </li>
+                    </ol>
+                  </div>
+
+                  <!-- More Articles from Author(s) -->
+                  <div v-if="authorArticles.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                    <h4 class="font-bold text-gray-800 mb-3">More Articles from Author(s)</h4>
+                    <div class="space-y-2">
+                      <a v-for="a in authorArticles" :key="a.id" href="#" @click.prevent="navigateToArticle(a)" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title }}</a>
+                    </div>
+                  </div>
+
+                  <!-- Related Content -->
+                  <div v-if="relatedDatasets.length || relatedApps.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                    <h4 class="font-bold text-gray-800 mb-3">Related Content</h4>
+                    <div class="space-y-2">
+                      <a v-for="d in relatedDatasets" :key="d.id" :href="`/datasets/${d.documentId || d.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ d.title || d.Title }}</a>
+                      <a v-for="a in relatedApps" :key="a.id" :href="`/apps/${a.documentId || a.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title || a.Title }}</a>
+                    </div>
+                  </div>
+
+                  <!-- Funding Acknowledgement -->
+                  <div v-if="article.funding" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                    <h4 class="font-bold text-gray-800 mb-2">Funding Acknowledgement</h4>
+                    <p class="text-sm text-gray-600 leading-relaxed" v-html="article.funding"></p>
+                  </div>
+
+                  <!-- View Article Version -->
+                  <button @click="viewPublishedArticle" class="w-full bg-blue-700 text-white py-2.5 rounded font-medium hover:bg-blue-800 transition-colors">
+                    View Article Version
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
       </div>
     </main>
   </div>
