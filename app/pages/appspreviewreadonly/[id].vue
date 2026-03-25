@@ -1,5 +1,6 @@
 <template>
   <div class="min-h-screen flex flex-col">
+    <!-- Preview Header Bar -->
     <header class="sticky top-0 z-50 bg-[#1a1a2e] h-14 flex items-center px-4 shadow-lg">
       <div class="flex items-center justify-center gap-5 flex-wrap w-full">
         <span class="text-xs text-gray-400 uppercase font-medium tracking-wide">App Preview</span>
@@ -15,10 +16,10 @@
       </div>
     </header>
 
-    <main class="flex-1 bg-gray-200">
-      <div class="preview-content" :class="viewMode">
-        <!-- Mobile Frame -->
-        <div class="device-frame" v-if="viewMode === 'mobile'">
+    <main class="flex-1 bg-gray-100">
+      <!-- Mobile Frame -->
+      <div v-if="viewMode === 'mobile'" class="flex justify-center py-10 px-5">
+        <div class="device-frame">
           <div class="device-notch"></div>
           <div class="device-screen">
             <div v-if="loading" class="flex flex-col items-center py-10">
@@ -35,9 +36,6 @@
               <div class="flex gap-2 mb-2 text-xs text-gray-500 flex-wrap">
                 <span v-if="app.date">{{ formatDate(app.date) }}</span>
                 <UBadge v-if="app.external" color="warning" variant="subtle" size="sm">External</UBadge>
-              </div>
-              <div v-if="app.contributors?.length" class="flex flex-wrap gap-1 mb-2">
-                <UBadge v-for="(c, i) in app.contributors" :key="i" variant="outline" size="sm">{{ c.title }}</UBadge>
               </div>
               <div v-if="app.tags?.length" class="mb-2">
                 <span class="text-xs font-bold mr-1">Tags:</span>
@@ -63,59 +61,130 @@
           </div>
           <div class="device-home-bar"></div>
         </div>
+      </div>
 
-        <!-- Desktop View -->
-        <div v-else class="max-w-[900px] mx-auto w-full py-6 px-4">
-          <div v-if="loading" class="flex flex-col items-center py-16">
-            <UIcon name="i-heroicons-arrow-path" class="w-10 h-10 animate-spin text-primary-500" />
-          </div>
-          <div v-else-if="app" class="bg-white rounded-xl shadow-md p-8">
-            <img v-if="app.image" :src="resolveImageUrl(app.image)" :alt="app.title" class="w-full rounded-lg mb-6 object-cover max-h-[400px]" />
-            <div v-if="app.categories?.length" class="flex flex-wrap gap-2 mb-4">
-              <UBadge v-for="cat in app.categories" :key="cat" color="primary" variant="subtle">{{ cat }}</UBadge>
-            </div>
-            <h1 class="text-3xl font-bold mb-3" style="line-height:1.3">{{ app.title }}</h1>
-            <div class="flex flex-wrap items-center gap-3 mb-4 text-sm text-gray-500">
-              <span v-if="app.date">{{ formatDate(app.date) }}</span>
-              <UBadge v-if="app.external" color="warning" variant="subtle">External</UBadge>
-            </div>
-            <div v-if="app.contributors?.length" class="flex flex-wrap gap-2 mb-4">
-              <UBadge v-for="(c, i) in app.contributors" :key="i" variant="outline">{{ c.title }}</UBadge>
-            </div>
-            <div v-if="app.tags?.length" class="mb-6">
-              <span class="font-bold mr-3 text-sm">Tags:</span>
-              <UBadge v-for="tag in app.tags" :key="tag" variant="subtle" class="mr-2 mb-2">{{ tag }}</UBadge>
-            </div>
-            <div v-if="app.description" class="border border-gray-200 rounded-lg p-5 mb-4">
-              <h3 class="text-base font-bold mb-2">Description</h3>
-              <p class="text-sm leading-relaxed">{{ app.description }}</p>
-            </div>
-            <div v-if="app.url" class="border border-gray-200 rounded-lg p-5 mb-4">
-              <h3 class="text-base font-bold mb-2">Link</h3>
-              <a :href="app.url" target="_blank" rel="noopener noreferrer" class="text-blue-600 break-all">{{ app.url }}</a>
-            </div>
-            <div v-if="app.funding" class="bg-gray-100 rounded p-4 mb-4">
-              <h4 class="text-sm font-bold mb-2">Funding</h4>
-              <p class="text-sm leading-relaxed" v-html="app.funding"></p>
-            </div>
-            <div v-if="app.citation" class="bg-gray-100 rounded p-4 mb-4">
-              <h4 class="text-sm font-bold mb-2">Citation</h4>
-              <p class="text-sm leading-relaxed" v-html="app.citation"></p>
-            </div>
-            <template v-if="Array.isArray(app.articles) && app.articles.length">
-              <h3 class="text-base font-bold mb-3">Related Articles</h3>
-              <div class="flex flex-wrap gap-2 mb-6">
-                <UBadge v-for="article in app.articles" :key="article.documentId || article.id" variant="outline">{{ article.Title || article.title || article.id }}</UBadge>
-              </div>
-            </template>
-            <template v-if="Array.isArray(app.datasets) && app.datasets.length">
-              <h3 class="text-base font-bold mb-3">Related Datasets</h3>
-              <div class="flex flex-wrap gap-2 mb-6">
-                <UBadge v-for="dataset in app.datasets" :key="dataset.documentId || dataset.id" variant="outline">{{ dataset.title || dataset.Title || dataset.id }}</UBadge>
-              </div>
-            </template>
-          </div>
+      <!-- Desktop View -->
+      <div v-else>
+        <div v-if="loading" class="flex justify-center py-16">
+          <UIcon name="i-heroicons-arrow-path" class="w-10 h-10 animate-spin text-primary-500" />
         </div>
+
+        <div v-else-if="error" class="text-center py-16">
+          <UAlert color="error" :description="error" class="mb-4" />
+        </div>
+
+        <template v-else-if="app">
+          <!-- White header section -->
+          <div class="bg-white">
+            <div class="max-w-[1300px] mx-auto pt-4 px-4 pb-3 sm:pt-6 sm:px-6 sm:pb-4">
+              <!-- Title Row -->
+              <div class="flex flex-col gap-3 mb-3 sm:flex-row sm:items-start sm:justify-between">
+                <div class="flex items-start gap-3">
+                  <div class="w-10 h-10 bg-blue-700 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <UIcon name="i-heroicons-computer-desktop" class="w-6 h-6 text-white" />
+                  </div>
+                  <h1 class="text-xl font-bold text-gray-900 leading-tight sm:text-2xl">{{ app.title }}</h1>
+                </div>
+                <div v-if="app.url" class="sm:flex-shrink-0">
+                  <a
+                    :href="app.url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-2 bg-blue-700 text-white px-5 py-2.5 rounded font-medium hover:bg-blue-800 transition-colors text-sm"
+                  >
+                    <UIcon name="i-heroicons-arrow-top-right-on-square" class="w-4 h-4" /> Launch
+                  </a>
+                </div>
+              </div>
+
+              <!-- Meta Row -->
+              <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 ml-0 sm:ml-[52px] mb-3">
+                <span v-if="app.date" class="flex items-center gap-1.5">
+                  <UIcon name="i-heroicons-calendar-days" class="w-4 h-4" />
+                  Last Updated: {{ formatDate(app.date) }}
+                </span>
+                <UBadge v-if="app.external" color="warning" variant="subtle">External</UBadge>
+              </div>
+
+              <!-- Tags / Categories -->
+              <div v-if="app.categories?.length || app.tags?.length" class="flex flex-wrap gap-2 ml-0 sm:ml-[52px]">
+                <UBadge v-for="cat in app.categories" :key="cat" color="primary" variant="subtle">{{ cat }}</UBadge>
+                <UBadge v-for="tag in app.tags" :key="tag" variant="subtle">{{ tag }}</UBadge>
+              </div>
+            </div>
+            <div class="h-[1px] w-full bg-gray-200"></div>
+          </div>
+
+          <!-- Gray content area -->
+          <div class="flex-1 bg-gray-100">
+            <div class="max-w-[1300px] mx-auto py-4 px-4 sm:py-6 sm:px-6">
+              <!-- Two Column Layout -->
+              <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
+                <!-- Main Content -->
+                <div class="flex-1 min-w-0 bg-white rounded-lg border border-gray-200 shadow-sm">
+                  <!-- Overview Card -->
+                  <div class="bg-white rounded-tl-lg rounded-tr-lg overflow-hidden shadow-sm mb-6">
+                    <div class="bg-[#1a3a5c] text-white px-6 py-4">
+                      <h2 class="text-lg font-bold">Overview: {{ app.title }}</h2>
+                      <p v-if="contributorsString" class="text-sm text-blue-200 mt-1">{{ contributorsString }}</p>
+                    </div>
+                    <img v-if="imageUrl" :src="imageUrl" :alt="app.title" class="w-full object-cover max-h-[450px]" />
+                  </div>
+
+                  <div class="p-6">
+                    <!-- Summary / Description -->
+                    <div v-if="app.description" class="mb-6">
+                      <div class="flex items-center gap-2 mb-3">
+                        <UIcon name="i-heroicons-information-circle" class="w-6 h-6 text-blue-700" />
+                        <h3 class="text-lg font-bold text-gray-800">Summary</h3>
+                      </div>
+                      <p class="text-gray-700 leading-relaxed">{{ app.description }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right Sidebar -->
+                <div class="w-full lg:w-[260px] lg:flex-shrink-0 space-y-4">
+                  <!-- Suggested Citation -->
+                  <div v-if="app.citation" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                    <h4 class="font-bold text-gray-800 mb-2">Suggested Citation</h4>
+                    <p class="text-sm text-gray-600 leading-relaxed break-words" v-html="app.citation"></p>
+                  </div>
+
+                  <!-- Related Content -->
+                  <div v-if="relatedArticles.length || relatedDatasets.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                    <h4 class="font-bold text-gray-800 mb-3">Related Content</h4>
+                    <div class="space-y-2">
+                      <a
+                        v-for="article in relatedArticles"
+                        :key="article.documentId || article.id"
+                        :href="`/article/${article.documentId || article.id}`"
+                        class="block text-sm text-blue-600 hover:underline leading-snug"
+                      >{{ article.title || article.Title }}</a>
+                      <a
+                        v-for="dataset in relatedDatasets"
+                        :key="dataset.documentId || dataset.id"
+                        :href="`/datasets/${dataset.documentId || dataset.id}`"
+                        class="block text-sm text-blue-600 hover:underline leading-snug"
+                      >{{ dataset.title || dataset.Title }}</a>
+                    </div>
+                  </div>
+
+                  <!-- Funding Acknowledgement -->
+                  <div v-if="app.funding" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                    <h4 class="font-bold text-gray-800 mb-2">Funding Acknowledgement</h4>
+                    <p class="text-sm text-gray-600 leading-relaxed" v-html="app.funding"></p>
+                  </div>
+
+                  <!-- View Published App -->
+                  <button @click="viewPublishedApp" class="w-full bg-blue-700 text-white py-2.5 rounded font-medium hover:bg-blue-800 transition-colors cursor-pointer">
+                    View Published App
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
       </div>
     </main>
   </div>
@@ -124,13 +193,13 @@
 <script setup>
 definePageMeta({ middleware: ['preview-access'] })
 
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { fetchAppPreviewById, publishApp, API_BASE_URL as API_URL } from '~/services/api'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { fetchAppPreviewById, publishApp, API_BASE_URL } from '~/services/api'
 
 const route = useRoute()
+const router = useRouter()
 const toast = useToast()
-const API_BASE_URL = API_URL
 
 const app = ref(null)
 const loading = ref(true)
@@ -140,10 +209,23 @@ const publishing = ref(false)
 
 const handlePublish = async () => {
   publishing.value = true
-  try { await publishApp(route.params.id); toast.add({ title: 'App published successfully!', color: 'green' }) }
-  catch (err) { toast.add({ title: `Failed to publish: ${err.message}`, color: 'red' }) }
-  finally { publishing.value = false }
+  try {
+    await publishApp(route.params.id)
+    toast.add({ title: 'App published successfully!', color: 'green' })
+  } catch (err) {
+    toast.add({ title: `Failed to publish: ${err.message}`, color: 'red' })
+  } finally { publishing.value = false }
 }
+
+const imageUrl = computed(() => {
+  const img = Array.isArray(app.value?.image) ? app.value.image[0] : app.value?.image
+  if (!img?.url) return null
+  return img.url.startsWith('/') ? `${API_BASE_URL}${img.url}` : img.url
+})
+
+const contributorsString = computed(() => app.value?.contributors?.map(c => c.title).join(', ') || '')
+const relatedArticles = computed(() => app.value?.articles || [])
+const relatedDatasets = computed(() => app.value?.datasets || [])
 
 const formatDate = (dateString) => {
   if (!dateString) return ''
@@ -153,6 +235,11 @@ const formatDate = (dateString) => {
 const resolveImageUrl = (img) => {
   if (!img?.url) return ''
   return img.url.startsWith('/') ? `${API_BASE_URL}${img.url}` : img.url
+}
+
+const viewPublishedApp = () => {
+  const id = app.value?.documentId || app.value?.id
+  if (id) router.push(`/apps/${id}`)
 }
 
 const normalizeApp = (data) => {
@@ -165,7 +252,8 @@ const normalizeApp = (data) => {
 }
 
 const loadApp = async () => {
-  loading.value = true; error.value = null
+  loading.value = true
+  error.value = null
   try { app.value = normalizeApp(await fetchAppPreviewById(route.params.id)) }
   catch (err) { error.value = `Failed to load app: ${err.message}` }
   finally { loading.value = false }
@@ -175,8 +263,6 @@ onMounted(() => { loadApp() })
 </script>
 
 <style scoped>
-.preview-content { min-height: calc(100vh - 56px); display: flex; justify-content: center; }
-.preview-content.mobile { padding: 40px 20px; align-items: flex-start; }
 .device-frame { width: 375px; background: #1a1a1a; border-radius: 40px; padding: 12px; box-shadow: 0 0 0 2px #333, 0 20px 50px rgba(0,0,0,0.3), inset 0 0 0 2px #000; }
 .device-notch { width: 150px; height: 28px; background: #1a1a1a; border-radius: 0 0 20px 20px; margin: 0 auto; position: relative; top: -1px; z-index: 10; }
 .device-screen { background: #fff; border-radius: 30px; overflow: hidden; height: 700px; overflow-y: auto; }
