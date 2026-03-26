@@ -20,7 +20,7 @@
           <!-- Title Row -->
           <div class="flex flex-col gap-3 mb-3 sm:flex-row sm:items-start sm:justify-between">
             <div class="flex items-start gap-3">
-              <div class="w-10 h-10 bg-blue-700 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div class="w-10 h-10 bg-primary-500 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
                 <UIcon name="i-heroicons-document-text" class="w-6 h-6 text-white" />
               </div>
               <h1 class="text-xl font-bold text-gray-900 leading-tight sm:text-2xl">{{ article.title }}</h1>
@@ -29,7 +29,7 @@
               <button v-if="prevArticle" @click="navigateToArticle(prevArticle)" class="flex items-center gap-1 border border-blue-700 text-blue-700 px-3 py-2 rounded hover:bg-blue-50 text-sm font-medium">
                 <UIcon name="i-heroicons-chevron-left" class="w-4 h-4" /> Prev Article
               </button>
-              <button v-if="nextArticle" @click="navigateToArticle(nextArticle)" class="flex items-center gap-1 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 text-sm font-medium">
+              <button v-if="nextArticle" @click="navigateToArticle(nextArticle)" class="flex items-center gap-1 bg-primary-500 text-white px-4 py-2 rounded hover:bg-blue-800 text-sm font-medium">
                 Next Article <UIcon name="i-heroicons-chevron-right" class="w-4 h-4" />
               </button>
             </div>
@@ -144,7 +144,7 @@
     <!-- Scroll to top -->
     <button
       v-if="showScrollTop"
-      class="fixed bottom-6 right-6 z-10 bg-blue-700 text-white cursor-pointer rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:bg-blue-800 transition-colors"
+      class="fixed bottom-6 right-6 z-10 bg-primary-500 text-white cursor-pointer rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:bg-blue-800 transition-colors"
       @click="scrollToTop"
       aria-label="Scroll to top"
     >
