@@ -270,7 +270,7 @@ const fixFootnotes = (md) => {
 }
 
 const slugify = (text) =>
-  text.toLowerCase().replace(/<[^>]+>/g, '').replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').trim()
+  text.toLowerCase().replace(/<[^>]+>/g, '').replace(/&[^;]+;/g, '').replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').trim()
 
 const tocItems = computed(() => {
   if (!article.value?.markdown) return []
