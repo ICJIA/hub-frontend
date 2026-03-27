@@ -28,7 +28,7 @@
           class="w-28"
           @update:model-value="onFilterChange"
         />
-        <div class="flex-1 min-w-[180px]">
+        <!-- <div class="flex-1 min-w-[180px]">
           <UInput
             v-model="searchQuery"
             placeholder="Search..."
@@ -36,7 +36,7 @@
             size="sm"
             @input="onSearchInput"
           />
-        </div>
+        </div> -->
         <div class="flex border border-gray-300 rounded-lg overflow-hidden">
           <button
             :class="['px-2 py-1 text-sm', viewMode === 'grid' ? 'bg-primary-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50']"
