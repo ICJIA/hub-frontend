@@ -187,7 +187,7 @@
                   >{{ app.Title || app.title }}</a>
                   <a
                     v-for="article in relatedArticles"
-                    :key="article.slug || article.documentId || article.id"
+                    :key="article.slug"
                     href="#"
                     @click.prevent="goToArticle(article)"
                     class="block text-sm text-blue-600 hover:underline leading-snug"
