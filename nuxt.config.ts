@@ -20,6 +20,11 @@ export default defineNuxtConfig({
       ]
     }
   },
+  icon: {
+    serverBundle: {
+      collections: ['heroicons','lucide'] // add any other collections you use
+    }
+  },
 
   devtools: {
     enabled: true
