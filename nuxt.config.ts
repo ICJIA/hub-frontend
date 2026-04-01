@@ -21,9 +21,11 @@ export default defineNuxtConfig({
     }
   },
   icon: {
-    serverBundle: {
-      collections: ['heroicons','lucide'] // add any other collections you use
-    }
+    clientBundle: {
+      scan: true, // auto-detect icons used in your project
+      sizeLimitKb: 256
+    },
+    provider: 'iconify' // use Iconify CDN as fallback
   },
 
   devtools: {
