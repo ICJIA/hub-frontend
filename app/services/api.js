@@ -58,16 +58,25 @@ export const fetchArticleById = async (id) => {
       headers: getHeaders()
     }
   )
-  
+
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`)
   }
-  
+
   const data = await response.json()
   if(data.data) {
     return data.data;
-  } 
-  
+  }
+
+  throw new Error('Article not found')
+}
+
+export const fetchArticleBySlug = async (slug) => {
+  const params = new URLSearchParams({ 'filters[slug][$eq]': slug, 'populate': '*' })
+  const response = await fetch(`${API_BASE_URL}/api/articles?${params}`, { headers: getHeaders() })
+  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+  const data = await response.json()
+  if (data.data?.[0]) return data.data[0]
   throw new Error('Article not found')
 }
 
@@ -408,6 +417,15 @@ export const fetchAppById = async (id) => {
   throw new Error('App not found')
 }
 
+export const fetchAppBySlug = async (slug) => {
+  const params = new URLSearchParams({ 'filters[slug][$eq]': slug, 'populate': '*' })
+  const response = await fetch(`${API_BASE_URL}/api/apps?${params}`, { headers: getHeaders() })
+  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+  const data = await response.json()
+  if (data.data?.[0]) return data.data[0]
+  throw new Error('App not found')
+}
+
 export const fetchDatasets = async (page = 1, pageSize = 10, sort = 'date:desc', search = '', filters = {}) => {
   const params = new URLSearchParams({
     'populate': '*',
@@ -440,12 +458,22 @@ export const fetchDatasetById = async (id) => {
   throw new Error('Dataset not found')
 }
 
+export const fetchDatasetBySlug = async (slug) => {
+  const params = new URLSearchParams({ 'filters[slug][$eq]': slug, 'populate': '*' })
+  const response = await fetch(`${API_BASE_URL}/api/datasets?${params}`, { headers: getHeaders() })
+  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+  const data = await response.json()
+  if (data.data?.[0]) return data.data[0]
+  throw new Error('Dataset not found')
+}
+
 export const fetchDatasetsBasic = async (search = '') => {
   const params = new URLSearchParams({
     'status': 'draft',
     'fields[0]': 'id',
     'fields[1]': 'title',
     'fields[2]': 'documentId',
+    'fields[3]': 'slug',
     'pagination[pageSize]': 50,
   })
   if (search) params.append('filters[title][$containsi]', search)
@@ -476,6 +504,7 @@ export const fetchArticlesBasic = async (search = '') => {
     'fields[0]': 'id',
     'fields[1]': 'Title',
     'fields[2]': 'documentId',
+    'fields[3]': 'slug',
     'pagination[pageSize]': 50,
   })
   if (search) params.append('filters[title][$containsi]', search)
@@ -491,10 +520,13 @@ export const fetchArticlesBasic = async (search = '') => {
 export default {
   fetchArticles,
   fetchArticleById,
+  fetchArticleBySlug,
   fetchApps,
   fetchAppById,
+  fetchAppBySlug,
   fetchDatasets,
   fetchDatasetById,
+  fetchDatasetBySlug,
   fetchArticlePreviewById,
   updateArticle,
   publishArticle,

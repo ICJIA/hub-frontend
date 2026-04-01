@@ -1,11 +1,6 @@
 <template>
   <div class="max-w-[1400px] mx-auto px-4 py-6">
     <div class="text-center mb-6">
-      <div class="flex justify-center gap-1 mb-3">
-        <UButton variant="ghost" to="/" size="sm">Articles</UButton>
-        <UButton variant="ghost" to="/apps" size="sm">Apps</UButton>
-        <UButton variant="ghost" to="/datasets" size="sm">Datasets</UButton>
-      </div>
       <h1 class="text-2xl font-bold">Apps</h1>
     </div>
 
@@ -74,7 +69,7 @@
         :class="viewMode === 'list' ? 'col-span-12' : 'col-span-12 sm:col-span-6 md:col-span-4'"
       >
         <div
-          @click="goToApp(app.documentId)"
+          @click="goToApp(app.slug || app.documentId)"
           class="bg-white border border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow h-full"
           :class="viewMode === 'list' ? 'flex' : ''"
         >

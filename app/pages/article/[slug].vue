@@ -117,7 +117,7 @@
               <div v-if="authorArticles.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
                 <h4 class="font-bold text-gray-800 mb-3">More Articles from Author(s)</h4>
                 <div class="space-y-2">
-                  <a v-for="a in authorArticles" :key="a.id" href="#" @click.prevent="navigateToArticle(a)" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title }}</a>
+                  <a v-for="a in authorArticles" :key="a.slug || a.id" href="#" @click.prevent="navigateToArticle(a)" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title }}</a>
                 </div>
               </div>
 
@@ -125,8 +125,8 @@
               <div v-if="relatedDatasets.length || relatedApps.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
                 <h4 class="font-bold text-gray-800 mb-3">Related Content</h4>
                 <div class="space-y-2">
-                  <a v-for="d in relatedDatasets" :key="d.id" :href="`/datasets/${d.documentId || d.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ d.title || d.Title }}</a>
-                  <a v-for="a in relatedApps" :key="a.id" :href="`/apps/${a.documentId || a.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title || a.Title }}</a>
+                  <a v-for="d in relatedDatasets" :key="d.id" :href="`/datasets/${d.slug || d.documentId || d.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ d.title || d.Title }}</a>
+                  <a v-for="a in relatedApps" :key="a.id" :href="`/apps/${a.slug || a.documentId || a.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title || a.Title }}</a>
                 </div>
               </div>
 
@@ -158,16 +158,23 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { marked } from 'marked'
 import markedFootnote from 'marked-footnote'
-import { fetchArticleById, fetchArticles, API_BASE_URL } from '~/services/api'
+import { fetchArticleBySlug, fetchArticles, API_BASE_URL } from '~/services/api'
 
-marked.use(markedFootnote())
+if (!marked._footnotePluginAdded) {
+  marked.use(markedFootnote())
+  marked._footnotePluginAdded = true
+}
 
 const router = useRouter()
 const route = useRoute()
 
-const article = ref(null)
-const loading = ref(true)
-const error = ref(null)
+const { data: article, error: fetchError, pending: loading } = await useAsyncData(
+  `article-${route.params.slug}`,
+  () => fetchArticleBySlug(route.params.slug)
+)
+
+const error = computed(() => fetchError.value ? `Failed to load article: ${fetchError.value.message}` : null)
+
 const prevArticle = ref(null)
 const nextArticle = ref(null)
 const authorArticles = ref([])
@@ -201,7 +208,11 @@ const fixAssetUrls = (html) => {
 
 const fixFootnotes = (md) => {
   md = md.replace(/([^\n])\[\^(\d+)\]:/g, '$1\n\n[^$2]:')
-  md = md.replace(/(\[\^\d+\]:[^\n]*)\n(?!\[\^\d+\]:|\s*$|\n)([^\n]+)/g, '$1 $2')
+  let prev
+  do {
+    prev = md
+    md = md.replace(/(\[\^\d+\]:[^\n]*)\n(?!\[\^\d+\]:|\s*$|\n)([^\n]+)/g, '$1 $2')
+  } while (md !== prev)
   return md
 }
 
@@ -246,17 +257,17 @@ const formatDate = (dateString) => {
 const goBack = () => router.push('/')
 
 const navigateToArticle = (a) => {
-  const id = a.documentId || a.id
-  router.push(`/article/${id}`)
+  const slug = a.slug || a.documentId || a.id
+  router.push(`/article/${slug}`)
 }
 
 const loadNavigation = async () => {
   try {
     const data = await fetchArticles(1, 100, 'date:desc')
     const articles = data.data || []
-    const currentId = route.params.id
+    const currentSlug = route.params.slug
     const currentIndex = articles.findIndex(a =>
-      String(a.id) === String(currentId) || a.documentId === currentId
+      a.slug === currentSlug || a.documentId === currentSlug
     )
     if (currentIndex > 0) prevArticle.value = articles[currentIndex - 1]
     if (currentIndex !== -1 && currentIndex < articles.length - 1) nextArticle.value = articles[currentIndex + 1]
@@ -270,25 +281,12 @@ const loadAuthorArticles = async () => {
   if (!firstAuthor) return
   try {
     const data = await fetchArticles(1, 5, 'date:desc', '', { author: firstAuthor })
-    const currentId = route.params.id
+    const currentSlug = route.params.slug
     authorArticles.value = (data.data || [])
-      .filter(a => String(a.id) !== String(currentId) && a.documentId !== currentId)
+      .filter(a => a.slug !== currentSlug && a.documentId !== currentSlug)
       .slice(0, 3)
   } catch (e) {
     // Author articles are optional, fail silently
-  }
-}
-
-const loadArticle = async () => {
-  loading.value = true
-  error.value = null
-  try {
-    article.value = await fetchArticleById(route.params.id)
-    await Promise.all([loadNavigation(), loadAuthorArticles()])
-  } catch (err) {
-    error.value = `Failed to load article: ${err.message}`
-  } finally {
-    loading.value = false
   }
 }
 
@@ -296,8 +294,10 @@ const showScrollTop = ref(false)
 const onScroll = () => { showScrollTop.value = window.scrollY > 300 }
 const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
 
-onMounted(() => {
-  loadArticle()
+onMounted(async () => {
+  if (article.value) {
+    await Promise.all([loadNavigation(), loadAuthorArticles()])
+  }
   window.addEventListener('scroll', onScroll)
 })
 
@@ -315,7 +315,7 @@ onUnmounted(() => {
 .markdown-content :deep(p) { margin-bottom: 15px; }
 .markdown-content :deep(a) { color: #3498db; text-decoration: none; word-wrap: break-word; }
 .markdown-content :deep(a:hover) { text-decoration: underline; }
-.markdown-content :deep(ul),
+.markdown-content :deep(ul) { margin-bottom: 15px; padding-left: 25px; list-style-type: disc; }
 .markdown-content :deep(ol) { margin-bottom: 15px; padding-left: 25px; }
 .markdown-content :deep(li) { margin-bottom: 8px; }
 .markdown-content :deep(blockquote) { border-left: 4px solid #3498db; padding-left: 20px; margin: 20px 0; color: #555; font-style: italic; }

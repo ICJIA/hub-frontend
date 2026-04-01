@@ -180,16 +180,16 @@
                 <div class="space-y-2">
                   <a
                     v-for="app in relatedApps"
-                    :key="app.documentId || app.id"
+                    :key="app.slug || app.documentId || app.id"
                     href="#"
-                    @click.prevent="goToApp(app.documentId)"
+                    @click.prevent="goToApp(app)"
                     class="block text-sm text-blue-600 hover:underline leading-snug"
                   >{{ app.Title || app.title }}</a>
                   <a
                     v-for="article in relatedArticles"
-                    :key="article.documentId || article.id"
+                    :key="article.slug || article.documentId || article.id"
                     href="#"
-                    @click.prevent="goToArticle(article.documentId)"
+                    @click.prevent="goToArticle(article)"
                     class="block text-sm text-blue-600 hover:underline leading-snug"
                   >{{ article.Title || article.title }}</a>
                 </div>
@@ -221,7 +221,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { fetchDatasetById, API_BASE_URL } from '~/services/api'
+import { fetchDatasetBySlug, API_BASE_URL } from '~/services/api'
 
 const router = useRouter()
 const route = useRoute()
@@ -273,14 +273,14 @@ const formatDate = (dateString) => {
 }
 
 const goBack = () => router.push('/datasets')
-const goToApp = (id) => router.push(`/apps/${id}`)
-const goToArticle = (id) => router.push(`/article/${id}`)
+const goToApp = (item) => router.push(`/apps/${item.slug || item.documentId || item.id}`)
+const goToArticle = (item) => router.push(`/article/${item.slug || item.documentId || item.id}`)
 
 const loadDataset = async () => {
   loading.value = true
   error.value = null
   try {
-    const data = await fetchDatasetById(route.params.id)
+    const data = await fetchDatasetBySlug(route.params.slug)
     if (!Array.isArray(data.apps)) data.apps = []
     if (!Array.isArray(data.articles)) data.articles = []
     dataset.value = data

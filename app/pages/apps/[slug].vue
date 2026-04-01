@@ -97,16 +97,16 @@
                 <div class="space-y-2">
                   <a
                     v-for="article in relatedArticles"
-                    :key="article.documentId || article.id"
+                    :key="article.slug || article.documentId || article.id"
                     href="#"
-                    @click.prevent="goToArticle(article.documentId)"
+                    @click.prevent="goToArticle(article)"
                     class="block text-sm text-blue-600 hover:underline leading-snug"
                   >{{ article.title || article.Title }}</a>
                   <a
                     v-for="dataset in relatedDatasets"
-                    :key="dataset.documentId || dataset.id"
+                    :key="dataset.slug || dataset.documentId || dataset.id"
                     href="#"
-                    @click.prevent="goToDataset(dataset.documentId)"
+                    @click.prevent="goToDataset(dataset)"
                     class="block text-sm text-blue-600 hover:underline leading-snug"
                   >{{ dataset.title || dataset.Title }}</a>
                 </div>
@@ -146,7 +146,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { fetchAppById, API_BASE_URL } from '~/services/api'
+import { fetchAppBySlug, API_BASE_URL } from '~/services/api'
 
 const router = useRouter()
 const route = useRoute()
@@ -171,14 +171,14 @@ const formatDate = (dateString) => {
 }
 
 const goBack = () => router.push('/apps')
-const goToArticle = (id) => router.push(`/article/${id}`)
-const goToDataset = (id) => router.push(`/datasets/${id}`)
+const goToArticle = (item) => router.push(`/article/${item.slug || item.documentId || item.id}`)
+const goToDataset = (item) => router.push(`/datasets/${item.slug || item.documentId || item.id}`)
 
 const loadApp = async () => {
   loading.value = true
   error.value = null
   try {
-    const data = await fetchAppById(route.params.id)
+    const data = await fetchAppBySlug(route.params.slug)
     if (Array.isArray(data.image)) data.image = data.image[0] || null
     if (!Array.isArray(data.articles)) data.articles = []
     if (!Array.isArray(data.datasets)) data.datasets = []
