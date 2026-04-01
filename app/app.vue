@@ -1,10 +1,7 @@
 <template>
   <UApp>
-    <NuxtPage />
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
   </UApp>
 </template>
-
-<script setup>
-const colorMode = useColorMode()
-colorMode.preference = 'light'
-</script>
