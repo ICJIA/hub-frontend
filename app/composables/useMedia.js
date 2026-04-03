@@ -12,6 +12,9 @@ export const useMedia = () => {
     })
     if (!response.ok) throw new Error(`Upload failed: ${response.status}`)
     const uploadedFiles = await response.json()
+    if (!Array.isArray(uploadedFiles) || uploadedFiles.length === 0) {
+      throw new Error('Upload succeeded but returned no files')
+    }
     return uploadedFiles[0]
   }
 

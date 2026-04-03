@@ -195,11 +195,11 @@ definePageMeta({ middleware: ['preview-access'] })
 
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { fetchAppPreviewById, publishApp, API_BASE_URL } from '~/services/api'
 
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
+const { fetchAppPreviewById, publishApp } = useApps()
 
 const app = ref(null)
 const loading = ref(true)

@@ -56,10 +56,14 @@ export const useApps = () => {
     const params = new URLSearchParams(window.location.search)
     const status = statusOverride || params.get('status')
     const dataToSend = { ...appData }
-    if (dataToSend.image && typeof dataToSend.image === 'object' && dataToSend.image.id) {
+    if (typeof dataToSend.image === 'number') {
+      dataToSend.image = [dataToSend.image]
+    } else if (dataToSend.image && typeof dataToSend.image === 'object' && dataToSend.image.id) {
       dataToSend.image = [dataToSend.image.id]
-    } else if (!dataToSend.image) {
+    } else if (dataToSend.image === null) {
       dataToSend.image = []
+    } else if (dataToSend.image === undefined) {
+      delete dataToSend.image
     }
     if (Array.isArray(dataToSend.articles)) {
       dataToSend.articles = dataToSend.articles.map(a => (typeof a === 'number' ? a : a.id)).filter(Boolean)

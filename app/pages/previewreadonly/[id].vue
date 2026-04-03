@@ -211,13 +211,13 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { marked } from 'marked'
 import markedFootnote from 'marked-footnote'
-import { fetchArticlePreviewById, publishArticle, API_BASE_URL } from '~/services/api'
 
 marked.use(markedFootnote())
 
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
+const { fetchArticlePreviewById, publishArticle } = useArticles()
 const bearerToken = import.meta.env.VITE_API_BEARER_TOKEN || ''
 
 const article = ref(null)

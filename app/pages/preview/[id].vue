@@ -120,7 +120,6 @@ import { useRoute } from 'vue-router'
 import TurndownService from 'turndown'
 import { marked } from 'marked'
 import markedFootnote from 'marked-footnote'
-import { fetchArticlePreviewById, updateArticle, uploadMedia } from '~/services/api'
 import { generateToken } from '~/utils/previewToken'
 
 const turndownService = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced', bulletListMarker: '-' })
@@ -164,6 +163,8 @@ turndownService.addRule('table', {
 
 const route = useRoute()
 const toast = useToast()
+const { fetchArticlePreviewById, updateArticle } = useArticles()
+const { uploadMedia } = useMedia()
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:1338'
 
 const originalArticle = ref(null)

@@ -55,9 +55,17 @@ export const useDatasets = () => {
     const status = statusOverride || params.get('status')
     const dataToSend = { ...datasetData }
     // Media field: send array of numeric IDs (empty array clears the field).
-    dataToSend.datafile = Array.isArray(dataToSend.datafile)
-      ? dataToSend.datafile.map(f => (typeof f === 'number' ? f : f?.id)).filter(Boolean)
-      : []
+    if (Array.isArray(dataToSend.datafile)) {
+      dataToSend.datafile = dataToSend.datafile
+        .map(f => (typeof f === 'number' ? f : f?.id))
+        .filter(Boolean)
+    } else if (dataToSend.datafile && typeof dataToSend.datafile === 'object' && dataToSend.datafile.id) {
+      dataToSend.datafile = [dataToSend.datafile.id]
+    } else if (dataToSend.datafile === null) {
+      dataToSend.datafile = []
+    } else {
+      delete dataToSend.datafile
+    }
     if (Array.isArray(dataToSend.apps)) {
       dataToSend.apps = dataToSend.apps.map(a => (typeof a === 'number' ? a : a.id)).filter(Boolean)
     }
