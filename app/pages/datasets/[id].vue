@@ -51,11 +51,14 @@
       <!-- Gray content area -->
       <div class="flex-1 bg-gray-100">
         <div class="max-w-[1300px] mx-auto py-4 px-4 sm:py-6 sm:px-6">
+          <!-- Two Column Layout -->
           <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
             <!-- Main Content -->
             <div class="flex-1 min-w-0 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+              <!-- Overview Card -->
               <div class="bg-[#1a3a5c] text-white px-6 py-4">
                 <h2 class="text-lg font-bold">Overview: {{ dataset.title }}</h2>
+                <!-- <p v-if="dataset.unit" class="text-sm text-blue-200 mt-1">{{ dataset.unit }}</p> -->
               </div>
 
               <div class="p-6 space-y-8">
@@ -107,7 +110,8 @@
                         variant="outline"
                         size="sm"
                       >
-                        Download CSV
+                       Download CSV
+                        
                       </UButton>
                     </div>
                   </div>
@@ -164,44 +168,58 @@
 
             <!-- Right Sidebar -->
             <div class="w-full lg:w-[260px] lg:flex-shrink-0 space-y-4">
-              <SidebarCard v-if="dataset.citation" title="Suggested Citation">
+              <!-- Suggested Citation -->
+              <div v-if="dataset.citation" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                <h4 class="font-bold text-gray-800 mb-2">Suggested Citation</h4>
                 <p class="text-sm text-gray-600 leading-relaxed break-words" v-html="dataset.citation"></p>
-              </SidebarCard>
+              </div>
 
-              <SidebarCard v-if="relatedApps.length || relatedArticles.length" title="Related Content">
+              <!-- Related Content -->
+              <div v-if="relatedApps.length || relatedArticles.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                <h4 class="font-bold text-gray-800 mb-3">Related Content</h4>
                 <div class="space-y-2">
                   <a
                     v-for="app in relatedApps"
-                    :key="app.slug || app.documentId || app.id"
+                    :key="app.documentId || app.id"
                     href="#"
-                    @click.prevent="goToApp(app)"
+                    @click.prevent="goToApp(app.documentId)"
                     class="block text-sm text-blue-600 hover:underline leading-snug"
                   >{{ app.Title || app.title }}</a>
                   <a
                     v-for="article in relatedArticles"
-                    :key="article.slug"
+                    :key="article.documentId || article.id"
                     href="#"
-                    @click.prevent="goToArticle(article)"
+                    @click.prevent="goToArticle(article.documentId)"
                     class="block text-sm text-blue-600 hover:underline leading-snug"
                   >{{ article.Title || article.title }}</a>
                 </div>
-              </SidebarCard>
+              </div>
 
-              <SidebarCard v-if="dataset.funding" title="Funding Acknowledgement">
+              <!-- Funding Acknowledgement -->
+              <div v-if="dataset.funding" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                <h4 class="font-bold text-gray-800 mb-2">Funding Acknowledgement</h4>
                 <p class="text-sm text-gray-600 leading-relaxed" v-html="dataset.funding"></p>
-              </SidebarCard>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </template>
 
-    <ScrollToTop />
+    <!-- Scroll to top -->
+    <button
+      v-if="showScrollTop"
+      class="fixed bottom-6 right-6 z-10 bg-primary-500 text-white cursor-pointer rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:bg-blue-800 transition-colors"
+      @click="scrollToTop"
+      aria-label="Scroll to top"
+    >
+      <UIcon name="i-heroicons-chevron-up" class="w-5 h-5" />
+    </button>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
@@ -238,15 +256,31 @@ const datafileUrl = (file) => {
   return file.url.startsWith('/') ? `${API_BASE_URL}${file.url}` : file.url
 }
 
+const formatFileSize = (bytes) => {
+  if (!bytes) return ''
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
 const goBack = () => router.push('/datasets')
-const goToApp = (item) => router.push(`/apps/${item.slug || item.documentId || item.id}`)
-const goToArticle = (item) => router.push(`/article/${item.slug || item.documentId || item.id}`)
+const goToApp = (id) => router.push(`/apps/${id}`)
+const goToArticle = (id) => router.push(`/article/${id}`)
 
 const loadDataset = async () => {
   loading.value = true
   error.value = null
   try {
-    const data = await fetchDatasetBySlug(route.params.slug)
+    const data = await fetchDatasetBySlug(route.params.id)
     if (!Array.isArray(data.apps)) data.apps = []
     if (!Array.isArray(data.articles)) data.articles = []
     dataset.value = data
@@ -257,5 +291,16 @@ const loadDataset = async () => {
   }
 }
 
-onMounted(() => loadDataset())
+const showScrollTop = ref(false)
+const onScroll = () => { showScrollTop.value = window.scrollY > 300 }
+const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
+
+onMounted(() => {
+  loadDataset()
+  window.addEventListener('scroll', onScroll)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', onScroll)
+})
 </script>

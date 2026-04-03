@@ -190,11 +190,14 @@ definePageMeta({ middleware: ['preview-access'] })
 
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
-import { fetchAppPreviewById, updateApp, uploadMedia, fetchArticlesBasic, fetchDatasetsBasic, API_BASE_URL } from '~/services/api'
 import { generateToken } from '~/utils/previewToken'
 
 const route = useRoute()
 const toast = useToast()
+const { fetchAppPreviewById, updateApp } = useApps()
+const { uploadMedia } = useMedia()
+const { fetchArticlesBasic } = useArticles()
+const { fetchDatasetsBasic } = useDatasets()
 
 const originalApp = ref(null)
 const editableApp = ref(null)

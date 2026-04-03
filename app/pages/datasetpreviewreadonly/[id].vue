@@ -333,12 +333,11 @@ definePageMeta({ middleware: ['preview-access'] })
 
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { fetchDatasetPreviewById, publishDataset, API_BASE_URL as API_URL } from '~/services/api'
 
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
-const API_BASE_URL = API_URL
+const { fetchDatasetPreviewById, publishDataset } = useDatasets()
 
 const dataset = ref(null)
 const loading = ref(true)

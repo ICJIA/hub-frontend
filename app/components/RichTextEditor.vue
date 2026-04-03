@@ -368,7 +368,6 @@
   
   <script setup>
   import { ref, reactive, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { fetchMediaFiles, API_BASE_URL } from '~/services/api'
 import TurndownService from 'turndown'
 import { gfm } from 'turndown-plugin-gfm'
 import { marked } from 'marked'

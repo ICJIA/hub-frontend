@@ -52,12 +52,14 @@
             </a>
           </div>
         </div>
+        <!-- Green accent line -->
         <div class="h-[1px] w-full bg-gray-200"></div>
       </div>
 
       <!-- Gray content area -->
       <div class="flex-1 bg-gray-100">
         <div class="max-w-[1300px] mx-auto py-4 px-4 sm:py-6 sm:px-6">
+          <!-- Two Column Layout -->
           <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
             <!-- Main Content -->
             <div class="flex-1 min-w-0 bg-white rounded-lg border border-gray-200 shadow-sm">
@@ -71,87 +73,101 @@
               </div>
 
               <div class="p-6">
-                <div v-if="article.abstract" class="mb-6">
-                  <div class="flex items-center gap-2 mb-3">
-                    <UIcon name="i-heroicons-information-circle" class="w-6 h-6 text-blue-700" />
-                    <h3 class="text-lg font-bold text-gray-800">Summary</h3>
-                  </div>
-                  <p class="text-gray-700 leading-relaxed" v-html="fixAssetUrls(article.abstract)"></p>
+              <!-- Summary -->
+              <div v-if="article.abstract" class="mb-6">
+                <div class="flex items-center gap-2 mb-3">
+                  <UIcon name="i-heroicons-information-circle" class="w-6 h-6 text-blue-700" />
+                  <h3 class="text-lg font-bold text-gray-800">Summary</h3>
                 </div>
+                <p class="text-gray-700 leading-relaxed" v-html="fixAssetUrls(article.abstract)"></p>
+              </div>
 
-                <div class="markdown-content" v-html="renderedMarkdown"></div>
+              <!-- Markdown Content -->
+              <div class="markdown-content" v-html="renderedMarkdown"></div>
 
-                <div v-if="article.citation" class="mt-8">
-                  <h4 class="font-bold text-gray-800 mb-2">Citation:</h4>
-                  <p class="text-gray-700 text-sm leading-relaxed" v-html="fixAssetUrls(article.citation)"></p>
-                </div>
+              <!-- Citation -->
+              <div v-if="article.citation" class="mt-8">
+                <h4 class="font-bold text-gray-800 mb-2">Citation:</h4>
+                <p class="text-gray-700 text-sm leading-relaxed" v-html="fixAssetUrls(article.citation)"></p>
+              </div>
 
-                <div v-if="article.tags?.length" class="mt-6 flex items-center flex-wrap gap-2">
-                  <span class="font-bold text-gray-700">Keywords &amp; Tags:</span>
-                  <UBadge v-for="tag in article.tags" :key="tag" variant="subtle" class="mr-1">{{ tag }}</UBadge>
-                </div>
+              <!-- Keywords & Tags -->
+              <div v-if="article.tags?.length" class="mt-6 flex items-center flex-wrap gap-2">
+                <span class="font-bold text-gray-700">Keywords &amp; Tags:</span>
+                <UBadge v-for="tag in article.tags" :key="tag" variant="subtle" class="mr-1">{{ tag }}</UBadge>
               </div>
             </div>
 
+          </div>
+
             <!-- Right Sidebar -->
             <div class="w-full lg:w-[260px] lg:flex-shrink-0 space-y-4">
-              <SidebarCard v-if="tocItems.length" title="Table Of Contents">
+              <!-- Table of Contents -->
+              <div v-if="tocItems.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                <h4 class="font-bold text-gray-800 mb-3">Table Of Contents</h4>
                 <ol class="space-y-2">
                   <li v-for="(item, idx) in tocItems" :key="item.id" class="flex items-start gap-2">
                     <span class="text-sm text-gray-500 flex-shrink-0">{{ idx + 1 }}.</span>
                     <a href="#" @click.prevent="scrollToSection(item.id)" class="text-sm text-blue-600 hover:underline leading-snug">{{ item.text }}</a>
                   </li>
                 </ol>
-              </SidebarCard>
+              </div>
 
-              <SidebarCard v-if="authorArticles.length" title="More Articles from Author(s)">
+              <!-- More Articles from Author(s) -->
+              <div v-if="authorArticles.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                <h4 class="font-bold text-gray-800 mb-3">More Articles from Author(s)</h4>
                 <div class="space-y-2">
-                  <a v-for="a in authorArticles" :key="a.slug || a.id" href="#" @click.prevent="navigateToArticle(a)" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title }}</a>
+                  <a v-for="a in authorArticles" :key="a.id" href="#" @click.prevent="navigateToArticle(a)" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title }}</a>
                 </div>
-              </SidebarCard>
+              </div>
 
-              <SidebarCard v-if="relatedDatasets.length || relatedApps.length" title="Related Content">
+              <!-- Related Content -->
+              <div v-if="relatedDatasets.length || relatedApps.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                <h4 class="font-bold text-gray-800 mb-3">Related Content</h4>
                 <div class="space-y-2">
-                  <a v-for="d in relatedDatasets" :key="d.id" :href="`/datasets/${d.slug || d.documentId || d.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ d.title || d.Title }}</a>
-                  <a v-for="a in relatedApps" :key="a.id" :href="`/apps/${a.slug || a.documentId || a.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title || a.Title }}</a>
+                  <a v-for="d in relatedDatasets" :key="d.id" :href="`/datasets/${d.documentId || d.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ d.title || d.Title }}</a>
+                  <a v-for="a in relatedApps" :key="a.id" :href="`/apps/${a.documentId || a.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title || a.Title }}</a>
                 </div>
-              </SidebarCard>
+              </div>
 
-              <SidebarCard v-if="article.funding" title="Funding Acknowledgement">
+              <!-- Funding Acknowledgement -->
+              <div v-if="article.funding" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                <h4 class="font-bold text-gray-800 mb-2">Funding Acknowledgement</h4>
                 <p class="text-sm text-gray-600 leading-relaxed" v-html="article.funding"></p>
-              </SidebarCard>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </template>
 
-    <ScrollToTop />
+    <!-- Scroll to top -->
+    <button
+      v-if="showScrollTop"
+      class="fixed bottom-6 right-6 z-10 bg-primary-500 text-white cursor-pointer rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:bg-blue-800 transition-colors"
+      @click="scrollToTop"
+      aria-label="Scroll to top"
+    >
+      <UIcon name="i-heroicons-chevron-up" class="w-5 h-5" />
+    </button>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { marked } from 'marked'
 import markedFootnote from 'marked-footnote'
 
-if (!marked._footnotePluginAdded) {
-  marked.use(markedFootnote())
-  marked._footnotePluginAdded = true
-}
+marked.use(markedFootnote())
 
 const router = useRouter()
 const route = useRoute()
 const { fetchArticleBySlug, fetchArticles } = useArticles()
 
-const { data: article, error: fetchError, pending: loading } = await useAsyncData(
-  `article-${route.params.slug}`,
-  () => fetchArticleBySlug(route.params.slug)
-)
-
-const error = computed(() => fetchError.value ? `Failed to load article: ${fetchError.value.message}` : null)
-
+const article = ref(null)
+const loading = ref(true)
+const error = ref(null)
 const prevArticle = ref(null)
 const nextArticle = ref(null)
 const authorArticles = ref([])
@@ -185,11 +201,7 @@ const fixAssetUrls = (html) => {
 
 const fixFootnotes = (md) => {
   md = md.replace(/([^\n])\[\^(\d+)\]:/g, '$1\n\n[^$2]:')
-  let prev
-  do {
-    prev = md
-    md = md.replace(/(\[\^\d+\]:[^\n]*)\n(?!\[\^\d+\]:|\s*$|\n)([^\n]+)/g, '$1 $2')
-  } while (md !== prev)
+  md = md.replace(/(\[\^\d+\]:[^\n]*)\n(?!\[\^\d+\]:|\s*$|\n)([^\n]+)/g, '$1 $2')
   return md
 }
 
@@ -226,20 +238,25 @@ const renderedMarkdown = computed(() => {
   return fixAssetUrls(html)
 })
 
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+}
+
 const goBack = () => router.push('/')
 
 const navigateToArticle = (a) => {
-  const slug = a.slug || a.documentId || a.id
-  router.push(`/article/${slug}`)
+  const id = a.documentId || a.id
+  router.push(`/article/${id}`)
 }
 
 const loadNavigation = async () => {
   try {
     const data = await fetchArticles(1, 100, 'date:desc')
     const articles = data.data || []
-    const currentSlug = route.params.slug
+    const currentId = route.params.id
     const currentIndex = articles.findIndex(a =>
-      a.slug === currentSlug || a.documentId === currentSlug
+      String(a.id) === String(currentId) || a.documentId === currentId
     )
     if (currentIndex > 0) prevArticle.value = articles[currentIndex - 1]
     if (currentIndex !== -1 && currentIndex < articles.length - 1) nextArticle.value = articles[currentIndex + 1]
@@ -253,19 +270,39 @@ const loadAuthorArticles = async () => {
   if (!firstAuthor) return
   try {
     const data = await fetchArticles(1, 5, 'date:desc', '', { author: firstAuthor })
-    const currentSlug = route.params.slug
+    const currentId = route.params.id
     authorArticles.value = (data.data || [])
-      .filter(a => a.slug !== currentSlug && a.documentId !== currentSlug)
+      .filter(a => String(a.id) !== String(currentId) && a.documentId !== currentId)
       .slice(0, 3)
   } catch (e) {
     // Author articles are optional, fail silently
   }
 }
 
-onMounted(async () => {
-  if (article.value) {
+const loadArticle = async () => {
+  loading.value = true
+  error.value = null
+  try {
+    article.value = await fetchArticleBySlug(route.params.id)
     await Promise.all([loadNavigation(), loadAuthorArticles()])
+  } catch (err) {
+    error.value = `Failed to load article: ${err.message}`
+  } finally {
+    loading.value = false
   }
+}
+
+const showScrollTop = ref(false)
+const onScroll = () => { showScrollTop.value = window.scrollY > 300 }
+const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
+
+onMounted(() => {
+  loadArticle()
+  window.addEventListener('scroll', onScroll)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', onScroll)
 })
 </script>
 
@@ -278,7 +315,7 @@ onMounted(async () => {
 .markdown-content :deep(p) { margin-bottom: 15px; }
 .markdown-content :deep(a) { color: #3498db; text-decoration: none; word-wrap: break-word; }
 .markdown-content :deep(a:hover) { text-decoration: underline; }
-.markdown-content :deep(ul) { margin-bottom: 15px; padding-left: 25px; list-style-type: disc; }
+.markdown-content :deep(ul),
 .markdown-content :deep(ol) { margin-bottom: 15px; padding-left: 25px; }
 .markdown-content :deep(li) { margin-bottom: 8px; }
 .markdown-content :deep(blockquote) { border-left: 4px solid #3498db; padding-left: 20px; margin: 20px 0; color: #555; font-style: italic; }
@@ -293,6 +330,7 @@ onMounted(async () => {
 .markdown-content :deep(tbody tr:nth-child(even)) { background-color: #f4f8ff; }
 .markdown-content :deep(tbody tr:hover) { background-color: #eaf2ff; }
 
+/* Numbered list styling */
 .markdown-content :deep(ol) {
   counter-reset: kf-counter;
   padding-left: 0;

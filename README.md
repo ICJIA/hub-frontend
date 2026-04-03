@@ -96,8 +96,6 @@ app/
 │   │   └── [id].vue                 # Dataset editor (draft preview)
 │   └── datasetpreviewreadonly/
 │       └── [id].vue                 # Dataset publish view
-├── services/
-│   └── api.js                       # Strapi API service layer
 └── utils/
     └── previewToken.js              # Signed token utilities
 nuxt.config.ts
