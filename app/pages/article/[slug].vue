@@ -52,14 +52,12 @@
             </a>
           </div>
         </div>
-        <!-- Green accent line -->
         <div class="h-[1px] w-full bg-gray-200"></div>
       </div>
 
       <!-- Gray content area -->
       <div class="flex-1 bg-gray-100">
         <div class="max-w-[1300px] mx-auto py-4 px-4 sm:py-6 sm:px-6">
-          <!-- Two Column Layout -->
           <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
             <!-- Main Content -->
             <div class="flex-1 min-w-0 bg-white rounded-lg border border-gray-200 shadow-sm">
@@ -73,92 +71,70 @@
               </div>
 
               <div class="p-6">
-              <!-- Summary -->
-              <div v-if="article.abstract" class="mb-6">
-                <div class="flex items-center gap-2 mb-3">
-                  <UIcon name="i-heroicons-information-circle" class="w-6 h-6 text-blue-700" />
-                  <h3 class="text-lg font-bold text-gray-800">Summary</h3>
+                <div v-if="article.abstract" class="mb-6">
+                  <div class="flex items-center gap-2 mb-3">
+                    <UIcon name="i-heroicons-information-circle" class="w-6 h-6 text-blue-700" />
+                    <h3 class="text-lg font-bold text-gray-800">Summary</h3>
+                  </div>
+                  <p class="text-gray-700 leading-relaxed" v-html="fixAssetUrls(article.abstract)"></p>
                 </div>
-                <p class="text-gray-700 leading-relaxed" v-html="fixAssetUrls(article.abstract)"></p>
-              </div>
 
-              <!-- Markdown Content -->
-              <div class="markdown-content" v-html="renderedMarkdown"></div>
+                <div class="markdown-content" v-html="renderedMarkdown"></div>
 
-              <!-- Citation -->
-              <div v-if="article.citation" class="mt-8">
-                <h4 class="font-bold text-gray-800 mb-2">Citation:</h4>
-                <p class="text-gray-700 text-sm leading-relaxed" v-html="fixAssetUrls(article.citation)"></p>
-              </div>
+                <div v-if="article.citation" class="mt-8">
+                  <h4 class="font-bold text-gray-800 mb-2">Citation:</h4>
+                  <p class="text-gray-700 text-sm leading-relaxed" v-html="fixAssetUrls(article.citation)"></p>
+                </div>
 
-              <!-- Keywords & Tags -->
-              <div v-if="article.tags?.length" class="mt-6 flex items-center flex-wrap gap-2">
-                <span class="font-bold text-gray-700">Keywords &amp; Tags:</span>
-                <UBadge v-for="tag in article.tags" :key="tag" variant="subtle" class="mr-1">{{ tag }}</UBadge>
+                <div v-if="article.tags?.length" class="mt-6 flex items-center flex-wrap gap-2">
+                  <span class="font-bold text-gray-700">Keywords &amp; Tags:</span>
+                  <UBadge v-for="tag in article.tags" :key="tag" variant="subtle" class="mr-1">{{ tag }}</UBadge>
+                </div>
               </div>
             </div>
 
-          </div>
-
             <!-- Right Sidebar -->
             <div class="w-full lg:w-[260px] lg:flex-shrink-0 space-y-4">
-              <!-- Table of Contents -->
-              <div v-if="tocItems.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-                <h4 class="font-bold text-gray-800 mb-3">Table Of Contents</h4>
+              <SidebarCard v-if="tocItems.length" title="Table Of Contents">
                 <ol class="space-y-2">
                   <li v-for="(item, idx) in tocItems" :key="item.id" class="flex items-start gap-2">
                     <span class="text-sm text-gray-500 flex-shrink-0">{{ idx + 1 }}.</span>
                     <a href="#" @click.prevent="scrollToSection(item.id)" class="text-sm text-blue-600 hover:underline leading-snug">{{ item.text }}</a>
                   </li>
                 </ol>
-              </div>
+              </SidebarCard>
 
-              <!-- More Articles from Author(s) -->
-              <div v-if="authorArticles.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-                <h4 class="font-bold text-gray-800 mb-3">More Articles from Author(s)</h4>
+              <SidebarCard v-if="authorArticles.length" title="More Articles from Author(s)">
                 <div class="space-y-2">
                   <a v-for="a in authorArticles" :key="a.slug || a.id" href="#" @click.prevent="navigateToArticle(a)" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title }}</a>
                 </div>
-              </div>
+              </SidebarCard>
 
-              <!-- Related Content -->
-              <div v-if="relatedDatasets.length || relatedApps.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-                <h4 class="font-bold text-gray-800 mb-3">Related Content</h4>
+              <SidebarCard v-if="relatedDatasets.length || relatedApps.length" title="Related Content">
                 <div class="space-y-2">
                   <a v-for="d in relatedDatasets" :key="d.id" :href="`/datasets/${d.slug || d.documentId || d.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ d.title || d.Title }}</a>
                   <a v-for="a in relatedApps" :key="a.id" :href="`/apps/${a.slug || a.documentId || a.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title || a.Title }}</a>
                 </div>
-              </div>
+              </SidebarCard>
 
-              <!-- Funding Acknowledgement -->
-              <div v-if="article.funding" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-                <h4 class="font-bold text-gray-800 mb-2">Funding Acknowledgement</h4>
+              <SidebarCard v-if="article.funding" title="Funding Acknowledgement">
                 <p class="text-sm text-gray-600 leading-relaxed" v-html="article.funding"></p>
-              </div>
+              </SidebarCard>
             </div>
           </div>
         </div>
       </div>
     </template>
 
-    <!-- Scroll to top -->
-    <button
-      v-if="showScrollTop"
-      class="fixed bottom-6 right-6 z-10 bg-primary-500 text-white cursor-pointer rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:bg-blue-800 transition-colors"
-      @click="scrollToTop"
-      aria-label="Scroll to top"
-    >
-      <UIcon name="i-heroicons-chevron-up" class="w-5 h-5" />
-    </button>
+    <ScrollToTop />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { marked } from 'marked'
 import markedFootnote from 'marked-footnote'
-import { fetchArticleBySlug, fetchArticles, API_BASE_URL } from '~/services/api'
 
 if (!marked._footnotePluginAdded) {
   marked.use(markedFootnote())
@@ -167,6 +143,7 @@ if (!marked._footnotePluginAdded) {
 
 const router = useRouter()
 const route = useRoute()
+const { fetchArticleBySlug, fetchArticles } = useArticles()
 
 const { data: article, error: fetchError, pending: loading } = await useAsyncData(
   `article-${route.params.slug}`,
@@ -249,11 +226,6 @@ const renderedMarkdown = computed(() => {
   return fixAssetUrls(html)
 })
 
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-}
-
 const goBack = () => router.push('/')
 
 const navigateToArticle = (a) => {
@@ -290,19 +262,10 @@ const loadAuthorArticles = async () => {
   }
 }
 
-const showScrollTop = ref(false)
-const onScroll = () => { showScrollTop.value = window.scrollY > 300 }
-const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
-
 onMounted(async () => {
   if (article.value) {
     await Promise.all([loadNavigation(), loadAuthorArticles()])
   }
-  window.addEventListener('scroll', onScroll)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', onScroll)
 })
 </script>
 
@@ -330,7 +293,6 @@ onUnmounted(() => {
 .markdown-content :deep(tbody tr:nth-child(even)) { background-color: #f4f8ff; }
 .markdown-content :deep(tbody tr:hover) { background-color: #eaf2ff; }
 
-/* Numbered list styling */
 .markdown-content :deep(ol) {
   counter-reset: kf-counter;
   padding-left: 0;

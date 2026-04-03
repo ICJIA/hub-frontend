@@ -58,7 +58,6 @@
       <!-- Gray content area -->
       <div class="flex-1 bg-gray-100">
         <div class="max-w-[1300px] mx-auto py-4 px-4 sm:py-6 sm:px-6">
-          <!-- Two Column Layout -->
           <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
             <!-- Main Content -->
             <div class="flex-1 min-w-0 bg-white rounded-lg border border-gray-200 shadow-sm">
@@ -72,7 +71,6 @@
               </div>
 
               <div class="p-6">
-                <!-- Summary / Description -->
                 <div v-if="app.description" class="mb-6">
                   <div class="flex items-center gap-2 mb-3">
                     <UIcon name="i-heroicons-information-circle" class="w-6 h-6 text-blue-700" />
@@ -85,15 +83,11 @@
 
             <!-- Right Sidebar -->
             <div class="w-full lg:w-[260px] lg:flex-shrink-0 space-y-4">
-              <!-- Suggested Citation -->
-              <div v-if="app.citation" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-                <h4 class="font-bold text-gray-800 mb-2">Suggested Citation</h4>
+              <SidebarCard v-if="app.citation" title="Suggested Citation">
                 <p class="text-sm text-gray-600 leading-relaxed word-break" v-html="app.citation"></p>
-              </div>
+              </SidebarCard>
 
-              <!-- Related Content -->
-              <div v-if="relatedArticles.length || relatedDatasets.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-                <h4 class="font-bold text-gray-800 mb-3">Related Content</h4>
+              <SidebarCard v-if="relatedArticles.length || relatedDatasets.length" title="Related Content">
                 <div class="space-y-2">
                   <a
                     v-for="article in relatedArticles"
@@ -110,65 +104,37 @@
                     class="block text-sm text-blue-600 hover:underline leading-snug"
                   >{{ dataset.title || dataset.Title }}</a>
                 </div>
-              </div>
+              </SidebarCard>
 
-              <!-- Contributors -->
-              <!-- <div v-if="app.contributors?.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-                <h4 class="font-bold text-gray-800 mb-3">Contributors</h4>
-                <div class="space-y-1">
-                  <p v-for="(c, i) in app.contributors" :key="i" class="text-sm text-gray-600">{{ c.title }}</p>
-                </div>
-              </div> -->
-
-              <!-- Funding Acknowledgement -->
-              <div v-if="app.funding" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-                <h4 class="font-bold text-gray-800 mb-2">Funding Acknowledgement</h4>
+              <SidebarCard v-if="app.funding" title="Funding Acknowledgement">
                 <p class="text-sm text-gray-600 leading-relaxed" v-html="app.funding"></p>
-              </div>
+              </SidebarCard>
             </div>
           </div>
         </div>
       </div>
     </template>
 
-    <!-- Scroll to top -->
-    <button
-      v-if="showScrollTop"
-      class="fixed bottom-6 right-6 z-10 bg-primary-500 text-white cursor-pointer rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:bg-blue-800 transition-colors"
-      @click="scrollToTop"
-      aria-label="Scroll to top"
-    >
-      <UIcon name="i-heroicons-chevron-up" class="w-5 h-5" />
-    </button>
+    <ScrollToTop />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { fetchAppBySlug, API_BASE_URL } from '~/services/api'
 
 const router = useRouter()
 const route = useRoute()
+const { fetchAppBySlug, getAppImageUrl } = useApps()
 
 const app = ref(null)
 const loading = ref(true)
 const error = ref(null)
 
-const imageUrl = computed(() => {
-  const img = Array.isArray(app.value?.image) ? app.value.image[0] : app.value?.image
-  if (!img?.url) return null
-  return img.url.startsWith('/') ? `${API_BASE_URL}${img.url}` : img.url
-})
-
+const imageUrl = computed(() => getAppImageUrl(app.value))
 const contributorsString = computed(() => app.value?.contributors?.map(c => c.title).join(', ') || '')
 const relatedArticles = computed(() => app.value?.articles || [])
 const relatedDatasets = computed(() => app.value?.datasets || [])
-
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-}
 
 const goBack = () => router.push('/apps')
 const goToArticle = (item) => router.push(`/article/${item.slug || item.documentId || item.id}`)
@@ -191,16 +157,5 @@ const loadApp = async () => {
   }
 }
 
-const showScrollTop = ref(false)
-const onScroll = () => { showScrollTop.value = window.scrollY > 300 }
-const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
-
-onMounted(() => {
-  loadApp()
-  window.addEventListener('scroll', onScroll)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', onScroll)
-})
+onMounted(() => loadApp())
 </script>

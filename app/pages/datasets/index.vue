@@ -4,50 +4,15 @@
       <h1 class="text-2xl font-bold">Datasets</h1>
     </div>
 
-    <div class="bg-gray-100 border border-gray-200 rounded-lg p-3 mb-6">
-      <div class="flex flex-wrap items-center gap-2">
-        <span class="text-sm text-gray-500 font-medium">Filter by:</span>
-        <USelect
-          v-model="filterTopic"
-          :items="[{ label: 'All Topics', value: null }, ...availableTopics.map(t => ({ label: t, value: t }))]"
-          size="sm"
-          class="w-40"
-          @update:model-value="onFilterChange"
-        />
-        <USelect placeholder="All Centers" size="sm" class="w-36" disabled />
-        <USelect placeholder="All Authors" size="sm" class="w-36" disabled />
-        <USelect
-          v-model="filterYear"
-          :items="[{ label: 'All Years', value: null }, ...availableYears.map(y => ({ label: y, value: y }))]"
-          size="sm"
-          class="w-28"
-          @update:model-value="onFilterChange"
-        />
-        <!-- <div class="flex-1 min-w-[180px]">
-          <UInput
-            v-model="searchQuery"
-            placeholder="Search..."
-            icon="i-heroicons-magnifying-glass"
-            size="sm"
-            @input="onSearchInput"
-          />
-        </div> -->
-        <div class="flex border border-gray-300 rounded-lg overflow-hidden">
-          <button
-            :class="['px-2 py-1 text-sm', viewMode === 'grid' ? 'bg-primary-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50']"
-            @click="viewMode = 'grid'"
-          >
-            <UIcon name="i-heroicons-squares-2x2" class="w-4 h-4" />
-          </button>
-          <button
-            :class="['px-2 py-1 text-sm border-l border-gray-300', viewMode === 'list' ? 'bg-primary-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50']"
-            @click="viewMode = 'list'"
-          >
-            <UIcon name="i-heroicons-list-bullet" class="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-    </div>
+    <ContentFilterBar
+      v-model:topic="filterTopic"
+      v-model:year="filterYear"
+      v-model:view-mode="viewMode"
+      :available-topics="availableTopics"
+      :available-years="availableYears"
+      :show-author-filter="false"
+      @change="onFilterChange"
+    />
 
     <UAlert v-if="error" color="error" :description="error" class="mb-4" />
 
@@ -62,23 +27,15 @@
         :key="dataset.documentId"
         :class="viewMode === 'list' ? 'col-span-12' : 'col-span-12 sm:col-span-6 md:col-span-4'"
       >
-        <div
+        <ContentCard
+          :title="dataset.title"
+          :date="dataset.date"
+          :description="dataset.description"
+          :categories="dataset.categories"
+          :show-placeholder="false"
+          :view-mode="viewMode"
           @click="goToDataset(dataset.slug || dataset.documentId)"
-          class="bg-white border border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow h-full p-4"
-        >
-          <div class="text-lg font-semibold mb-1 leading-snug">{{ dataset.title }}</div>
-          <div v-if="dataset.date" class="text-xs text-gray-500 mb-2">{{ formatDate(dataset.date) }}</div>
-          <p v-if="dataset.description" class="text-sm text-gray-500 mb-3">{{ truncate(dataset.description, 150) }}</p>
-          <div v-if="dataset.categories?.length" class="flex flex-wrap gap-1">
-            <UBadge
-              v-for="category in dataset.categories"
-              :key="category"
-              color="primary"
-              variant="subtle"
-              size="sm"
-            >{{ category }}</UBadge>
-          </div>
-        </div>
+        />
       </div>
     </div>
 
@@ -100,20 +57,18 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchDatasets } from '~/services/api'
 
 const router = useRouter()
+const { fetchDatasets } = useDatasets()
 
 const datasets = ref([])
 const loading = ref(false)
 const error = ref(null)
-const searchQuery = ref('')
 const filterTopic = ref(null)
 const filterYear = ref(null)
 const viewMode = ref('grid')
 const availableTopics = ref([])
 const availableYears = ref([])
-let searchTimeout = null
 
 const pagination = reactive({
   page: 1,
@@ -130,7 +85,7 @@ const loadDatasets = async () => {
       pagination.page,
       pagination.pageSize,
       'date:desc',
-      searchQuery.value,
+      '',
       { category: filterTopic.value || '', year: filterYear.value || '' }
     )
     datasets.value = data.data
@@ -159,14 +114,6 @@ const loadFilterOptions = async () => {
   } catch (_) { /* filter options are non-critical */ }
 }
 
-const onSearchInput = () => {
-  clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => {
-    pagination.page = 1
-    loadDatasets()
-  }, 300)
-}
-
 const onFilterChange = () => {
   pagination.page = 1
   loadDatasets()
@@ -177,21 +124,7 @@ const changePage = async (page) => {
   await loadDatasets()
 }
 
-const goToDataset = (id) => {
-  router.push(`/datasets/${id}`)
-}
-
-const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric'
-  })
-}
-
-const truncate = (text, length) => {
-  if (!text) return ''
-  if (text.length <= length) return text
-  return text.substring(0, length) + '...'
-}
+const goToDataset = (slug) => router.push(`/datasets/${slug}`)
 
 onMounted(() => {
   loadDatasets()

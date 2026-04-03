@@ -51,14 +51,11 @@
       <!-- Gray content area -->
       <div class="flex-1 bg-gray-100">
         <div class="max-w-[1300px] mx-auto py-4 px-4 sm:py-6 sm:px-6">
-          <!-- Two Column Layout -->
           <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
             <!-- Main Content -->
             <div class="flex-1 min-w-0 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-              <!-- Overview Card -->
               <div class="bg-[#1a3a5c] text-white px-6 py-4">
                 <h2 class="text-lg font-bold">Overview: {{ dataset.title }}</h2>
-                <!-- <p v-if="dataset.unit" class="text-sm text-blue-200 mt-1">{{ dataset.unit }}</p> -->
               </div>
 
               <div class="p-6 space-y-8">
@@ -110,8 +107,7 @@
                         variant="outline"
                         size="sm"
                       >
-                       Download CSV
-                        
+                        Download CSV
                       </UButton>
                     </div>
                   </div>
@@ -168,15 +164,11 @@
 
             <!-- Right Sidebar -->
             <div class="w-full lg:w-[260px] lg:flex-shrink-0 space-y-4">
-              <!-- Suggested Citation -->
-              <div v-if="dataset.citation" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-                <h4 class="font-bold text-gray-800 mb-2">Suggested Citation</h4>
+              <SidebarCard v-if="dataset.citation" title="Suggested Citation">
                 <p class="text-sm text-gray-600 leading-relaxed break-words" v-html="dataset.citation"></p>
-              </div>
+              </SidebarCard>
 
-              <!-- Related Content -->
-              <div v-if="relatedApps.length || relatedArticles.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-                <h4 class="font-bold text-gray-800 mb-3">Related Content</h4>
+              <SidebarCard v-if="relatedApps.length || relatedArticles.length" title="Related Content">
                 <div class="space-y-2">
                   <a
                     v-for="app in relatedApps"
@@ -193,38 +185,28 @@
                     class="block text-sm text-blue-600 hover:underline leading-snug"
                   >{{ article.Title || article.title }}</a>
                 </div>
-              </div>
+              </SidebarCard>
 
-              <!-- Funding Acknowledgement -->
-              <div v-if="dataset.funding" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-                <h4 class="font-bold text-gray-800 mb-2">Funding Acknowledgement</h4>
+              <SidebarCard v-if="dataset.funding" title="Funding Acknowledgement">
                 <p class="text-sm text-gray-600 leading-relaxed" v-html="dataset.funding"></p>
-              </div>
+              </SidebarCard>
             </div>
           </div>
         </div>
       </div>
     </template>
 
-    <!-- Scroll to top -->
-    <button
-      v-if="showScrollTop"
-      class="fixed bottom-6 right-6 z-10 bg-primary-500 text-white cursor-pointer rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:bg-blue-800 transition-colors"
-      @click="scrollToTop"
-      aria-label="Scroll to top"
-    >
-      <UIcon name="i-heroicons-chevron-up" class="w-5 h-5" />
-    </button>
+    <ScrollToTop />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { fetchDatasetBySlug, API_BASE_URL } from '~/services/api'
 
 const router = useRouter()
 const route = useRoute()
+const { fetchDatasetBySlug } = useDatasets()
 
 const dataset = ref(null)
 const loading = ref(true)
@@ -256,22 +238,6 @@ const datafileUrl = (file) => {
   return file.url.startsWith('/') ? `${API_BASE_URL}${file.url}` : file.url
 }
 
-const formatFileSize = (bytes) => {
-  if (!bytes) return ''
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
-
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-}
-
 const goBack = () => router.push('/datasets')
 const goToApp = (item) => router.push(`/apps/${item.slug || item.documentId || item.id}`)
 const goToArticle = (item) => router.push(`/article/${item.slug || item.documentId || item.id}`)
@@ -291,16 +257,5 @@ const loadDataset = async () => {
   }
 }
 
-const showScrollTop = ref(false)
-const onScroll = () => { showScrollTop.value = window.scrollY > 300 }
-const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
-
-onMounted(() => {
-  loadDataset()
-  window.addEventListener('scroll', onScroll)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', onScroll)
-})
+onMounted(() => loadDataset())
 </script>

@@ -4,56 +4,16 @@
       <h1 class="text-2xl font-bold">Apps</h1>
     </div>
 
-    <div class="bg-gray-100 border border-gray-200 rounded-lg p-3 mb-6">
-      <div class="flex flex-wrap items-center gap-2">
-        <span class="text-sm text-gray-500 font-medium">Filter by:</span>
-        <USelect
-          v-model="filterTopic"
-          :items="[{ label: 'All Topics', value: null }, ...availableTopics.map(t => ({ label: t, value: t }))]"
-          size="sm"
-          class="w-40"
-          @update:model-value="onFilterChange"
-        />
-        <USelect placeholder="All Centers" size="sm" class="w-36" disabled />
-        <USelect
-          v-model="filterAuthor"
-          :items="[{ label: 'All Authors', value: null }, ...availableAuthors.map(a => ({ label: a, value: a }))]"
-          size="sm"
-          class="w-40"
-          @update:model-value="onFilterChange"
-        />
-        <USelect
-          v-model="filterYear"
-          :items="[{ label: 'All Years', value: null }, ...availableYears.map(y => ({ label: y, value: y }))]"
-          size="sm"
-          class="w-28"
-          @update:model-value="onFilterChange"
-        />
-        <!-- <div class="flex-1 min-w-[180px]">
-          <UInput
-            v-model="searchQuery"
-            placeholder="Search..."
-            icon="i-heroicons-magnifying-glass"
-            size="sm"
-            @input="onSearchInput"
-          />
-        </div> -->
-        <div class="flex border border-gray-300 rounded-lg overflow-hidden">
-          <button
-            :class="['px-2 py-1 text-sm', viewMode === 'grid' ? 'bg-primary-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50']"
-            @click="viewMode = 'grid'"
-          >
-            <UIcon name="i-heroicons-squares-2x2" class="w-4 h-4" />
-          </button>
-          <button
-            :class="['px-2 py-1 text-sm border-l border-gray-300', viewMode === 'list' ? 'bg-primary-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50']"
-            @click="viewMode = 'list'"
-          >
-            <UIcon name="i-heroicons-list-bullet" class="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-    </div>
+    <ContentFilterBar
+      v-model:topic="filterTopic"
+      v-model:author="filterAuthor"
+      v-model:year="filterYear"
+      v-model:view-mode="viewMode"
+      :available-topics="availableTopics"
+      :available-authors="availableAuthors"
+      :available-years="availableYears"
+      @change="onFilterChange"
+    />
 
     <UAlert v-if="error" color="error" :description="error" class="mb-4" />
 
@@ -68,39 +28,15 @@
         :key="app.documentId"
         :class="viewMode === 'list' ? 'col-span-12' : 'col-span-12 sm:col-span-6 md:col-span-4'"
       >
-        <div
+        <ContentCard
+          :title="app.title"
+          :date="app.date"
+          :description="app.description"
+          :categories="app.categories"
+          :image-url="getAppImageUrl(app)"
+          :view-mode="viewMode"
           @click="goToApp(app.slug || app.documentId)"
-          class="bg-white border border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow h-full"
-          :class="viewMode === 'list' ? 'flex' : ''"
-        >
-          <img
-            v-if="appImageUrl(app)"
-            :src="appImageUrl(app)"
-            :alt="app.title"
-            :class="viewMode === 'list' ? 'w-44 min-w-[180px] object-cover' : 'w-full h-48 object-cover'"
-          />
-          <div
-            v-else
-            class="flex items-center justify-center bg-purple-300"
-            :style="viewMode === 'list' ? 'width:180px;min-width:180px' : 'height:200px'"
-          >
-            <span class="text-white text-sm">No Image</span>
-          </div>
-          <div class="p-4">
-            <div class="text-lg font-semibold mb-1 leading-snug">{{ app.title }}</div>
-            <div v-if="app.date" class="text-xs text-gray-500 mb-2">{{ formatDate(app.date) }}</div>
-            <p v-if="app.description" class="text-sm text-gray-500 mb-3">{{ truncate(app.description, 150) }}</p>
-            <div v-if="app.categories?.length" class="flex flex-wrap gap-1">
-              <UBadge
-                v-for="category in app.categories"
-                :key="category"
-                color="primary"
-                variant="subtle"
-                size="sm"
-              >{{ category }}</UBadge>
-            </div>
-          </div>
-        </div>
+        />
       </div>
     </div>
 
@@ -122,14 +58,13 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchApps, API_BASE_URL } from '~/services/api'
 
 const router = useRouter()
+const { fetchApps, getAppImageUrl } = useApps()
 
 const apps = ref([])
 const loading = ref(false)
 const error = ref(null)
-const searchQuery = ref('')
 const filterTopic = ref(null)
 const filterAuthor = ref(null)
 const filterYear = ref(null)
@@ -137,7 +72,6 @@ const viewMode = ref('grid')
 const availableTopics = ref([])
 const availableAuthors = ref([])
 const availableYears = ref([])
-let searchTimeout = null
 
 const pagination = reactive({
   page: 1,
@@ -145,12 +79,6 @@ const pagination = reactive({
   pageCount: 1,
   total: 0
 })
-
-const appImageUrl = (app) => {
-  const img = Array.isArray(app.image) ? app.image[0] : app.image
-  if (!img?.url) return null
-  return img.url.startsWith('/') ? `${API_BASE_URL}${img.url}` : img.url
-}
 
 const loadApps = async () => {
   loading.value = true
@@ -160,7 +88,7 @@ const loadApps = async () => {
       pagination.page,
       pagination.pageSize,
       'date:desc',
-      searchQuery.value,
+      '',
       { category: filterTopic.value || '', author: filterAuthor.value || '', year: filterYear.value || '' }
     )
     apps.value = data.data
@@ -197,14 +125,6 @@ const loadFilterOptions = async () => {
   } catch (_) { /* filter options are non-critical */ }
 }
 
-const onSearchInput = () => {
-  clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => {
-    pagination.page = 1
-    loadApps()
-  }, 300)
-}
-
 const onFilterChange = () => {
   pagination.page = 1
   loadApps()
@@ -215,21 +135,7 @@ const changePage = async (page) => {
   await loadApps()
 }
 
-const goToApp = (id) => {
-  router.push(`/apps/${id}`)
-}
-
-const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric'
-  })
-}
-
-const truncate = (text, length) => {
-  if (!text) return ''
-  if (text.length <= length) return text
-  return text.substring(0, length) + '...'
-}
+const goToApp = (slug) => router.push(`/apps/${slug}`)
 
 onMounted(() => {
   loadApps()
