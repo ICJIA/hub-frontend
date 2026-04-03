@@ -45,8 +45,9 @@ export const useArticles = () => {
 
   const fetchArticlePreviewById = async (id) => {
     const params = new URLSearchParams(window.location.search)
-    const status = params.get('status')
-    const response = await fetch(`${API_BASE_URL}/api/articles/${id}?status=${status}&populate=*`, { headers: getHeadersWithAuth() })
+    const status = params.get('status') || 'draft'
+    const queryParams = new URLSearchParams({ status, populate: '*' })
+    const response = await fetch(`${API_BASE_URL}/api/articles/${id}?${queryParams}`, { headers: getHeadersWithAuth() })
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
     const data = await response.json()
     return data.data
@@ -93,7 +94,7 @@ export const useArticles = () => {
     const params = new URLSearchParams({
       status: 'draft',
       'fields[0]': 'id',
-      'fields[1]': 'Title',
+      'fields[1]': 'title',
       'fields[2]': 'documentId',
       'fields[3]': 'slug',
       'pagination[pageSize]': 50
