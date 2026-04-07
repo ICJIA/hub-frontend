@@ -125,8 +125,8 @@
               <div v-if="relatedDatasets.length || relatedApps.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
                 <h4 class="font-bold text-gray-800 mb-3">Related Content</h4>
                 <div class="space-y-2">
-                  <a v-for="d in relatedDatasets" :key="d.id" :href="`/datasets/${d.documentId || d.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ d.title || d.Title }}</a>
-                  <a v-for="a in relatedApps" :key="a.id" :href="`/apps/${a.documentId || a.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title || a.Title }}</a>
+                  <a v-for="d in relatedDatasets" :key="d.id" :href="`/datasets/${d.slug}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ d.title || d.Title }}</a>
+                  <a v-for="a in relatedApps" :key="a.id" :href="`/apps/${a.slug}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title || a.Title }}</a>
                 </div>
               </div>
 
@@ -246,8 +246,8 @@ const formatDate = (dateString) => {
 const goBack = () => router.push('/')
 
 const navigateToArticle = (a) => {
-  const id = a.documentId || a.id
-  router.push(`/article/${id}`)
+  const slug = a.slug;
+  router.push(`/article/${slug}`)
 }
 
 const loadNavigation = async () => {

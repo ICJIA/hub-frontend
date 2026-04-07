@@ -239,8 +239,8 @@ const datafileUrl = (file) => {
 }
 
 const goBack = () => router.push('/datasets')
-const goToApp = (item) => router.push(`/apps/${item.slug || item.documentId || item.id}`)
-const goToArticle = (item) => router.push(`/article/${item.slug || item.documentId || item.id}`)
+const goToApp = (item) => router.push(`/apps/${item.slug}`)
+const goToArticle = (item) => router.push(`/article/${item.slug}`)
 
 const loadDataset = async () => {
   loading.value = true

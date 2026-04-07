@@ -131,7 +131,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { marked } from 'marked'
 import markedFootnote from 'marked-footnote'
@@ -226,10 +226,15 @@ const renderedMarkdown = computed(() => {
   return fixAssetUrls(html)
 })
 
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+}
+
 const goBack = () => router.push('/')
 
 const navigateToArticle = (a) => {
-  const slug = a.slug || a.documentId || a.id
+  const slug = a.slug
   router.push(`/article/${slug}`)
 }
 
@@ -262,11 +267,12 @@ const loadAuthorArticles = async () => {
   }
 }
 
-onMounted(async () => {
-  if (article.value) {
-    await Promise.all([loadNavigation(), loadAuthorArticles()])
+watch(article, (newArticle) => {
+  if (newArticle) {
+    loadNavigation()
+    loadAuthorArticles()
   }
-})
+}, { immediate: true })
 </script>
 
 <style scoped>

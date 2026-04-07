@@ -296,13 +296,13 @@
                       <a
                         v-for="app in dataset.apps"
                         :key="app.documentId || app.id"
-                        :href="`/apps/${app.documentId || app.id}`"
+                        :href="`/apps/${app.slug}`"
                         class="block text-sm text-blue-600 hover:underline leading-snug"
                       >{{ app.Title || app.title }}</a>
                       <a
                         v-for="article in dataset.articles"
                         :key="article.documentId || article.id"
-                        :href="`/article/${article.documentId || article.id}`"
+                        :href="`/article/${article.slug}`"
                         class="block text-sm text-blue-600 hover:underline leading-snug"
                       >{{ article.Title || article.title }}</a>
                     </div>

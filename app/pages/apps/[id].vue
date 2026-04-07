@@ -99,14 +99,14 @@
                     v-for="article in relatedArticles"
                     :key="article.documentId || article.id"
                     href="#"
-                    @click.prevent="goToArticle(article.documentId)"
+                    @click.prevent="goToArticle(article.slug)"
                     class="block text-sm text-blue-600 hover:underline leading-snug"
                   >{{ article.title || article.Title }}</a>
                   <a
                     v-for="dataset in relatedDatasets"
                     :key="dataset.documentId || dataset.id"
                     href="#"
-                    @click.prevent="goToDataset(dataset.documentId)"
+                    @click.prevent="goToDataset(dataset.slug)"
                     class="block text-sm text-blue-600 hover:underline leading-snug"
                   >{{ dataset.title || dataset.Title }}</a>
                 </div>

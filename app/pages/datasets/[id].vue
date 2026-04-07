@@ -182,7 +182,7 @@
                     v-for="app in relatedApps"
                     :key="app.documentId || app.id"
                     href="#"
-                    @click.prevent="goToApp(app.documentId)"
+                    @click.prevent="goToApp(app.slug)"
                     class="block text-sm text-blue-600 hover:underline leading-snug"
                   >{{ app.Title || app.title }}</a>
                   <a
