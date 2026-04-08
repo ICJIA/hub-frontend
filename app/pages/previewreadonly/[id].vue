@@ -179,15 +179,15 @@
                   <div v-if="relatedDatasets.length || relatedApps.length" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
                     <h4 class="font-bold text-gray-800 mb-3">Related Content</h4>
                     <div class="space-y-2">
-                      <a v-for="d in relatedDatasets" :key="d.id" :href="`/datasets/${d.documentId || d.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ d.title || d.Title }}</a>
-                      <a v-for="a in relatedApps" :key="a.id" :href="`/apps/${a.documentId || a.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title || a.Title }}</a>
+                      <a v-for="d in relatedDatasets" :key="d.id" :href="`/datasets/${d.slug}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ d.title || d.Title }}</a>
+                      <a v-for="a in relatedApps" :key="a.id" :href="`/apps/${a.slug}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title || a.Title }}</a>
                     </div>
                   </div>
 
                   <!-- Funding Acknowledgement -->
                   <div v-if="article.funding" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
                     <h4 class="font-bold text-gray-800 mb-2">Funding Acknowledgement</h4>
-                    <p class="text-sm text-gray-600 leading-relaxed" v-html="article.funding"></p>
+                    <p class="text-sm text-gray-600 dark:text-gray-100 leading-relaxed" v-html="article.funding"></p>
                   </div>
 
                   <!-- View Article Version -->
@@ -396,7 +396,7 @@ onMounted(() => { loadArticle() })
 .markdown-content :deep(h4) { color: #2c3e50; margin-top: 30px; margin-bottom: 15px; }
 .markdown-content :deep(h2) { font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
 .markdown-content :deep(p) { margin-bottom: 15px; }
-.markdown-content :deep(a) { color: #3498db; text-decoration: none; word-wrap: break-word; }
+.markdown-content :deep(a) { color: #3498db; text-decoration: none; overflow-wrap: break-word; }
 .markdown-content :deep(a:hover) { text-decoration: underline; }
 .markdown-content :deep(ul),
 .markdown-content :deep(ol) { margin-bottom: 15px; padding-left: 25px; }

@@ -1,17 +1,17 @@
 <template>
   <div class="min-h-screen flex flex-col">
-    <div v-if="loading" class="flex justify-center py-16 bg-gray-100 flex-1">
+    <div v-if="loading" class="flex justify-center py-16 bg-gray-100 dark:bg-gray-900 flex-1">
       <UIcon name="i-heroicons-arrow-path" class="w-10 h-10 animate-spin text-primary-500" />
     </div>
 
-    <div v-else-if="error" class="text-center py-16 bg-gray-100 flex-1">
+    <div v-else-if="error" class="text-center py-16 bg-gray-100 dark:bg-gray-900 flex-1">
       <UAlert color="error" :description="error" class="mb-4" />
       <UButton variant="outline" icon="i-heroicons-arrow-left" @click="goBack">Back to Articles</UButton>
     </div>
 
     <template v-else-if="article">
       <!-- White header section -->
-      <div class="bg-white">
+      <div class="bg-white dark:bg-gray-900">
         <div class="max-w-[1300px] mx-auto pt-4 px-4 pb-3 sm:pt-6 sm:px-6 sm:pb-4">
           <UButton variant="outline" icon="i-heroicons-arrow-left" @click="goBack" class="mb-4">
             Back to Articles
@@ -23,7 +23,7 @@
               <div class="w-10 h-10 bg-primary-500 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
                 <UIcon name="i-heroicons-document-text" class="w-6 h-6 text-white" />
               </div>
-              <h1 class="text-xl font-bold text-gray-900 leading-tight sm:text-2xl">{{ article.title }}</h1>
+              <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight sm:text-2xl">{{ article.title }}</h1>
             </div>
             <div class="flex items-center gap-2 sm:flex-shrink-0">
               <button v-if="prevArticle" @click="navigateToArticle(prevArticle)" class="flex items-center gap-1 border border-blue-700 text-blue-700 px-3 py-2 rounded hover:bg-blue-50 text-sm font-medium">
@@ -36,7 +36,7 @@
           </div>
 
           <!-- Meta Row -->
-          <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 ml-0 sm:ml-[52px]">
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 dark:text-gray-400 ml-0 sm:ml-[52px]">
             <span class="flex items-center gap-1.5">
               <UIcon name="i-heroicons-calendar-days" class="w-4 h-4" />
               Last Updated: {{ formatDate(article.date) }}
@@ -52,17 +52,17 @@
             </a>
           </div>
         </div>
-        <div class="h-[1px] w-full bg-gray-200"></div>
+        <div class="h-[1px] w-full bg-gray-200 dark:bg-gray-700"></div>
       </div>
 
       <!-- Gray content area -->
-      <div class="flex-1 bg-gray-100">
+      <div class="flex-1 bg-gray-100 dark:bg-gray-900">
         <div class="max-w-[1300px] mx-auto py-4 px-4 sm:py-6 sm:px-6">
           <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
             <!-- Main Content -->
-            <div class="flex-1 min-w-0 bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div class="flex-1 min-w-0 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
               <!-- Overview Card -->
-              <div class="bg-white rounded-tl-lg rounded-tr-lg overflow-hidden shadow-sm mb-6">
+              <div class="bg-white dark:bg-gray-800 rounded-tl-lg rounded-tr-lg overflow-hidden shadow-sm mb-6">
                 <div class="bg-[#1a3a5c] text-white px-6 py-4">
                   <h2 class="text-lg font-bold">Overview</h2>
                   <p v-if="authorsString" class="text-sm text-blue-200 mt-1">Authors: {{ authorsString }}</p>
@@ -74,20 +74,20 @@
                 <div v-if="article.abstract" class="mb-6">
                   <div class="flex items-center gap-2 mb-3">
                     <UIcon name="i-heroicons-information-circle" class="w-6 h-6 text-blue-700" />
-                    <h3 class="text-lg font-bold text-gray-800">Summary</h3>
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">Summary</h3>
                   </div>
-                  <p class="text-gray-700 leading-relaxed" v-html="fixAssetUrls(article.abstract)"></p>
+                  <p class="text-gray-700 dark:text-gray-100 leading-relaxed" v-html="fixAssetUrls(article.abstract)"></p>
                 </div>
 
                 <div class="markdown-content" v-html="renderedMarkdown"></div>
 
                 <div v-if="article.citation" class="mt-8">
-                  <h4 class="font-bold text-gray-800 mb-2">Citation:</h4>
-                  <p class="text-gray-700 text-sm leading-relaxed" v-html="fixAssetUrls(article.citation)"></p>
+                  <h4 class="font-bold text-gray-800 dark:text-gray-100 mb-2">Citation:</h4>
+                  <p class="text-gray-700 dark:text-gray-100 text-sm leading-relaxed" v-html="fixAssetUrls(article.citation)"></p>
                 </div>
 
                 <div v-if="article.tags?.length" class="mt-6 flex items-center flex-wrap gap-2">
-                  <span class="font-bold text-gray-700">Keywords &amp; Tags:</span>
+                  <span class="font-bold text-gray-700 dark:text-gray-100">Keywords &amp; Tags:</span>
                   <UBadge v-for="tag in article.tags" :key="tag" variant="subtle" class="mr-1">{{ tag }}</UBadge>
                 </div>
               </div>
@@ -98,7 +98,7 @@
               <SidebarCard v-if="tocItems.length" title="Table Of Contents">
                 <ol class="space-y-2">
                   <li v-for="(item, idx) in tocItems" :key="item.id" class="flex items-start gap-2">
-                    <span class="text-sm text-gray-500 flex-shrink-0">{{ idx + 1 }}.</span>
+                    <span class="text-sm text-gray-500 dark:text-gray-400 flex-shrink-0">{{ idx + 1 }}.</span>
                     <a href="#" @click.prevent="scrollToSection(item.id)" class="text-sm text-blue-600 hover:underline leading-snug">{{ item.text }}</a>
                   </li>
                 </ol>
@@ -113,12 +113,12 @@
               <SidebarCard v-if="relatedDatasets.length || relatedApps.length" title="Related Content">
                 <div class="space-y-2">
                   <a v-for="d in relatedDatasets" :key="d.id" :href="`/datasets/${d.slug || d.documentId || d.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ d.title || d.Title }}</a>
-                  <a v-for="a in relatedApps" :key="a.id" :href="`/apps/${a.slug || a.documentId || a.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title || a.Title }}</a>
+                  <a v-for="a in relatedApps" :key="a.id" :href="`/apps/${a.slug}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title || a.Title }}</a>
                 </div>
               </SidebarCard>
 
               <SidebarCard v-if="article.funding" title="Funding Acknowledgement">
-                <p class="text-sm text-gray-600 leading-relaxed" v-html="article.funding"></p>
+                <p class="text-sm text-gray-600 dark:text-gray-100 leading-relaxed" v-html="article.funding"></p>
               </SidebarCard>
             </div>
           </div>
@@ -131,7 +131,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { marked } from 'marked'
 import markedFootnote from 'marked-footnote'
@@ -209,7 +209,11 @@ const tocItems = computed(() => {
 
 const scrollToSection = (id) => {
   const el = document.getElementById(id)
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  if (!el) return
+  const header = document.querySelector('header')
+  const offset = (header?.offsetHeight ?? 0) + 16
+  const top = el.getBoundingClientRect().top + window.scrollY - offset
+  window.scrollTo({ top, behavior: 'smooth' })
 }
 
 const renderedMarkdown = computed(() => {
@@ -226,10 +230,15 @@ const renderedMarkdown = computed(() => {
   return fixAssetUrls(html)
 })
 
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+}
+
 const goBack = () => router.push('/')
 
 const navigateToArticle = (a) => {
-  const slug = a.slug || a.documentId || a.id
+  const slug = a.slug
   router.push(`/article/${slug}`)
 }
 
@@ -262,63 +271,10 @@ const loadAuthorArticles = async () => {
   }
 }
 
-onMounted(async () => {
-  if (article.value) {
-    await Promise.all([loadNavigation(), loadAuthorArticles()])
+watch(article, (newArticle) => {
+  if (newArticle) {
+    loadNavigation()
+    loadAuthorArticles()
   }
-})
+}, { immediate: true })
 </script>
-
-<style scoped>
-.markdown-content { color: #333; line-height: 1.8; font-size: 16px; }
-.markdown-content :deep(h1),
-.markdown-content :deep(h2),
-.markdown-content :deep(h3),
-.markdown-content :deep(h4) { color: #2c3e50; margin-top: 30px; margin-bottom: 15px; }
-.markdown-content :deep(p) { margin-bottom: 15px; }
-.markdown-content :deep(a) { color: #3498db; text-decoration: none; word-wrap: break-word; }
-.markdown-content :deep(a:hover) { text-decoration: underline; }
-.markdown-content :deep(ul) { margin-bottom: 15px; padding-left: 25px; list-style-type: disc; }
-.markdown-content :deep(ol) { margin-bottom: 15px; padding-left: 25px; }
-.markdown-content :deep(li) { margin-bottom: 8px; }
-.markdown-content :deep(blockquote) { border-left: 4px solid #3498db; padding-left: 20px; margin: 20px 0; color: #555; font-style: italic; }
-.markdown-content :deep(code) { background: #f4f4f4; padding: 2px 6px; border-radius: 4px; font-family: 'Monaco','Menlo',monospace; font-size: 14px; }
-.markdown-content :deep(pre) { background: #2d2d2d; color: #f8f8f2; padding: 20px; border-radius: 8px; overflow-x: auto; margin: 20px 0; }
-.markdown-content :deep(pre code) { background: none; padding: 0; color: inherit; }
-.markdown-content :deep(.table-wrapper) { overflow-x: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 24px; }
-.markdown-content :deep(table) { width: 100%; border-collapse: collapse; margin: 0; }
-.markdown-content :deep(thead) { background: linear-gradient(135deg, #0d6efd, #0a58ca); color: #fff; }
-.markdown-content :deep(th),
-.markdown-content :deep(td) { padding: 14px 16px; text-align: left; }
-.markdown-content :deep(tbody tr:nth-child(even)) { background-color: #f4f8ff; }
-.markdown-content :deep(tbody tr:hover) { background-color: #eaf2ff; }
-
-.markdown-content :deep(ol) {
-  counter-reset: kf-counter;
-  padding-left: 0;
-}
-.markdown-content :deep(ol > li) {
-  list-style: none;
-  padding-left: 0;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-.markdown-content :deep(ol > li)::before {
-  content: counter(kf-counter);
-  counter-increment: kf-counter;
-  min-width: 28px;
-  height: 28px;
-  background: #1a3a5c;
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 700;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-</style>
