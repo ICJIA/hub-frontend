@@ -1,17 +1,17 @@
 <template>
   <div class="min-h-screen flex flex-col">
-    <div v-if="loading" class="flex justify-center py-16 bg-gray-100 flex-1">
+    <div v-if="loading" class="flex justify-center py-16 bg-gray-100 dark:bg-gray-900 flex-1">
       <UIcon name="i-heroicons-arrow-path" class="w-10 h-10 animate-spin text-primary-500" />
     </div>
 
-    <div v-else-if="error" class="text-center py-16 bg-gray-100 flex-1">
+    <div v-else-if="error" class="text-center py-16 bg-gray-100 dark:bg-gray-900 flex-1">
       <UAlert color="error" :description="error" class="mb-4" />
       <UButton variant="outline" icon="i-heroicons-arrow-left" @click="goBack">Back to Datasets</UButton>
     </div>
 
     <template v-else-if="dataset">
       <!-- White header section -->
-      <div class="bg-white">
+      <div class="bg-white dark:bg-gray-900">
         <div class="max-w-[1300px] mx-auto pt-4 px-4 pb-3 sm:pt-6 sm:px-6 sm:pb-4">
           <UButton variant="outline" icon="i-heroicons-arrow-left" @click="goBack" class="mb-4">
             Back to Datasets
@@ -24,13 +24,13 @@
                 <UIcon name="i-heroicons-circle-stack" class="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 class="text-xl font-bold text-gray-900 leading-tight sm:text-2xl">{{ dataset.title }}</h1>
+                <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight sm:text-2xl">{{ dataset.title }}</h1>
               </div>
             </div>
           </div>
 
           <!-- Meta Row -->
-          <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 ml-0 sm:ml-[52px] mb-3">
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 dark:text-gray-400 ml-0 sm:ml-[52px] mb-3">
             <span v-if="dataset.date" class="flex items-center gap-1.5">
               <UIcon name="i-heroicons-calendar-days" class="w-4 h-4" />
               Last Updated: {{ formatDate(dataset.date) }}
@@ -45,15 +45,15 @@
             <UBadge v-for="tag in dataset.tags" :key="tag" variant="subtle">{{ tag }}</UBadge>
           </div>
         </div>
-        <div class="h-[1px] w-full bg-gray-200"></div>
+        <div class="h-[1px] w-full bg-gray-200 dark:bg-gray-700"></div>
       </div>
 
       <!-- Gray content area -->
-      <div class="flex-1 bg-gray-100">
+      <div class="flex-1 bg-gray-100 dark:bg-gray-900">
         <div class="max-w-[1300px] mx-auto py-4 px-4 sm:py-6 sm:px-6">
           <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
             <!-- Main Content -->
-            <div class="flex-1 min-w-0 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div class="flex-1 min-w-0 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
               <div class="bg-[#1a3a5c] text-white px-6 py-4">
                 <h2 class="text-lg font-bold">Overview: {{ dataset.title }}</h2>
               </div>
@@ -63,26 +63,26 @@
                 <div v-if="dataset.description">
                   <div class="flex items-center gap-2 mb-3">
                     <UIcon name="i-heroicons-information-circle" class="w-6 h-6 text-blue-700" />
-                    <h3 class="text-lg font-bold text-gray-800">Summary</h3>
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">Summary</h3>
                   </div>
-                  <p class="text-gray-700 leading-relaxed">{{ dataset.description }}</p>
+                  <p class="text-gray-700 dark:text-gray-100 leading-relaxed">{{ dataset.description }}</p>
                 </div>
 
                 <!-- Key Findings (Notes) -->
                 <div v-if="notesList.length">
                   <div class="flex items-center gap-2 mb-4">
                     <UIcon name="i-heroicons-list-bullet" class="w-6 h-6 text-blue-700" />
-                    <h3 class="text-lg font-bold text-gray-800">Key Findings</h3>
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">Key Findings</h3>
                   </div>
                   <div class="space-y-4">
                     <div v-for="(note, i) in notesList" :key="i" class="flex gap-4">
                       <div class="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold mt-0.5">{{ i + 1 }}</div>
                       <div>
                         <template v-if="typeof note === 'object' && note !== null">
-                          <p class="font-bold text-gray-800">{{ note.title || note.heading }}</p>
-                          <p v-if="note.description || note.text || note.body" class="text-gray-600 text-sm mt-1">{{ note.description || note.text || note.body }}</p>
+                          <p class="font-bold text-gray-800 dark:text-gray-100">{{ note.title || note.heading }}</p>
+                          <p v-if="note.description || note.text || note.body" class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ note.description || note.text || note.body }}</p>
                         </template>
-                        <p v-else class="text-gray-700">{{ note }}</p>
+                        <p v-else class="text-gray-700 dark:text-gray-100">{{ note }}</p>
                       </div>
                     </div>
                   </div>
@@ -93,7 +93,7 @@
                   <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
                     <div class="flex items-center gap-2">
                       <UIcon name="i-heroicons-circle-stack" class="w-6 h-6 text-blue-700" />
-                      <h3 class="text-lg font-bold text-gray-800">Dataset: {{ dataset.title }}</h3>
+                      <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">Dataset: {{ dataset.title }}</h3>
                     </div>
                     <div v-if="datafileList.length" class="flex flex-wrap gap-2">
                       <UButton
@@ -114,23 +114,23 @@
                   <div v-if="dataset.variables?.length" class="overflow-x-auto">
                     <table class="w-full text-sm border-collapse">
                       <thead>
-                        <tr class="border-b-2 border-gray-200">
-                          <th class="text-left p-3 font-semibold text-gray-700">
+                        <tr class="border-b-2 border-gray-200 dark:border-gray-600">
+                          <th class="text-left p-3 font-semibold text-gray-700 dark:text-gray-100">
                             <div class="flex items-center gap-1">Name <UIcon name="i-heroicons-information-circle" class="w-4 h-4 text-gray-400" /></div>
                           </th>
-                          <th class="text-left p-3 font-semibold text-gray-700">
+                          <th class="text-left p-3 font-semibold text-gray-700 dark:text-gray-100">
                             <div class="flex items-center gap-1">Type <UIcon name="i-heroicons-information-circle" class="w-4 h-4 text-gray-400" /></div>
                           </th>
-                          <th class="text-left p-3 font-semibold text-gray-700">
+                          <th class="text-left p-3 font-semibold text-gray-700 dark:text-gray-100">
                             <div class="flex items-center gap-1">Definition <UIcon name="i-heroicons-information-circle" class="w-4 h-4 text-gray-400" /></div>
                           </th>
                         </tr>
                       </thead>
                       <tbody>
-                        <tr v-for="(v, i) in dataset.variables" :key="i" :class="i % 2 === 1 ? 'bg-gray-50' : ''">
-                          <td class="p-3 border-b border-gray-100 font-medium">{{ v.name }}</td>
-                          <td class="p-3 border-b border-gray-100">{{ v.type }}</td>
-                          <td class="p-3 border-b border-gray-100">{{ v.definition }}</td>
+                        <tr v-for="(v, i) in dataset.variables" :key="i" :class="i % 2 === 1 ? 'bg-gray-50 dark:bg-gray-700/50' : ''">
+                          <td class="p-3 border-b border-gray-100 dark:border-gray-700 font-medium text-gray-800 dark:text-gray-200">{{ v.name }}</td>
+                          <td class="p-3 border-b border-gray-100 dark:border-gray-700 text-gray-700 dark:text-gray-100">{{ v.type }}</td>
+                          <td class="p-3 border-b border-gray-100 dark:border-gray-700 text-gray-700 dark:text-gray-100">{{ v.definition }}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -139,9 +139,9 @@
 
                 <!-- Sources -->
                 <div v-if="dataset.sources?.length">
-                  <h3 class="text-base font-bold mb-3 text-gray-800">Sources</h3>
+                  <h3 class="text-base font-bold mb-3 text-gray-800 dark:text-gray-100">Sources</h3>
                   <div v-for="(source, i) in dataset.sources" :key="i" class="mb-3">
-                    <strong class="text-sm">{{ source.title }}</strong>
+                    <strong class="text-sm text-gray-800 dark:text-gray-200">{{ source.title }}</strong>
                     <div v-if="source.url && source.url !== 'undefined'">
                       <a :href="source.url" target="_blank" rel="noopener noreferrer" class="text-blue-600 text-sm">{{ source.url }}</a>
                     </div>
@@ -150,12 +150,12 @@
 
                 <!-- Time Period -->
                 <div v-if="dataset.timeperiod">
-                  <h3 class="text-base font-bold mb-3 text-gray-800">Time Period</h3>
-                  <div class="border border-gray-200 rounded-lg max-w-[400px]">
-                    <div class="p-4 flex flex-wrap gap-4 text-sm">
-                      <div><span class="font-medium text-gray-500">Year Type:</span> {{ dataset.timeperiod.yeartype || '—' }}</div>
-                      <div><span class="font-medium text-gray-500">From:</span> {{ dataset.timeperiod.yearmin || '—' }}</div>
-                      <div><span class="font-medium text-gray-500">To:</span> {{ dataset.timeperiod.yearmax || '—' }}</div>
+                  <h3 class="text-base font-bold mb-3 text-gray-800 dark:text-gray-100">Time Period</h3>
+                  <div class="border border-gray-200 dark:border-gray-600 rounded-lg max-w-[400px]">
+                    <div class="p-4 flex flex-wrap gap-4 text-sm text-gray-700 dark:text-gray-100">
+                      <div><span class="font-medium text-gray-500 dark:text-gray-400">Year Type:</span> {{ dataset.timeperiod.yeartype || '—' }}</div>
+                      <div><span class="font-medium text-gray-500 dark:text-gray-400">From:</span> {{ dataset.timeperiod.yearmin || '—' }}</div>
+                      <div><span class="font-medium text-gray-500 dark:text-gray-400">To:</span> {{ dataset.timeperiod.yearmax || '—' }}</div>
                     </div>
                   </div>
                 </div>
@@ -165,7 +165,7 @@
             <!-- Right Sidebar -->
             <div class="w-full lg:w-[260px] lg:flex-shrink-0 space-y-4">
               <SidebarCard v-if="dataset.citation" title="Suggested Citation">
-                <p class="text-sm text-gray-600 leading-relaxed break-words" v-html="dataset.citation"></p>
+                <p class="text-sm text-gray-600 dark:text-gray-100 leading-relaxed break-words" v-html="dataset.citation"></p>
               </SidebarCard>
 
               <SidebarCard v-if="relatedApps.length || relatedArticles.length" title="Related Content">
@@ -188,7 +188,7 @@
               </SidebarCard>
 
               <SidebarCard v-if="dataset.funding" title="Funding Acknowledgement">
-                <p class="text-sm text-gray-600 leading-relaxed" v-html="dataset.funding"></p>
+                <p class="text-sm text-gray-600 dark:text-gray-100 leading-relaxed" v-html="dataset.funding"></p>
               </SidebarCard>
             </div>
           </div>

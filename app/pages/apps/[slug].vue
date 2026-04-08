@@ -1,17 +1,17 @@
 <template>
   <div class="min-h-screen flex flex-col">
-    <div v-if="loading" class="flex justify-center py-16 bg-gray-100 flex-1">
+    <div v-if="loading" class="flex justify-center py-16 bg-gray-100 dark:bg-gray-900 flex-1">
       <UIcon name="i-heroicons-arrow-path" class="w-10 h-10 animate-spin text-primary-500" />
     </div>
 
-    <div v-else-if="error" class="text-center py-16 bg-gray-100 flex-1">
+    <div v-else-if="error" class="text-center py-16 bg-gray-100 dark:bg-gray-900 flex-1">
       <UAlert color="error" :description="error" class="mb-4" />
       <UButton variant="outline" icon="i-heroicons-arrow-left" @click="goBack">Back to Apps</UButton>
     </div>
 
     <template v-else-if="app">
       <!-- White header section -->
-      <div class="bg-white">
+      <div class="bg-white dark:bg-gray-900">
         <div class="max-w-[1300px] mx-auto pt-4 px-4 pb-3 sm:pt-6 sm:px-6 sm:pb-4">
           <UButton variant="outline" icon="i-heroicons-arrow-left" @click="goBack" class="mb-4">
             Back to Apps
@@ -23,7 +23,7 @@
               <div class="w-10 h-10 bg-primary-500 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
                 <UIcon name="i-heroicons-computer-desktop" class="w-6 h-6 text-white" />
               </div>
-              <h1 class="text-xl font-bold text-gray-900 leading-tight sm:text-2xl">{{ app.title }}</h1>
+              <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight sm:text-2xl">{{ app.title }}</h1>
             </div>
             <div v-if="app.url" class="sm:flex-shrink-0">
               <a
@@ -38,7 +38,7 @@
           </div>
 
           <!-- Meta Row -->
-          <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 ml-0 sm:ml-[52px] mb-3">
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 dark:text-gray-400 ml-0 sm:ml-[52px] mb-3">
             <span v-if="app.date" class="flex items-center gap-1.5">
               <UIcon name="i-heroicons-calendar-days" class="w-4 h-4" />
               Last Updated: {{ formatDate(app.date) }}
@@ -52,17 +52,17 @@
             <UBadge v-for="tag in app.tags" :key="tag" variant="subtle">{{ tag }}</UBadge>
           </div>
         </div>
-        <div class="h-[1px] w-full bg-gray-200"></div>
+        <div class="h-[1px] w-full bg-gray-200 dark:bg-gray-700"></div>
       </div>
 
       <!-- Gray content area -->
-      <div class="flex-1 bg-gray-100">
+      <div class="flex-1 bg-gray-100 dark:bg-gray-900">
         <div class="max-w-[1300px] mx-auto py-4 px-4 sm:py-6 sm:px-6">
           <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
             <!-- Main Content -->
-            <div class="flex-1 min-w-0 bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div class="flex-1 min-w-0 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
               <!-- Overview Card -->
-              <div class="bg-white rounded-tl-lg rounded-tr-lg overflow-hidden shadow-sm mb-6">
+              <div class="bg-white dark:bg-gray-800 rounded-tl-lg rounded-tr-lg overflow-hidden shadow-sm mb-6">
                 <div class="bg-[#1a3a5c] text-white px-6 py-4">
                   <h2 class="text-lg font-bold">Overview: {{ app.title }}</h2>
                   <p v-if="contributorsString" class="text-sm text-blue-200 mt-1">{{ contributorsString }}</p>
@@ -74,9 +74,9 @@
                 <div v-if="app.description" class="mb-6">
                   <div class="flex items-center gap-2 mb-3">
                     <UIcon name="i-heroicons-information-circle" class="w-6 h-6 text-blue-700" />
-                    <h3 class="text-lg font-bold text-gray-800">Summary</h3>
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">Summary</h3>
                   </div>
-                  <p class="text-gray-700 leading-relaxed">{{ app.description }}</p>
+                  <p class="text-gray-700 dark:text-gray-100 leading-relaxed">{{ app.description }}</p>
                 </div>
               </div>
             </div>
@@ -84,7 +84,7 @@
             <!-- Right Sidebar -->
             <div class="w-full lg:w-[260px] lg:flex-shrink-0 space-y-4">
               <SidebarCard v-if="app.citation" title="Suggested Citation">
-                <p class="text-sm text-gray-600 leading-relaxed word-break" v-html="app.citation"></p>
+                <p class="text-sm text-gray-600 dark:text-gray-100 leading-relaxed word-break" v-html="app.citation"></p>
               </SidebarCard>
 
               <SidebarCard v-if="relatedArticles.length || relatedDatasets.length" title="Related Content">
@@ -107,7 +107,7 @@
               </SidebarCard>
 
               <SidebarCard v-if="app.funding" title="Funding Acknowledgement">
-                <p class="text-sm text-gray-600 leading-relaxed" v-html="app.funding"></p>
+                <p class="text-sm text-gray-600 dark:text-gray-100 leading-relaxed" v-html="app.funding"></p>
               </SidebarCard>
             </div>
           </div>

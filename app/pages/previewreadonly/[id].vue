@@ -187,7 +187,7 @@
                   <!-- Funding Acknowledgement -->
                   <div v-if="article.funding" class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
                     <h4 class="font-bold text-gray-800 mb-2">Funding Acknowledgement</h4>
-                    <p class="text-sm text-gray-600 leading-relaxed" v-html="article.funding"></p>
+                    <p class="text-sm text-gray-600 dark:text-gray-100 leading-relaxed" v-html="article.funding"></p>
                   </div>
 
                   <!-- View Article Version -->
