@@ -662,7 +662,7 @@
 .editor-content ul { list-style-type: disc; }
 
 h1, h2, h3, h4, h5, h6 { font-weight: bold; }
-.word-break { word-break: break-word; }
+.word-break { overflow-wrap: break-word; }
 
 /* ==========================================================================
    MARKDOWN CONTENT (Article Detail)
@@ -678,7 +678,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: bold; }
 .markdown-content p { margin-bottom: 15px; }
 .markdown-content img { max-width: 100%; }
 
-.markdown-content a { color: #3498db; text-decoration: none; word-wrap: break-word; }
+.markdown-content a { color: #3498db; text-decoration: none; overflow-wrap: break-word; }
 .markdown-content a:hover { text-decoration: underline; }
 
 .markdown-content ul { margin-bottom: 15px; padding-left: 25px; list-style-type: disc; }

@@ -113,7 +113,7 @@
               <SidebarCard v-if="relatedDatasets.length || relatedApps.length" title="Related Content">
                 <div class="space-y-2">
                   <a v-for="d in relatedDatasets" :key="d.id" :href="`/datasets/${d.slug || d.documentId || d.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ d.title || d.Title }}</a>
-                  <a v-for="a in relatedApps" :key="a.id" :href="`/apps/${a.slug || a.documentId || a.id}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title || a.Title }}</a>
+                  <a v-for="a in relatedApps" :key="a.id" :href="`/apps/${a.slug}`" class="block text-sm text-blue-600 hover:underline leading-snug">{{ a.title || a.Title }}</a>
                 </div>
               </SidebarCard>
 

@@ -396,7 +396,7 @@ onMounted(() => { loadArticle() })
 .markdown-content :deep(h4) { color: #2c3e50; margin-top: 30px; margin-bottom: 15px; }
 .markdown-content :deep(h2) { font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
 .markdown-content :deep(p) { margin-bottom: 15px; }
-.markdown-content :deep(a) { color: #3498db; text-decoration: none; word-wrap: break-word; }
+.markdown-content :deep(a) { color: #3498db; text-decoration: none; overflow-wrap: break-word; }
 .markdown-content :deep(a:hover) { text-decoration: underline; }
 .markdown-content :deep(ul),
 .markdown-content :deep(ol) { margin-bottom: 15px; padding-left: 25px; }
