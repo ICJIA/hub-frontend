@@ -79,7 +79,7 @@
                   <p class="text-gray-700 dark:text-gray-100 leading-relaxed" v-html="fixAssetUrls(article.abstract)"></p>
                 </div>
 
-                <div class="markdown-content" v-html="renderedMarkdown"></div>
+                <div class="markdown-content" v-html="renderedMarkdown" @click="handleContentClick"></div>
 
                 <div v-if="article.citation" class="mt-8">
                   <h4 class="font-bold text-gray-800 dark:text-gray-100 mb-2">Citation:</h4>
@@ -210,6 +210,19 @@ const tocItems = computed(() => {
 const scrollToSection = (id) => {
   const el = document.getElementById(id)
   if (!el) return
+  const header = document.querySelector('header')
+  const offset = (header?.offsetHeight ?? 0) + 16
+  const top = el.getBoundingClientRect().top + window.scrollY - offset
+  window.scrollTo({ top, behavior: 'smooth' })
+}
+
+const handleContentClick = (e) => {
+  const anchor = e.target.closest('a[href^="#"]')
+  if (!anchor) return
+  const id = anchor.getAttribute('href').slice(1)
+  const el = document.getElementById(id)
+  if (!el) return
+  e.preventDefault()
   const header = document.querySelector('header')
   const offset = (header?.offsetHeight ?? 0) + 16
   const top = el.getBoundingClientRect().top + window.scrollY - offset
