@@ -742,3 +742,6 @@ h1, h2, h3, h4, h5, h6 { font-weight: bold; }
 .dark .markdown-content .table-wrapper { box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
 .dark .markdown-content tbody tr:nth-child(even) { background-color: #1e3a5f; }
 .dark .markdown-content tbody tr:hover { background-color: #1e40af33; }
+button{
+  cursor: pointer;
+}
