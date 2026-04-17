@@ -22,6 +22,7 @@
         class="object-cover w-full h-full transition-opacity duration-500"
         :class="imageLoaded ? 'opacity-100' : 'opacity-0'"
         @load="imageLoaded = true"
+        @error="imageLoaded = true"
       />
     </div>
     <div

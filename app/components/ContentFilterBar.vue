@@ -63,7 +63,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onBeforeUnmount } from 'vue'
 
 const props = defineProps({
   availableTopics: { type: Array, default: () => [] },
@@ -98,4 +98,6 @@ const clearSearch = () => {
   localSearch.value = ''
   emit('update:search', '')
 }
+
+onBeforeUnmount(() => clearTimeout(debounceTimer))
 </script>

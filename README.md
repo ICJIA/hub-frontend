@@ -83,7 +83,7 @@ These routes are typically opened from within the Strapi admin panel. When opene
 
 ### Search index
 
-Search is powered by [Fuse.js](https://fusejs.io/) and a pre-built JSON index (`public/search-index.json`) fetched at runtime. The index contains all published articles, apps, and datasets from the Strapi API with markdown stripped from article body text.
+Search is powered by [Fuse.js](https://fusejs.io/) and a pre-built JSON index (`public/search-index.json`) fetched at runtime. The index contains all published articles, apps, and datasets from the Strapi API with Markdown stripped from article body text.
 
 **Local development** — generate the index once (requires `VITE_API_BASE_URL` to be set):
 

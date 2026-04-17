@@ -103,6 +103,12 @@ const { loadIndex, search, isLoaded, isLoading, loadError } = useSearch()
 
 const query = ref(route.query.q ? String(route.query.q) : '')
 
+// Keep the input in sync when the user navigates back/forward or edits the URL
+watch(() => route.query.q, (q) => {
+  const next = q ? String(q) : ''
+  if (next !== query.value) query.value = next
+})
+
 const results = computed(() => search(query.value))
 
 const groupedResults = computed(() => {
@@ -138,9 +144,11 @@ const navigate = (item) => {
   router.push(paths[item.type])
 }
 
-// Sync query param ↔ URL so the search is bookmarkable / shareable
+// Sync query → URL so the search is bookmarkable / shareable.
+// Writes the trimmed value so leading/trailing spaces don't pollute shared links.
 watch(query, (val) => {
-  router.replace({ query: val.trim() ? { q: val } : {} })
+  const trimmed = val.trim()
+  router.replace({ query: trimmed ? { q: trimmed } : {} })
 })
 
 onMounted(async () => {

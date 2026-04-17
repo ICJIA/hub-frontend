@@ -1,4 +1,4 @@
-import Fuse from 'fuse.js'
+import Fuse, { type IFuseOptions } from 'fuse.js'
 
 export interface SearchItem {
   id: number
@@ -13,7 +13,7 @@ export interface SearchItem {
   imageUrl: string
 }
 
-const FUSE_OPTIONS: Fuse.IFuseOptions<SearchItem> = {
+const FUSE_OPTIONS: IFuseOptions<SearchItem> = {
   keys: [
     { name: 'title', weight: 0.4 },
     { name: 'summary', weight: 0.3 },
@@ -27,9 +27,12 @@ const FUSE_OPTIONS: Fuse.IFuseOptions<SearchItem> = {
   ignoreLocation: true
 }
 
-// Fuse instance is not serialisable — keep as module-level (client-only usage)
+// Module-level singletons — client-only.
+// On a Node server the module is shared across requests, so these must never
+// be written during SSR. loadIndex() guards against this with an
+// import.meta.client check; callers must only invoke it from onMounted or
+// other client-side lifecycle hooks, never from setup() or useAsyncData.
 let _fuse: Fuse<SearchItem> | null = null
-// Deduplication: only one in-flight fetch at a time
 let _inflight: Promise<void> | null = null
 
 export const useSearch = () => {
@@ -41,6 +44,7 @@ export const useSearch = () => {
   const loadError = useState<string | null>('search:error', () => null)
 
   const loadIndex = async (): Promise<void> => {
+    if (!import.meta.client) return
     if (isLoaded.value) return
     if (_inflight) {
       await _inflight
