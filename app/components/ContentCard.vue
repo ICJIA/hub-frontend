@@ -4,15 +4,29 @@
     :class="imageUrl && viewMode === 'list' ? 'flex' : ''"
     @click="$emit('click')"
   >
-    <img
+    <!-- Image with lazy-load shimmer and fade-in -->
+    <div
       v-if="imageUrl"
-      :src="imageUrl"
-      :alt="title"
-      :class="viewMode === 'list' ? 'w-44 min-w-[180px] object-cover' : 'w-full h-48 object-cover'"
-    />
+      class="relative overflow-hidden bg-gray-200 dark:bg-gray-700 shrink-0"
+      :class="viewMode === 'list' ? 'w-44 min-w-[180px]' : 'w-full h-48'"
+    >
+      <!-- Shimmer placeholder shown until the image loads -->
+      <div
+        v-if="!imageLoaded"
+        class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 bg-[length:200%_100%]"
+      />
+      <img
+        :src="imageUrl"
+        :alt="title"
+        loading="lazy"
+        class="object-cover w-full h-full transition-opacity duration-500"
+        :class="imageLoaded ? 'opacity-100' : 'opacity-0'"
+        @load="imageLoaded = true"
+      />
+    </div>
     <div
       v-else-if="showPlaceholder"
-      class="flex items-center justify-center bg-purple-300"
+      class="flex items-center justify-center bg-purple-300 shrink-0"
       :style="viewMode === 'list' ? 'width:180px;min-width:180px' : 'height:200px'"
     >
       <span class="text-white text-sm">No Image</span>
@@ -35,7 +49,9 @@
 </template>
 
 <script setup>
-defineProps({
+import { ref, watch } from 'vue'
+
+const props = defineProps({
   title: { type: String, required: true },
   date: { type: String, default: null },
   description: { type: String, default: null },
@@ -46,4 +62,9 @@ defineProps({
 })
 
 defineEmits(['click'])
+
+const imageLoaded = ref(false)
+
+// Reset when the image src changes (e.g. navigating between pages)
+watch(() => props.imageUrl, () => { imageLoaded.value = false })
 </script>

@@ -10,9 +10,8 @@ A Nuxt 4 frontend for browsing and managing research content — articles, apps,
 ## Installation
 
 ```bash
-
 # Install dependencies
-npm install
+pnpm install
 ```
 
 Create a `.env` file at the project root:
@@ -28,28 +27,47 @@ VITE_API_BEARER_TOKEN=<your-strapi-bearer-token>
 ## Running the Development Server
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 The app will be available at `http://localhost:3000`.
 
+> **Note:** The search feature requires a search index. Generate it once before starting the dev server (see [Search index](#search-index) below).
+
 ## Building for Production
 
 ```bash
-# Create an optimized build
-npm run build
+# Create an optimized build (also regenerates the search index automatically)
+pnpm build
 
 # Preview the production build locally
-npm run preview
+pnpm preview
 ```
 
 The build output is written to the `.output/` directory.
 
+## Available scripts
+
+| Command | Description |
+|---|---|
+| `pnpm dev` | Start development server |
+| `pnpm build` | Production build (auto-regenerates search index) |
+| `pnpm preview` | Preview production build |
+| `pnpm generate:search` | Generate `public/search-index.json` for local dev |
+| `pnpm lint` | Run ESLint |
+| `pnpm typecheck` | Type-check with `vue-tsc` |
+| `pnpm test` | Run Vitest unit tests |
+| `pnpm a11y` | Run accessibility audit script |
+
 ## Usage
 
-### Browsing Content
+### Browsing content
 
-Open `http://localhost:3000`. Use the tabs to switch between Articles, Apps, and Datasets. Filter by category, author, or year, or use the search box. Toggle between grid and list view with the view controls.
+Open `http://localhost:3000`. Navigate between Articles (`/`), Apps (`/apps`), and Datasets (`/datasets`). Each listing page includes a filter bar with topic, author, and year dropdowns, an inline search input, and a grid/list view toggle.
+
+### Global search
+
+`/search` provides a cross-content-type fuzzy search page. Enter any term to find matching articles, apps, and datasets in a single view. Results are grouped by type and the URL stays in sync with the query (`?q=…`) so searches can be bookmarked or shared.
 
 ### Editing & Publishing
 
@@ -63,6 +81,29 @@ Each content type has its own preview and publish workflow:
 
 These routes are typically opened from within the Strapi admin panel. When opened standalone (not in an iframe), access requires a signed token passed as `?token=` in the query string.
 
+### Search index
+
+Search is powered by [Fuse.js](https://fusejs.io/) and a pre-built JSON index (`public/search-index.json`) fetched at runtime. The index contains all published articles, apps, and datasets from the Strapi API with markdown stripped from article body text.
+
+**Local development** — generate the index once (requires `VITE_API_BASE_URL` to be set):
+
+```bash
+pnpm generate:search
+```
+
+**Production / CI** — the index is rebuilt automatically by a Nitro `compiled` hook in `nuxt.config.ts` during `pnpm build`. No manual step is needed.
+
+The `useSearch()` composable ([app/composables/useSearch.ts](app/composables/useSearch.ts)) exposes the full search API:
+
+```ts
+const { loadIndex, search, searchByType, getByType, isLoaded, isLoading, loadError } = useSearch()
+
+await loadIndex()                        // lazy-loads the index once per session
+search('community violence')             // global fuzzy search → SearchItem[]
+searchByType('sentencing', 'article')    // type-scoped fuzzy search
+getByType('dataset')                     // all items of a type, unfiltered
+```
+
 ## Project Structure
 
 ```
@@ -71,11 +112,16 @@ app/
 ├── assets/
 │   └── style.css                    # Global styles
 ├── components/
+│   ├── ContentCard.vue              # Shared card used in listing + search results
+│   ├── ContentFilterBar.vue         # Filter dropdowns + inline search + view toggle
 │   └── RichTextEditor.vue           # WYSIWYG editor (Quill-based)
+├── composables/
+│   └── useSearch.ts                 # Fuse.js search composable (session-scoped state)
 ├── middleware/
 │   └── preview-access.ts            # Token/iframe auth for preview routes
 ├── pages/
-│   ├── index.vue                    # Home: tabbed Articles / Apps / Datasets listing
+│   ├── index.vue                    # Articles listing
+│   ├── search.vue                   # Global cross-type search page
 │   ├── article/
 │   │   └── [id].vue                 # Article detail view
 │   ├── preview/
@@ -98,7 +144,9 @@ app/
 │       └── [id].vue                 # Dataset publish view
 └── utils/
     └── previewToken.js              # Signed token utilities
-nuxt.config.ts
+scripts/
+└── generate-search-index.mjs        # CLI script to build public/search-index.json
+nuxt.config.ts                       # Nitro compiled hook auto-builds search index on deploy
 ```
 
 ## Troubleshooting
