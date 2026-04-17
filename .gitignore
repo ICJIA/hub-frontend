@@ -38,6 +38,9 @@ Thumbs.db
 *.sln
 *.sw?
 
+# Generated search index (rebuilt at deploy via Nitro compiled hook)
+public/search-index.json
+
 # Test / coverage
 coverage
 .nyc_output

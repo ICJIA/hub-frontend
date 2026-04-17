@@ -1,6 +1,34 @@
 import { defineNuxtConfig } from 'nuxt/config';
 
 export default defineNuxtConfig({
+  nitro: {
+    hooks: {
+      async compiled(nitro: any) {
+        const { writeFileSync, mkdirSync, existsSync } = await import('node:fs')
+        const { join } = await import('node:path')
+        const { buildIndex } = await import('./scripts/lib/build-search-index.mjs')
+
+        const apiBaseUrl = process.env.VITE_API_BASE_URL || ''
+        const bearerToken = process.env.VITE_API_BEARER_TOKEN || ''
+
+        console.log('\n⚙  Building search index...')
+        const { index, counts } = await buildIndex({ apiBaseUrl, bearerToken })
+
+        const outputDir = nitro.options.output.publicDir
+        if (!existsSync(outputDir)) mkdirSync(outputDir, { recursive: true })
+        writeFileSync(join(outputDir, 'search-index.json'), JSON.stringify(index))
+
+        // Also write to public/ so `nuxt dev` serves it after a build
+        const publicDir = join(nitro.options.rootDir, 'public')
+        if (!existsSync(publicDir)) mkdirSync(publicDir, { recursive: true })
+        writeFileSync(join(publicDir, 'search-index.json'), JSON.stringify(index))
+
+        console.log(`✓ Search index: ${index.length} items (${counts.articles} articles · ${counts.apps} apps · ${counts.datasets} datasets)\n`)
+      }
+    }
+  },
+
+
   modules: ['@nuxt/ui', '@nuxt/eslint', '@nuxt/a11y'],
   colorMode: {
     preference: 'system',
