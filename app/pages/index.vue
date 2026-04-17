@@ -125,7 +125,7 @@ const changePage = (page) => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-const goToArticle = (slug) => router.push(`/article/${slug}`)
+const goToArticle = (slug) => router.push(`/articles/${slug}`)
 
 onMounted(async () => {
   await loadIndex()

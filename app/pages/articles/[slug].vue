@@ -252,7 +252,7 @@ const goBack = () => router.push('/')
 
 const navigateToArticle = (a) => {
   const slug = a.slug
-  router.push(`/article/${slug}`)
+  router.push(`/articles/${slug}`)
 }
 
 const loadNavigation = async () => {
