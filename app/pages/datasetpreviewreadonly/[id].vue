@@ -302,7 +302,7 @@
                       <a
                         v-for="article in dataset.articles"
                         :key="article.documentId || article.id"
-                        :href="`/article/${article.slug}`"
+                        :href="`/articles/${article.slug}`"
                         class="block text-sm text-blue-600 hover:underline leading-snug"
                       >{{ article.Title || article.title }}</a>
                     </div>

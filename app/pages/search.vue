@@ -137,7 +137,7 @@ const typeIcon = (type) => {
 
 const navigate = (item) => {
   const paths = {
-    article: `/article/${item.slug}`,
+    article: `/articles/${item.slug}`,
     app: `/apps/${item.slug}`,
     dataset: `/datasets/${item.slug}`
   }

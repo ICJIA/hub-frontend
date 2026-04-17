@@ -315,7 +315,7 @@ const navigateToArticle = (a) => {
 
 const viewPublishedArticle = () => {
   const id = article.value?.documentId || article.value?.id
-  if (id) router.push(`/article/${id}`)
+  if (id) router.push(`/articles/${id}`)
 }
 
 const getPreviewHeaders = () => ({

@@ -137,7 +137,7 @@ const relatedArticles = computed(() => app.value?.articles || [])
 const relatedDatasets = computed(() => app.value?.datasets || [])
 
 const goBack = () => router.push('/apps')
-const goToArticle = (item) => router.push(`/article/${item.slug}`)
+const goToArticle = (item) => router.push(`/articles/${item.slug}`)
 const goToDataset = (item) => router.push(`/datasets/${item.slug}`)
 
 const loadApp = async () => {

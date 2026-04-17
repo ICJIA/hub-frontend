@@ -158,7 +158,7 @@
                       <a
                         v-for="article in relatedArticles"
                         :key="article.documentId || article.id"
-                        :href="`/article/${article.documentId || article.id}`"
+                        :href="`/articles/${article.documentId || article.id}`"
                         class="block text-sm text-blue-600 hover:underline leading-snug"
                       >{{ article.title || article.Title }}</a>
                       <a
