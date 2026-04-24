@@ -26,14 +26,16 @@
       <!-- ══════════════════════════════════════════════════
            2. RAU INFO BOX — white section, blue card
       ═══════════════════════════════════════════════════ -->
-      <div class="bg-white dark:bg-gray-950 py-8">
+      <div class="bg-white dark:bg-gray-900 py-8">
         <div class="max-w-[1400px] mx-auto px-4">
-          <div class="bg-white dark:bg-gray-950 p-6">
+          <div class="bg-white dark:bg-gray-900 p-6">
             <div class="flex gap-4">
-              <UIcon name="i-lucide-landmark" class="w-8 h-8 shrink-0 dark:bg-gray-950 mt-1" />
+              <UIcon name="i-lucide-landmark" class="w-8 h-8 shrink-0 text-gray-700 dark:text-gray-300 mt-1" />
               <div>
-                <h2 class="text-xl font-bold mb-2">{{ currentPage.unitName }}</h2>
-                <p class="dark:bg-gray-950 leading-relaxed text-sm">{{ currentPage.description }}</p>
+                <h2 class="text-xl font-bold mb-2 dark:text-white">{{ currentPage.unitName }}</h2>
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed text-sm"><!--{{ currentPage.description }}-->
+                  Welcome to the Research & Analysis (R&A) Center at the Illinois Criminal Justice Information Authority (ICJIA). This site serves as a hub for data-driven insights, policy-relevant research, and evidence-based analysis focused on criminal justice in Illinois. Whether you're a policymaker, practitioner, researcher, or community advocate, you'll find timely publications, interactive data tools, and in-depth reports that illuminate trends in crime, victimization, justice system performance, and public safety. The R&A Center is committed to transparency, rigor, and accessibility—empowering stakeholders to make informed decisions that advance equity and effectiveness across the justice landscape.
+                </p>
               </div>
             </div>
           </div>
@@ -43,22 +45,22 @@
       <!-- ══════════════════════════════════════════════════
            3. KEY STATISTICS — white section, navy cards
       ═══════════════════════════════════════════════════ -->
-      <div class="bg-[#1a3a5c] py-8">
+      <div class="bg-[#1a3a5c] dark:bg-gray-900 py-8">
         <div class="max-w-[1400px] mx-auto px-4">
           <h2 class="text-xl font-bold mb-4 text-white">Key Statistics</h2>
           <div class="grid grid-cols-3 gap-4">
             <div
               v-for="stat in currentPage.statistics"
               :key="stat.label"
-              class="bg-white rounded-lg overflow-hidden border-[10px] border-gray-200 flex flex-col"
+              class="bg-white dark:bg-gray-800 rounded-lg overflow-hidden border-[10px] border-gray-200 dark:border-gray-700 flex flex-col"
             >
-              <div class="bg-[#1a3a5c] px-5 py-4">
+              <div class="px-5 py-4" :class="stat.headerBg || 'bg-[#1a3a5c]'">
                 <span class="text-4xl font-extrabold text-white">{{ stat.value }}</span>
               </div>
               <div class="px-5 py-4 flex flex-col flex-1">
-                <h3 class="font-bold text-gray-900 mb-2 leading-snug">{{ stat.label }}</h3>
-                <p class="text-sm text-gray-600 leading-relaxed flex-1">{{ stat.description }}</p>
-                <a v-if="stat.url" :href="stat.url" class="mt-3 text-sm text-blue-700 hover:underline font-medium">Read More</a>
+                <h3 class="font-bold text-gray-900 dark:text-white mb-2 leading-snug">{{ stat.label }}</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed flex-1">{{ stat.description }}</p>
+                <a v-if="stat.url" :href="stat.url" class="mt-3 text-sm text-blue-700 dark:text-blue-400 hover:underline font-medium">Read More</a>
               </div>
             </div>
           </div>
@@ -66,39 +68,43 @@
       </div>
 
       <!-- ══════════════════════════════════════════════════
-           4. PERSONS — light gray section, accordion list
+           4. CENTERS — light gray section, accordion list
       ═══════════════════════════════════════════════════ -->
       <div class="bg-gray-50 dark:bg-gray-900 py-8">
         <div class="max-w-[1400px] mx-auto px-4">
-          <h2 class="text-xl font-bold mb-4">{{ currentPage.personsTitle }}</h2>
-          <div class="divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="w-9 h-9 rounded-lg bg-[#1a3a5c] flex items-center justify-center shrink-0">
+              <UIcon name="i-lucide-building-2" class="w-5 h-5 text-white" />
+            </div>
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ currentPage.centersTitle }}</h2>
+          </div>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-2xl">{{ currentPage.centersSubtitle }}</p>
+          <div class="max-w-2xl divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
             <div
-              v-for="person in currentPage.persons"
-              :key="person.name"
+              v-for="center in currentPage.centers"
+              :key="center.name"
             >
               <div
                 class="flex items-center justify-between px-5 py-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
                 role="button"
                 tabindex="0"
-                :aria-expanded="!!person._open"
-                @click="person._open = !person._open"
-                @keydown.enter.prevent="person._open = !person._open"
-                @keydown.space.prevent="person._open = !person._open"
+                :aria-expanded="!!center._open"
+                @click="center._open = !center._open"
+                @keydown.enter.prevent="center._open = !center._open"
+                @keydown.space.prevent="center._open = !center._open"
               >
-                <span class="font-medium text-sm">{{ person.name }}</span>
-                <div class="flex items-center gap-3">
-                  <span class="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">{{ person.title }}</span>
-                  <UIcon
-                    :name="person._open ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
-                    class="w-4 h-4 text-gray-400"
-                  />
-                </div>
+                <span class="font-medium text-sm dark:text-white">{{ center.name }}</span>
+                <UIcon
+                  :name="center._open ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+                  class="w-4 h-4 text-gray-400"
+                />
               </div>
               <div
-                v-if="person._open"
-                class="px-5 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 leading-relaxed"
+                v-if="center._open"
+                class="px-5 py-4 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-700"
               >
-                {{ person.bio }}
+                <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-3">{{ center.description }}</p>
+                <a v-if="center.url" :href="center.url" class="text-sm text-blue-700 dark:text-blue-400 hover:underline font-medium">View center's products →</a>
               </div>
             </div>
           </div>
@@ -108,9 +114,9 @@
       <!-- ══════════════════════════════════════════════════
            5. LATEST ARTICLES — white section, 3-col grid
       ═══════════════════════════════════════════════════ -->
-      <div class="bg-white dark:bg-gray-950 py-10">
+      <div class="bg-white dark:bg-gray-900 py-10">
         <div class="max-w-[1400px] mx-auto px-4">
-          <h2 class="text-xl font-bold mb-6">Latest Articles</h2>
+          <h2 class="text-xl font-bold mb-6 dark:text-white">Latest Articles</h2>
           <div class="grid grid-cols-12 gap-4 mb-6">
             <div
               v-for="article in displayArticles"
@@ -142,11 +148,11 @@
           <div class="grid grid-cols-12 gap-8">
             <!-- Bullet list -->
             <div class="col-span-12 lg:col-span-7">
-              <h2 class="text-xl font-bold mb-2">{{ currentPage.topicsTitle }}</h2>
+              <h2 class="text-xl font-bold mb-2 dark:text-white">{{ currentPage.topicsTitle }}</h2>
               <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">
                 Browse research by topic area. Each topic links to filtered articles and resources from the Research and Analysis Unit.
               </p>
-              <ul class="bg-white rounded-lg p-6 grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-6">
+              <ul class="bg-white dark:bg-gray-800 rounded-lg p-6 grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-6">
                 <li
                   v-for="topic in currentPage.topics"
                   :key="topic.label"
@@ -183,12 +189,12 @@
       ═══════════════════════════════════════════════════ -->
       <div class="bg-[#E6F1FA] dark:bg-gray-900 py-10">
         <div class="max-w-[1400px] mx-auto px-4">
-          <h2 class="text-xl font-bold mb-6">{{ currentPage.resourcesTitle }}</h2>
+          <h2 class="text-xl font-bold mb-6 dark:text-white">{{ currentPage.resourcesTitle }}</h2>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div
               v-for="resource in currentPage.resources"
               :key="resource.title"
-              class="bg-white rounded-xl border border-gray-200 p-4 flex flex-col gap-4"
+              class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 flex flex-col gap-4"
             >
               <div class="flex items-center gap-3">
                 <div
@@ -198,8 +204,8 @@
                   <UIcon :name="resource.icon" class="w-6 h-6" :class="resource.iconColor" />
                 </div>
                 <div>
-                  <p class="font-bold text-gray-900 text-sm leading-snug">{{ resource.title }}</p>
-                  <p class="text-xs text-gray-500 mt-0.5">{{ resource.subtitle }}</p>
+                  <p class="font-bold text-gray-900 dark:text-white text-sm leading-snug">{{ resource.title }}</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ resource.subtitle }}</p>
                 </div>
               </div>
               <UButton :to="resource.url" variant="outline" color="gray" block size="sm">View</UButton>
@@ -211,16 +217,16 @@
       <!-- ══════════════════════════════════════════════════
            8. MAJOR PROJECTS — carousel
       ═══════════════════════════════════════════════════ -->
-      <div class="bg-gray-50 py-10">
+      <div class="bg-gray-50 dark:bg-gray-900 py-10">
         <div class="max-w-[1400px] mx-auto px-4">
           <!-- Header -->
           <div class="flex items-center gap-3 mb-2">
             <div class="w-9 h-9 rounded-lg bg-[#1a3a5c] flex items-center justify-center shrink-0">
               <UIcon name="i-lucide-check-circle" class="w-5 h-5 text-white" />
             </div>
-            <h2 class="text-xl font-bold text-gray-900">{{ currentPage.projectsTitle }}</h2>
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ currentPage.projectsTitle }}</h2>
           </div>
-          <p class="text-sm text-gray-500 mb-6 max-w-2xl">{{ currentPage.projectsSubtitle }}</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-2xl">{{ currentPage.projectsSubtitle }}</p>
 
           <!-- Carousel -->
           <UCarousel
@@ -232,7 +238,7 @@
             }"
           >
             <template #default="{ item: project }">
-              <div class="rounded-xl overflow-hidden border border-gray-200 bg-white flex flex-col h-full">
+              <div class="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col h-full">
                 <!-- Coloured header -->
                 <div class="p-5 flex flex-col justify-between min-h-[160px]" :class="project.headerBg">
                   <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
@@ -245,9 +251,9 @@
                 </div>
                 <!-- White body -->
                 <div class="p-5 flex flex-col flex-1">
-                  <p class="text-sm text-gray-600 leading-relaxed mb-4">{{ project.description }}</p>
+                  <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">{{ project.description }}</p>
                   <ul class="space-y-2 flex-1 mb-5">
-                    <li v-for="bullet in project.bullets" :key="bullet" class="flex items-center gap-2 text-sm text-gray-700">
+                    <li v-for="bullet in project.bullets" :key="bullet" class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                       <UIcon name="i-lucide-check-circle-2" class="w-4 h-4 text-green-600 shrink-0" />
                       <span>{{ bullet }}</span>
                     </li>
@@ -285,64 +291,53 @@ const MOCK = {
       value: '470',
       label: 'Uses Of Force in 2025',
       description: 'This number reflects the safe-T acts count of Use of Force. Which only include incidents in which a person was hospitalized or killed as a result of use of force.',
-      url: '#'
+      url: '#',
+      headerBg: 'bg-[#1d6fb8]'
     },
     {
       value: '28,000',
       label: 'Persons Arrested in 2025',
       description: 'This number reflects the safe-T acts count of Use of Force. Which only include incidents in which a person was hospitalized or killed as a result of use of force.',
-      url: '#'
+      url: '#',
+      headerBg: 'bg-[#4a9fd4]'
     },
     {
       value: '173,042',
       label: 'Reported Offences in 2025',
       description: 'This number reflects the safe-T acts count of Use of Force. Which only include incidents in which a person was hospitalized or killed as a result of use of force.',
-      url: '#'
+      url: '#',
+      headerBg: 'bg-[#1a3a5c]'
     }
   ],
-  personsTitle: 'Persons in the Research and Analysis Unit',
-  persons: [
+  centersTitle: 'Centers in the Research and Analysis Unit',
+  centersSubtitle: 'There are five centers in R&A that focus on different areas of the criminal justice system. Click the tiles to the left to get an overview of the centers and their research.',
+  centers: [
     {
-      name: 'Adam Langwith',
-      title: 'Research Director',
-      bio: 'Adam Langwith oversees the day-to-day operations of the Research and Analysis Unit. He has over 15 years of experience in criminal justice research and program evaluation, with a focus on data-driven policy development and cross-agency collaboration.'
+      name: 'Center for Justice Research and Evaluation',
+      description: 'The Center for Criminal Justice Data and Analytics is tasked with collecting, analyzing, and interpreting criminal justice data to inform statewide policy and practice.',
+      url: '#'
     },
     {
-      name: 'Alysson Gatens',
-      title: 'Senior Research Analyst',
-      bio: 'Alysson Gatens specializes in substance use policy, human trafficking, and crime victim research. She has published extensively on trauma-informed approaches and evidence-based interventions for vulnerable populations in the justice system.'
+      name: 'Center for Victim Studies',
+      description: 'The Center for Victim Studies conducts research on crime victimization, trauma-informed approaches, and evidence-based interventions for vulnerable populations in the justice system.',
+      url: '#'
     },
     {
-      name: 'Amanda Klump',
-      title: 'Research Analyst',
-      bio: "Amanda Klump conducts quantitative and qualitative research on juvenile justice, reentry, and community-based programming. She holds a Master's degree in criminology and has contributed to multiple statewide program evaluations."
+      name: 'Center for Violence Prevention and Intervention Research',
+      description: 'The Center for Violence Prevention and Intervention Research focuses on gun violence, homicide, and community-based violence intervention strategies across Illinois.',
+      url: '#'
     },
     {
-      name: 'Janelle Vasquez',
-      title: 'Policy Analyst',
-      bio: 'Janelle Vasquez translates research findings into actionable policy recommendations for state and local agencies. Her background spans legislative analysis, stakeholder engagement, and grant program oversight across multiple justice domains.'
+      name: 'Center for Sponsored Research and Program Development',
+      description: 'The Center for Sponsored Research and Program Development manages federally funded research projects and program evaluations to support evidence-based policy and practice.',
+      url: '#'
     },
     {
-      name: 'Jessica Reichert',
-      title: 'Senior Research Director',
-      bio: "Jessica Reichert leads the unit's portfolio of federally funded research projects. With two decades of experience, she has directed major studies on homicide, domestic violence, human trafficking, and substance use disorder treatment outcomes."
-    },
-    {
-      name: 'Malgorzata Davis',
-      title: 'Senior Research Analyst',
-      bio: 'Malgorzata Davis focuses on violence prevention, gun violence, and homicide research. She brings expertise in geospatial analysis and statistical modeling to support data-informed decision-making by law enforcement and community organizations.'
-    },
-    {
-      name: 'Rebeccah Strandberg',
-      title: 'Research Analyst',
-      bio: "Rebeccah Strandberg supports the unit's work on mental health diversion, victimization, and restorative justice. She has a background in social work and applies mixed-methods research approaches to complex criminal justice questions."
-    },
-    {
-      name: 'Samantha DiPietro',
-      title: 'Research Analyst',
-      bio: 'Samantha DiPietro conducts research on drug policy, incarceration trends, and reentry outcomes. She collaborates with partner agencies to develop data dashboards and visualizations that make research findings accessible to practitioners and policymakers.'
+      name: 'Center for Community Based Justice Research',
+      description: 'The Center for Community Based Justice Research examines reentry, juvenile justice, mental health diversion, and restorative justice initiatives at the community level.',
+      url: '#'
     }
-  ].map(p => reactive({ ...p, _open: false })),
+  ].map(c => reactive({ ...c, _open: false })),
   topicsTitle: 'Topics in R&A',
   topics: [
     { label: 'Homicide' },
