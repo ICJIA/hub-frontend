@@ -33,9 +33,7 @@
               <UIcon name="i-lucide-landmark" class="w-8 h-8 shrink-0 text-gray-700 dark:text-gray-300 mt-1" />
               <div>
                 <h2 class="text-xl font-bold mb-2 dark:text-white">{{ currentPage.unitName }}</h2>
-                <p class="text-gray-700 dark:text-gray-300 leading-relaxed text-sm"><!--{{ currentPage.description }}-->
-                  Welcome to the Research & Analysis (R&A) Center at the Illinois Criminal Justice Information Authority (ICJIA). This site serves as a hub for data-driven insights, policy-relevant research, and evidence-based analysis focused on criminal justice in Illinois. Whether you're a policymaker, practitioner, researcher, or community advocate, you'll find timely publications, interactive data tools, and in-depth reports that illuminate trends in crime, victimization, justice system performance, and public safety. The R&A Center is committed to transparency, rigor, and accessibility—empowering stakeholders to make informed decisions that advance equity and effectiveness across the justice landscape.
-                </p>
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">{{ currentPage.description }}</p>
               </div>
             </div>
           </div>
