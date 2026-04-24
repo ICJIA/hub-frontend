@@ -65,17 +65,19 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
+const route = useRoute()
 const { loadIndex, searchByType, getByType, isLoaded, isLoading, loadError } = useSearch()
 
-const filterTopic = ref(null)
-const filterAuthor = ref(null)
-const filterYear = ref(null)
-const filterSearch = ref('')
+// Initialize from URL so topic clicks from Research Hub and shared links work
+const filterTopic = ref(route.query.topic || null)
+const filterAuthor = ref(route.query.author || null)
+const filterYear = ref(route.query.year || null)
+const filterSearch = ref(route.query.search || '')
 const viewMode = ref('grid')
-const currentPage = ref(1)
+const currentPage = ref(Number(route.query.page) || 1)
 const pageSize = 12
 
 const allItems = computed(() => getByType('article'))
@@ -91,7 +93,10 @@ const availableAuthors = computed(() =>
 const availableYears = computed(() => {
   const years = new Set(
     allItems.value
-      .map(i => (i.date ? String(new Date(i.date).getFullYear()) : null))
+      .map(i => {
+        const y = new Date(i.date).getFullYear()
+        return Number.isFinite(y) ? String(y) : null
+      })
       .filter(Boolean)
   )
   return [...years].sort((a, b) => Number(b) - Number(a))
@@ -118,6 +123,27 @@ const paginatedItems = computed(() => {
 // Reset to page 1 when any filter changes
 watch([filterSearch, filterTopic, filterAuthor, filterYear], () => {
   currentPage.value = 1
+})
+
+// Sync filters → URL so filtered views are shareable / deep-linkable
+watch([filterTopic, filterAuthor, filterYear, filterSearch, currentPage], () => {
+  const query = {}
+  if (filterTopic.value) query.topic = filterTopic.value
+  if (filterAuthor.value) query.author = filterAuthor.value
+  if (filterYear.value) query.year = filterYear.value
+  if (filterSearch.value) query.search = filterSearch.value
+  if (currentPage.value > 1) query.page = String(currentPage.value)
+  router.replace({ query })
+})
+
+// Sync URL → filters for back/forward navigation and external links
+watch(() => route.query, (q) => {
+  if ((q.topic || null) !== filterTopic.value) filterTopic.value = q.topic || null
+  if ((q.author || null) !== filterAuthor.value) filterAuthor.value = q.author || null
+  if ((q.year || null) !== filterYear.value) filterYear.value = q.year || null
+  if ((q.search || '') !== filterSearch.value) filterSearch.value = q.search || ''
+  const p = Number(q.page || 1)
+  if (p !== currentPage.value) currentPage.value = p
 })
 
 const changePage = (page) => {

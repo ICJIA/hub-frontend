@@ -78,7 +78,12 @@
             >
               <div
                 class="flex items-center justify-between px-5 py-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+                role="button"
+                tabindex="0"
+                :aria-expanded="!!person._open"
                 @click="person._open = !person._open"
+                @keydown.enter.prevent="person._open = !person._open"
+                @keydown.space.prevent="person._open = !person._open"
               >
                 <span class="font-medium text-sm">{{ person.name }}</span>
                 <div class="flex items-center gap-3">
@@ -145,13 +150,16 @@
                 <li
                   v-for="topic in currentPage.topics"
                   :key="topic.label"
-                  class="flex items-center gap-2 cursor-pointer group"
-                  @click="goToArticlesByTopic(topic.label)"
                 >
-                  <span class="w-2 h-2 rounded-full bg-blue-700 shrink-0" />
-                  <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
-                    {{ topic.label }}
-                  </span>
+                  <NuxtLink
+                    :to="`/articles?topic=${encodeURIComponent(topic.label)}`"
+                    class="flex items-center gap-2 group"
+                  >
+                    <span class="w-2 h-2 rounded-full bg-blue-700 shrink-0" />
+                    <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
+                      {{ topic.label }}
+                    </span>
+                  </NuxtLink>
                 </li>
               </ul>
             </div>
@@ -467,7 +475,6 @@ const latestArticles = computed(() => getByType('article').slice(0, 6))
 const displayArticles = computed(() => latestArticles.value.length ? latestArticles.value : MOCK_ARTICLES)
 
 const goToArticle = (slug) => router.push(`/articles/${slug}`)
-const goToArticlesByTopic = (label) => router.push(`/articles?topic=${encodeURIComponent(label)}`)
 
 onMounted(async () => {
   isLoading.value = true
