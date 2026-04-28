@@ -5,12 +5,12 @@
     ═══════════════════════════════════════════════════ -->
     <div
       class="text-white bg-cover bg-top bg-no-repeat min-h-[355px]"
-      style="background-image: url('/research-hub-hero-image.png');"
+      style="background-image: url('https://v2.hub.icjia-api.cloud/uploads/hero_research_hub_9802a98e5f.png');"
     >
       <div class="max-w-[1400px] mx-auto px-6 py-12 flex items-center justify-between gap-8">
         <div class="flex-1">
           <h1 class="text-4xl font-bold mb-3 leading-tight">{{ currentPage.title }}</h1>
-          <p class="text-white/75 text-base max-w-2xl leading-relaxed">{{ currentPage.subtitle }}</p>
+          <p class="text-white text-base max-w-2xl leading-relaxed">{{ currentPage.subtitle }}</p>
         </div>
       </div>
     </div>
@@ -50,7 +50,7 @@
             <div
               v-for="stat in currentPage.statistics"
               :key="stat.label"
-              class="bg-white dark:bg-gray-800 rounded-lg overflow-hidden border-[10px] border-gray-200 dark:border-gray-700 flex flex-col"
+              class="bg-white dark:bg-gray-800 rounded-lg overflow-hidden border-[10px] border-white dark:border-gray-700 flex flex-col"
             >
               <div class="px-5 py-4" :class="stat.headerBg || 'bg-[#1a3a5c]'">
                 <span class="text-4xl font-extrabold text-white">{{ stat.value }}</span>
@@ -171,7 +171,7 @@
             <div class="col-span-12 lg:col-span-5">
               <div class="rounded-lg overflow-hidden h-full min-h-[220px] bg-gray-200 dark:bg-gray-700">
                 <img
-                  src="https://icjia.illinois.gov/researchhub/img/icjia-hero.jpg"
+                  src="https://v2.hub.icjia-api.cloud/uploads/topics_hero_1_2455dbc45d.png"
                   alt="ICJIA Research"
                   class="w-full h-full object-cover"
                   @error="(e) => e.target.style.display = 'none'"
@@ -228,13 +228,36 @@
 
           <!-- Carousel -->
           <UCarousel
+            ref="projectsCarouselRef"
             :items="currentPage.projects"
             arrows
+            :options="{ duration: 25 }"
             :ui="{
-              item: 'basis-[340px]',
+              item: 'basis-[420px]',
               container: 'gap-5',
             }"
           >
+            <template #prev="{ onClick }">
+              <UButton
+                v-if="!carouselAtStart"
+                icon="i-lucide-chevron-left"
+                color="white"
+                variant="solid"
+                size="md"
+                class="rounded-full shadow"
+                @click="onClick"
+              />
+            </template>
+            <template #next="{ onClick }">
+              <UButton
+                icon="i-lucide-chevron-right"
+                color="white"
+                variant="solid"
+                size="md"
+                class="rounded-full shadow"
+                @click="onClick"
+              />
+            </template>
             <template #default="{ item: project }">
               <div class="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col h-full">
                 <!-- Coloured header -->
@@ -271,7 +294,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 // ─── Slug that maps to this page in Strapi's pages collection ───────────────
@@ -311,28 +334,28 @@ const MOCK = {
   centersSubtitle: 'There are five centers in R&A that focus on different areas of the criminal justice system. Click the tiles to the left to get an overview of the centers and their research.',
   centers: [
     {
-      name: 'Center for Justice Research and Evaluation',
-      description: 'The Center for Criminal Justice Data and Analytics is tasked with collecting, analyzing, and interpreting criminal justice data to inform statewide policy and practice.',
+      name: 'Center for Community Corrections Research',
+      description: 'The Center for Community Corrections Research conducts research and evaluation projects on interventions designed to divert individuals from prison; and, to improve re-entry for persons returning to their communities after incarceration. The goal is to expand the use of effective community interventions using evaluation, research, and implementation science. Center staff collect and analyze a variety of data including administrative, qualitative and quantitative. Research and evaluation reports are designed to influence Illinois policies regarding the use of interventions such as problem-solving courts, probation, behavioral and medical treatments; and, to evaluate the effectiveness of these interventions to reduce prison recidivism in diverse populations. The Center develops data visualizations and dashboards to assist with program management and improvements. Center staff publish research and evaluation reports, work in collaboration with external evaluators, and provide research presentations.',
+      url: '#'
+    },
+    {
+      name: 'Center for Criminal Justice Data and Analytics',
+      description: 'The Center for Criminal Justice Data and Analytics continually collects, analyzes, reports on, and disseminates crime and risk factor statistical information for strategic planning, policy decisions and public education. Staff has developed a repository of these data on the ICJIA website, along with various online tools for data display and analysis. In partnership with the State Police, the Center is responsible for the dissemination of state criminal history record information (CHRI) data for research purposes, including in-house analytic use. The Center provides technical assistance in statistical methods, database design, data analysis and presentation.',
+      url: '#'
+    },
+    {
+      name: 'Center for Sponsored Research & Program Development',
+      description: 'The Center for Sponsored Research & Program Development secures experts in the field to conduct research and evaluate programs that inform policy, support evidence-based practices, and guide decision-making. Staff review and select programs and other priority criminal justice-related topics viable for evaluation and further research. Researchers are selected through a competitive process and are awarded federal grant subcontracts to conduct studies. The center also provides technical assistance to programs supported with Authority-administered grant funds as they refine program objectives, develop data collection tools, and assess program performance.',
       url: '#'
     },
     {
       name: 'Center for Victim Studies',
-      description: 'The Center for Victim Studies conducts research on crime victimization, trauma-informed approaches, and evidence-based interventions for vulnerable populations in the justice system.',
+      description: 'The Center for Victim Studies designs and conducts research examining the nature and scope of victimization in Illinois and evaluates programs that address victim needs. Center staff use a variety of research methods and analyses to explore victimization and victim services in order to improve policy, programming, and practice throughout the state. The center also coordinates presentations and disseminates reports, translating promising research into implications for policy and practice for stakeholders and victim service providers. Staff also provide technical assistance to help victim service programs collect data to inform how to best meet the multifaceted needs of victims. Finally, staff manage the InfoNet System, a web-based data collection and reporting system used by more than 100 victim service providers in Illinois. The system is one of only a few known central repositories in the country for statewide, standardized victim service data. Click here to learn more about InfoNet.',
       url: '#'
     },
     {
       name: 'Center for Violence Prevention and Intervention Research',
-      description: 'The Center for Violence Prevention and Intervention Research focuses on gun violence, homicide, and community-based violence intervention strategies across Illinois.',
-      url: '#'
-    },
-    {
-      name: 'Center for Sponsored Research and Program Development',
-      description: 'The Center for Sponsored Research and Program Development manages federally funded research projects and program evaluations to support evidence-based policy and practice.',
-      url: '#'
-    },
-    {
-      name: 'Center for Community Based Justice Research',
-      description: 'The Center for Community Based Justice Research examines reentry, juvenile justice, mental health diversion, and restorative justice initiatives at the community level.',
+      description: 'The Center for Violence Prevention and Intervention Research reviews scientific literature, designs and conducts studies, and collects and analyzes data on violent crime in Illinois to help inform and enhance the state’s criminal justice response to violence through timely research publications, presentations and discussions. Center staff examine environmental, social, and individual factors that contribute to the occurrence of violent crime and seek collaboration with a diverse set of stakeholders to understand the scope of existing prevention and intervention efforts and guide future strategies more broadly.',
       url: '#'
     }
   ].map(c => reactive({ ...c, _open: false })),
@@ -461,13 +484,54 @@ const isLoading = ref(true)
 
 
 // Merge Strapi page data over mock defaults — mock fills any missing field
-const currentPage = computed(() => ({ ...MOCK, ...(page.value || {}) }))
+const currentPage = computed(() => {
+  const merged = { ...MOCK, ...(page.value || {}) }
+  if (page.value?.statistics?.length) {
+    merged.statistics = page.value.statistics.map((stat, i) => ({
+      value: stat.count,
+      label: stat.title,
+      description: stat.body,
+      url: stat.url,
+      headerBg: MOCK.statistics[i]?.headerBg ?? 'bg-[#1a3a5c]'
+    }))
+  }
+  if (page.value?.centers?.length) {
+    merged.centers = page.value.centers.map(c => reactive({ ...c, _open: false }))
+  }
+  if (page.value?.hero?.length) {
+    const { title, subtitle } = page.value.hero[0]
+    if (title) merged.title = title
+    if (subtitle) merged.subtitle = subtitle
+  }
+  if (page.value?.infobox?.length) {
+    const { unitName, description } = page.value.infobox[0]
+    if (unitName) merged.unitName = unitName
+    if (description) merged.description = description
+  }
+  if (page.value?.resources?.length) {
+    merged.resources = page.value.resources
+  }
+  return merged
+})
 
 // Real articles from search index (top 6); fall back to mock when index empty
 const latestArticles = computed(() => getByType('article').slice(0, 6))
 const displayArticles = computed(() => latestArticles.value.length ? latestArticles.value : MOCK_ARTICLES)
 
 const goToArticle = (slug) => router.push(`/articles/${slug}`)
+
+const projectsCarouselRef = ref(null)
+const carouselAtStart = ref(true)
+
+watch(projectsCarouselRef, (carousel) => {
+  if (!carousel) return
+  const embla = carousel.emblaApi
+  if (!embla) return
+  carouselAtStart.value = !embla.canScrollPrev()
+  embla.on('select', () => {
+    carouselAtStart.value = !embla.canScrollPrev()
+  })
+}, { flush: 'post' })
 
 onMounted(async () => {
   isLoading.value = true
