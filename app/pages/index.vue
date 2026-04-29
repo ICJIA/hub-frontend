@@ -45,7 +45,7 @@
       ═══════════════════════════════════════════════════ -->
       <div class="bg-[#1a3a5c] dark:bg-gray-900 py-8">
         <div class="max-w-[1400px] mx-auto px-4">
-          <h2 class="text-xl font-bold mb-4 text-white">Key Statistics</h2>
+          <h2 class="text-xl font-bold mb-4 text-white">{{ currentPage.statisticsTitle }}</h2>
           <div class="grid grid-cols-3 gap-4">
             <div
               v-for="stat in currentPage.statistics"
@@ -114,7 +114,7 @@
       ═══════════════════════════════════════════════════ -->
       <div class="bg-white dark:bg-gray-900 py-10">
         <div class="max-w-[1400px] mx-auto px-4">
-          <h2 class="text-xl font-bold mb-6 dark:text-white">Latest Articles</h2>
+          <h2 class="text-xl font-bold mb-6 dark:text-white">{{ currentPage.articlesTitle }}</h2>
           <div class="grid grid-cols-12 gap-4 mb-6">
             <div
               v-for="article in displayArticles"
@@ -133,7 +133,7 @@
             </div>
           </div>
           <div class="flex justify-center">
-            <UButton to="/articles" variant="outline" size="md">View All Articles</UButton>
+            <UButton :to="currentPage.articlesButtonUrl" variant="outline" size="md">{{ currentPage.articlesButtonLabel }}</UButton>
           </div>
         </div>
       </div>
@@ -147,9 +147,7 @@
             <!-- Bullet list -->
             <div class="col-span-12 lg:col-span-7">
               <h2 class="text-xl font-bold mb-2 dark:text-white">{{ currentPage.topicsTitle }}</h2>
-              <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">
-                Browse research by topic area. Each topic links to filtered articles and resources from the Research and Analysis Unit.
-              </p>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">{{ currentPage.topicsSubtitle }}</p>
               <ul class="bg-white dark:bg-gray-800 rounded-lg p-6 grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-6">
                 <li
                   v-for="topic in currentPage.topics"
@@ -159,7 +157,7 @@
                     :to="`/articles?topic=${encodeURIComponent(topic.label)}`"
                     class="flex items-center gap-2 group"
                   >
-                    <span class="w-2 h-2 rounded-full bg-blue-700 shrink-0" />
+                    <UIcon name="i-lucide-check" class="w-4 h-4 text-blue-900 dark:text-blue-400 shrink-0" />
                     <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
                       {{ topic.label }}
                     </span>
@@ -206,7 +204,7 @@
                   <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ resource.subtitle }}</p>
                 </div>
               </div>
-              <UButton :to="resource.url" variant="outline" color="gray" block size="sm">View</UButton>
+              <UButton :to="resource.url" variant="outline" color="gray" block size="sm" class="border border-gray-200 dark:border-gray-600">{{ currentPage.resourceViewLabel }}</UButton>
             </div>
           </div>
         </div>
@@ -280,7 +278,7 @@
                     </li>
                   </ul>
                   <div class="flex justify-end">
-                    <UButton :to="project.url" variant="outline" color="gray" size="sm">Learn More</UButton>
+                    <UButton :to="project.url" variant="outline" color="gray" size="sm" class="border border-gray-200 dark:border-gray-600">{{ currentPage.projectLearnMoreLabel }}</UButton>
                   </div>
                 </div>
               </div>
@@ -307,6 +305,13 @@ const MOCK = {
   unitName: 'Research and Analysis Unit',
   description:
     'The Research and Analysis Unit (RAU) at the Illinois Criminal Justice Information Authority (ICJIA) conducts research to improve the quality of justice and increase public safety in Illinois. The unit produces reports, datasets, and research-based resources to inform evidence-based policy and practice across the state.',
+  articlesTitle: 'Latest Articles',
+  articlesButtonLabel: 'View All Articles',
+  articlesButtonUrl: '/articles',
+  topicsSubtitle: 'Browse research by topic area. Each topic links to filtered articles and resources from the Research and Analysis Unit.',
+  resourceViewLabel: 'View',
+  projectLearnMoreLabel: 'Learn More',
+  statisticsTitle: 'Key Statistics',
   statistics: [
     {
       value: '470',
