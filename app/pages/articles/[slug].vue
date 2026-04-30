@@ -147,7 +147,8 @@ const { fetchArticleBySlug, fetchArticles } = useArticles()
 
 const { data: article, error: fetchError, pending: loading } = await useAsyncData(
   `article-${route.params.slug}`,
-  () => fetchArticleBySlug(route.params.slug)
+  () => fetchArticleBySlug(route.params.slug),
+  { watch: [() => route.params.slug] }
 )
 
 const error = computed(() => fetchError.value ? `Failed to load article: ${fetchError.value.message}` : null)

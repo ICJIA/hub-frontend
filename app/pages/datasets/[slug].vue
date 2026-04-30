@@ -215,7 +215,8 @@ const { data: dataset, error: fetchError, pending: loading } = await useAsyncDat
     if (!Array.isArray(data.apps)) data.apps = []
     if (!Array.isArray(data.articles)) data.articles = []
     return data
-  }
+  },
+  { watch: [() => route.params.slug] }
 )
 
 const error = computed(() => fetchError.value ? `Failed to load dataset: ${fetchError.value.message}` : null)
