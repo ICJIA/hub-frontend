@@ -331,7 +331,7 @@
 <script setup>
 definePageMeta({ middleware: ['preview-access'] })
 
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
@@ -397,7 +397,7 @@ const loadDataset = async () => {
   finally { loading.value = false }
 }
 
-onMounted(() => { loadDataset() })
+useAsyncData(`dataset-readonly-${route.params.id}`, () => loadDataset(), { server: false })
 </script>
 
 <style scoped>

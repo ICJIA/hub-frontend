@@ -6,7 +6,7 @@
 
     <div v-else-if="error" class="text-center py-16 bg-gray-100 dark:bg-gray-900 flex-1">
       <UAlert color="error" :description="error" class="mb-4" />
-      <UButton variant="outline" icon="i-heroicons-arrow-left" @click="goBack">Back to Articles</UButton>
+      <UButton variant="outline" icon="i-heroicons-arrow-left" @click="goBack">{{ backLabel }}</UButton>
     </div>
 
     <template v-else-if="article">
@@ -14,7 +14,7 @@
       <div class="bg-white dark:bg-gray-900">
         <div class="max-w-[1300px] mx-auto pt-4 px-4 pb-3 sm:pt-6 sm:px-6 sm:pb-4">
           <UButton variant="outline" icon="i-heroicons-arrow-left" @click="goBack" class="mb-4">
-            Back to Articles
+            {{ backLabel }}
           </UButton>
 
           <!-- Title Row -->
@@ -147,7 +147,8 @@ const { fetchArticleBySlug, fetchArticles } = useArticles()
 
 const { data: article, error: fetchError, pending: loading } = await useAsyncData(
   `article-${route.params.slug}`,
-  () => fetchArticleBySlug(route.params.slug)
+  () => fetchArticleBySlug(route.params.slug),
+  { watch: [() => route.params.slug] }
 )
 
 const error = computed(() => fetchError.value ? `Failed to load article: ${fetchError.value.message}` : null)
@@ -167,6 +168,15 @@ const splashImageUrl = computed(() => {
 })
 
 const authorsString = computed(() => article.value?.authors?.map(a => a.title).join(', ') || '')
+
+useSeoMeta({
+  title: () => article.value?.title ? `${article.value.title} | ICJIA Research Hub` : 'Article | ICJIA Research Hub',
+  description: () => article.value?.abstract || 'Criminal justice research from the ICJIA Research and Analysis Unit.',
+  ogTitle: () => article.value?.title || 'ICJIA Research Hub',
+  ogDescription: () => article.value?.abstract || 'Criminal justice research from the ICJIA Research and Analysis Unit.',
+  ogImage: () => splashImageUrl.value || '',
+  twitterCard: 'summary_large_image',
+})
 
 const relatedDatasets = computed(() => {
   const d = article.value?.datasets
@@ -248,11 +258,13 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
-const goBack = () => router.push('/')
+const backLabel = computed(() => route.query.from === 'articles' ? 'Back to Articles' : 'Back to Home')
+const goBack = () => route.query.from === 'articles' ? router.push('/articles') : router.push('/')
 
 const navigateToArticle = (a) => {
   const slug = a.slug
-  router.push(`/articles/${slug}`)
+  const from = route.query.from ? `?from=${route.query.from}` : ''
+  router.push(`/articles/${slug}${from}`)
 }
 
 const loadNavigation = async () => {

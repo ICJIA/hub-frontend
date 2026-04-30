@@ -2,7 +2,7 @@ export const useMedia = () => {
   const uploadMedia = async (file) => {
     const formData = new FormData()
     formData.append('files', file)
-    const response = await fetch(`${API_BASE_URL}/api/upload`, {
+    const response = await fetch(`${STRAPI_PROXY}/upload`, {
       method: 'POST',
       headers: {
         ...getAuthHeader()
@@ -31,7 +31,7 @@ export const useMedia = () => {
       params.append('filters[mime][$notContains]', 'image')
     }
     if (search) params.append('filters[name][$contains]', search)
-    const response = await fetch(`${API_BASE_URL}/api/upload/files?${params}`, {
+    const response = await fetch(`${STRAPI_PROXY}/upload/files?${params}`, {
       headers: getAuthHeader()
     })
     if (!response.ok) throw new Error(`Failed to fetch media: ${response.status}`)

@@ -207,7 +207,7 @@
 <script setup>
 definePageMeta({ middleware: ['preview-access'] })
 
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { marked } from 'marked'
 import markedFootnote from 'marked-footnote'
@@ -218,8 +218,6 @@ const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 const { fetchArticlePreviewById, publishArticle } = useArticles()
-const bearerToken = import.meta.env.VITE_API_BEARER_TOKEN || ''
-
 const article = ref(null)
 const loading = ref(true)
 const error = ref(null)
@@ -318,17 +316,14 @@ const viewPublishedArticle = () => {
   if (id) router.push(`/articles/${id}`)
 }
 
-const getPreviewHeaders = () => ({
-  'Content-Type': 'application/json',
-  ...(bearerToken && { 'Authorization': `Bearer ${bearerToken}` })
-})
+const getPreviewHeaders = () => getHeadersWithAuth()
 
 const loadNavigation = async () => {
   try {
     const params = new URLSearchParams(window.location.search)
     const status = params.get('status') || 'draft'
     const response = await fetch(
-      `${API_BASE_URL}/api/articles?status=${status}&pagination[pageSize]=100&sort=date:desc`,
+      `${STRAPI_PROXY}/articles?status=${status}&pagination[pageSize]=100&sort=date:desc`,
       { headers: getPreviewHeaders() }
     )
     if (!response.ok) return
@@ -352,7 +347,7 @@ const loadAuthorArticles = async () => {
     const params = new URLSearchParams(window.location.search)
     const status = params.get('status') || 'draft'
     const response = await fetch(
-      `${API_BASE_URL}/api/articles?status=${status}&pagination[pageSize]=5&filters[authors][title][$containsi]=${encodeURIComponent(firstAuthor)}`,
+      `${STRAPI_PROXY}/articles?status=${status}&pagination[pageSize]=5&filters[authors][title][$containsi]=${encodeURIComponent(firstAuthor)}`,
       { headers: getPreviewHeaders() }
     )
     if (!response.ok) return
@@ -379,7 +374,7 @@ const loadArticle = async () => {
   }
 }
 
-onMounted(() => { loadArticle() })
+useAsyncData(`article-readonly-${route.params.id}`, () => loadArticle(), { server: false })
 </script>
 
 <style scoped>

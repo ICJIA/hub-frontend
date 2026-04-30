@@ -64,11 +64,18 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const { loadIndex, searchByType, getByType, isLoaded, isLoading, loadError } = useSearch()
+
+useSeoMeta({
+  title: 'Apps | ICJIA Research Hub',
+  description: 'Browse criminal justice apps and tools from the ICJIA Research and Analysis Unit.',
+  ogTitle: 'Apps | ICJIA Research Hub',
+  ogDescription: 'Browse criminal justice apps and tools from the ICJIA Research and Analysis Unit.',
+})
 
 const filterTopic = ref(null)
 const filterAuthor = ref(null)
@@ -126,7 +133,5 @@ const changePage = (page) => {
 
 const goToApp = (slug) => router.push(`/apps/${slug}`)
 
-onMounted(async () => {
-  await loadIndex()
-})
+useAsyncData('search-index', () => loadIndex(), { server: false })
 </script>

@@ -63,11 +63,18 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const { loadIndex, searchByType, getByType, isLoaded, isLoading, loadError } = useSearch()
+
+useSeoMeta({
+  title: 'Datasets | ICJIA Research Hub',
+  description: 'Browse criminal justice datasets from the ICJIA Research and Analysis Unit.',
+  ogTitle: 'Datasets | ICJIA Research Hub',
+  ogDescription: 'Browse criminal justice datasets from the ICJIA Research and Analysis Unit.',
+})
 
 const filterTopic = ref(null)
 const filterYear = ref(null)
@@ -119,7 +126,5 @@ const changePage = (page) => {
 
 const goToDataset = (slug) => router.push(`/datasets/${slug}`)
 
-onMounted(async () => {
-  await loadIndex()
-})
+useAsyncData('search-index', () => loadIndex(), { server: false })
 </script>

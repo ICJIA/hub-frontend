@@ -94,12 +94,19 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
 const { loadIndex, search, isLoaded, isLoading, loadError } = useSearch()
+
+useSeoMeta({
+  title: 'Search | ICJIA Research Hub',
+  description: 'Search criminal justice research, datasets, and apps from the ICJIA Research and Analysis Unit.',
+  ogTitle: 'Search | ICJIA Research Hub',
+  ogDescription: 'Search criminal justice research, datasets, and apps from the ICJIA Research and Analysis Unit.',
+})
 
 const query = ref(route.query.q ? String(route.query.q) : '')
 
@@ -151,7 +158,5 @@ watch(query, (val) => {
   router.replace({ query: trimmed ? { q: trimmed } : {} })
 })
 
-onMounted(async () => {
-  await loadIndex()
-})
+useAsyncData('search-index', () => loadIndex(), { server: false })
 </script>

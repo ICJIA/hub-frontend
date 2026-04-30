@@ -201,16 +201,32 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
 const { fetchDatasetBySlug } = useDatasets()
 
-const dataset = ref(null)
-const loading = ref(true)
-const error = ref(null)
+const { data: dataset, error: fetchError, pending: loading } = await useAsyncData(
+  `dataset-${route.params.slug}`,
+  async () => {
+    const data = await fetchDatasetBySlug(route.params.slug)
+    if (!Array.isArray(data.apps)) data.apps = []
+    if (!Array.isArray(data.articles)) data.articles = []
+    return data
+  },
+  { watch: [() => route.params.slug] }
+)
+
+const error = computed(() => fetchError.value ? `Failed to load dataset: ${fetchError.value.message}` : null)
+
+useSeoMeta({
+  title: () => dataset.value?.title ? `${dataset.value.title} | ICJIA Research Hub` : 'Dataset | ICJIA Research Hub',
+  description: () => dataset.value?.description || 'Criminal justice dataset from the ICJIA Research and Analysis Unit.',
+  ogTitle: () => dataset.value?.title || 'ICJIA Research Hub',
+  ogDescription: () => dataset.value?.description || 'Criminal justice dataset from the ICJIA Research and Analysis Unit.',
+})
 
 const notesList = computed(() => {
   const n = dataset.value?.notes
@@ -241,21 +257,4 @@ const datafileUrl = (file) => {
 const goBack = () => router.push('/datasets')
 const goToApp = (item) => router.push(`/apps/${item.slug}`)
 const goToArticle = (item) => router.push(`/articles/${item.slug}`)
-
-const loadDataset = async () => {
-  loading.value = true
-  error.value = null
-  try {
-    const data = await fetchDatasetBySlug(route.params.slug)
-    if (!Array.isArray(data.apps)) data.apps = []
-    if (!Array.isArray(data.articles)) data.articles = []
-    dataset.value = data
-  } catch (err) {
-    error.value = `Failed to load dataset: ${err.message}`
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(() => loadDataset())
 </script>

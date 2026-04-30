@@ -239,7 +239,7 @@
 <script setup>
 definePageMeta({ middleware: ['preview-access'] })
 
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { generateToken } from '~/utils/previewToken'
 
@@ -415,8 +415,14 @@ const loadDataset = async () => {
 }
 
 const handleBeforeUnload = (e) => { if (hasChanges.value) { e.preventDefault(); e.returnValue = '' } }
-onMounted(() => { loadDataset(); window.addEventListener('beforeunload', handleBeforeUnload) })
-onBeforeUnmount(() => { window.removeEventListener('beforeunload', handleBeforeUnload) })
+
+useAsyncData(`dataset-editor-${route.params.id}`, () => loadDataset(), { server: false })
+
+watchEffect((onCleanup) => {
+  if (!import.meta.client) return
+  window.addEventListener('beforeunload', handleBeforeUnload)
+  onCleanup(() => window.removeEventListener('beforeunload', handleBeforeUnload))
+})
 </script>
 
 <style scoped>

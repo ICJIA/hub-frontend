@@ -8,8 +8,10 @@ export default defineNuxtConfig({
         const { join } = await import('node:path')
         const { buildIndex } = await import('./scripts/lib/build-search-index.mjs')
 
-        const apiBaseUrl = process.env.VITE_API_BASE_URL || ''
-        const bearerToken = process.env.VITE_API_BEARER_TOKEN || ''
+        const apiBaseUrl = process.env.VITE_API_BASE_URL
+        const bearerToken = process.env.API_BEARER_TOKEN
+        if (!apiBaseUrl) throw new Error('VITE_API_BASE_URL is not set — cannot build search index')
+        if (!bearerToken) throw new Error('API_BEARER_TOKEN is not set — cannot build search index')
 
         console.log('\n⚙  Building search index...')
         const { index, counts } = await buildIndex({ apiBaseUrl, bearerToken })
@@ -29,6 +31,14 @@ export default defineNuxtConfig({
   },
 
 
+  runtimeConfig: {
+    apiToken: process.env.API_BEARER_TOKEN || '',
+    strapiUrl: process.env.VITE_API_BASE_URL || 'http://localhost:1338',
+    // Server-only. Set PREVIEW_SECRET in the environment (same value as VITE_PREVIEW_SECRET).
+    previewSecret: process.env.PREVIEW_SECRET || process.env.VITE_PREVIEW_SECRET || 'preview-secret',
+    public: {}
+  },
+
   modules: ['@nuxt/ui', '@nuxt/eslint', '@nuxt/a11y'],
   colorMode: {
     preference: 'system',
@@ -39,6 +49,12 @@ export default defineNuxtConfig({
 
   app: {
     head: {
+      htmlAttrs: { lang: 'en' },
+      meta: [
+        { name: 'robots', content: 'index, follow' },
+        { property: 'og:site_name', content: 'ICJIA Research Hub' },
+        { property: 'og:type', content: 'website' },
+      ],
       script: [
         {
           // crypto.randomUUID() is only available in secure contexts (HTTPS/localhost).
@@ -86,7 +102,13 @@ export default defineNuxtConfig({
         'Content-Security-Policy': 'frame-ancestors *'
       },
     },
-    '/': { prerender: true }
+    '/': { prerender: true },
+    '/preview/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
+    '/appspreview/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
+    '/datasetpreview/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
+    '/previewreadonly/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
+    '/appspreviewreadonly/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
+    '/datasetpreviewreadonly/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
   },
   eslint: {
     config: {

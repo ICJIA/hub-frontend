@@ -64,12 +64,19 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
 const { loadIndex, searchByType, getByType, isLoaded, isLoading, loadError } = useSearch()
+
+useSeoMeta({
+  title: 'Articles | ICJIA Research Hub',
+  description: 'Browse criminal justice research articles from the ICJIA Research and Analysis Unit.',
+  ogTitle: 'Articles | ICJIA Research Hub',
+  ogDescription: 'Browse criminal justice research articles from the ICJIA Research and Analysis Unit.',
+})
 
 // Initialize from URL so topic clicks from Research Hub and shared links work
 const filterTopic = ref(route.query.topic || null)
@@ -151,9 +158,7 @@ const changePage = (page) => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-const goToArticle = (slug) => router.push(`/articles/${slug}`)
+const goToArticle = (slug) => router.push(`/articles/${slug}?from=articles`)
 
-onMounted(async () => {
-  await loadIndex()
-})
+useAsyncData('search-index', () => loadIndex(), { server: false })
 </script>
