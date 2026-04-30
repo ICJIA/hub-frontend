@@ -1,4 +1,4 @@
-import { defineEventHandler, getQuery, getHeader, proxyRequest, createError } from 'h3'
+import { defineEventHandler, getHeader, getRequestURL, proxyRequest, createError } from 'h3'
 
 // Exact set of (method, path pattern) pairs the app uses — everything else is rejected.
 const ALLOWED: [string, RegExp][] = [
@@ -55,9 +55,8 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
   }
 
-  const query = getQuery(event)
-  const qs = new URLSearchParams(query as Record<string, string>).toString()
-  const target = `${config.strapiUrl}/api/${path}${qs ? '?' + qs : ''}`
+  const qs = getRequestURL(event).search
+  const target = `${config.strapiUrl}/api/${path}${qs}`
 
   return proxyRequest(event, target, {
     headers: { Authorization: `Bearer ${config.apiToken}` }
