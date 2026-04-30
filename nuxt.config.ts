@@ -32,6 +32,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     apiToken: process.env.API_BEARER_TOKEN || '',
     strapiUrl: process.env.VITE_API_BASE_URL || 'http://localhost:1338',
+    // Server-only. Set PREVIEW_SECRET in the environment (same value as VITE_PREVIEW_SECRET).
+    previewSecret: process.env.PREVIEW_SECRET || process.env.VITE_PREVIEW_SECRET || 'preview-secret',
     public: {}
   },
 
