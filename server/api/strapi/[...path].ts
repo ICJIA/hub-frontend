@@ -47,12 +47,12 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
   }
 
-  // 2. Write operations require a valid short-lived preview token.
-  if (method === 'PUT' || method === 'POST') {
-    const token = getHeader(event, 'x-preview-token')
-    if (!isValidPreviewToken(token, config.previewSecret)) {
-      throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
-    }
+  // 2. Every request — including reads of draft content — requires a valid
+  //    preview token. The server bearer token must never be exercised on behalf
+  //    of an unauthenticated caller.
+  const token = getHeader(event, 'x-preview-token')
+  if (!isValidPreviewToken(token, config.previewSecret)) {
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
   }
 
   const query = getQuery(event)
