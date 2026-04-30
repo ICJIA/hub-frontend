@@ -8,8 +8,10 @@ export default defineNuxtConfig({
         const { join } = await import('node:path')
         const { buildIndex } = await import('./scripts/lib/build-search-index.mjs')
 
-        const apiBaseUrl = process.env.VITE_API_BASE_URL || ''
-        const bearerToken = process.env.API_BEARER_TOKEN || ''
+        const apiBaseUrl = process.env.VITE_API_BASE_URL
+        const bearerToken = process.env.API_BEARER_TOKEN
+        if (!apiBaseUrl) throw new Error('VITE_API_BASE_URL is not set — cannot build search index')
+        if (!bearerToken) throw new Error('API_BEARER_TOKEN is not set — cannot build search index')
 
         console.log('\n⚙  Building search index...')
         const { index, counts } = await buildIndex({ apiBaseUrl, bearerToken })
