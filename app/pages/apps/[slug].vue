@@ -120,42 +120,41 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
 const { fetchAppBySlug, getAppImageUrl } = useApps()
 
-const app = ref(null)
-const loading = ref(true)
-const error = ref(null)
+const { data: app, error: fetchError, pending: loading } = await useAsyncData(
+  `app-${route.params.slug}`,
+  async () => {
+    const data = await fetchAppBySlug(route.params.slug)
+    if (Array.isArray(data.image)) data.image = data.image[0] || null
+    if (!Array.isArray(data.articles)) data.articles = []
+    if (!Array.isArray(data.datasets)) data.datasets = []
+    if (!Array.isArray(data.contributors)) data.contributors = []
+    return data
+  }
+)
+
+const error = computed(() => fetchError.value ? `Failed to load app: ${fetchError.value.message}` : null)
 
 const imageUrl = computed(() => getAppImageUrl(app.value))
 const contributorsString = computed(() => app.value?.contributors?.map(c => c.title).join(', ') || '')
 const relatedArticles = computed(() => app.value?.articles || [])
 const relatedDatasets = computed(() => app.value?.datasets || [])
 
+useSeoMeta({
+  title: () => app.value?.title ? `${app.value.title} | ICJIA Research Hub` : 'App | ICJIA Research Hub',
+  description: () => app.value?.description || 'Criminal justice app from the ICJIA Research and Analysis Unit.',
+  ogTitle: () => app.value?.title || 'ICJIA Research Hub',
+  ogDescription: () => app.value?.description || 'Criminal justice app from the ICJIA Research and Analysis Unit.',
+  ogImage: () => imageUrl.value || '',
+})
+
 const goBack = () => router.push('/apps')
 const goToArticle = (item) => router.push(`/articles/${item.slug}`)
 const goToDataset = (item) => router.push(`/datasets/${item.slug}`)
-
-const loadApp = async () => {
-  loading.value = true
-  error.value = null
-  try {
-    const data = await fetchAppBySlug(route.params.slug)
-    if (Array.isArray(data.image)) data.image = data.image[0] || null
-    if (!Array.isArray(data.articles)) data.articles = []
-    if (!Array.isArray(data.datasets)) data.datasets = []
-    if (!Array.isArray(data.contributors)) data.contributors = []
-    app.value = data
-  } catch (err) {
-    error.value = `Failed to load app: ${err.message}`
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(() => loadApp())
 </script>

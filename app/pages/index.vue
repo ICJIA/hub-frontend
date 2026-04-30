@@ -257,7 +257,7 @@
                     </li>
                   </ul>
                   <div class="flex justify-end">
-                    <UButton :to="project.url" variant="outline" color="gray" size="sm">Learn More</UButton>
+                    <UButton :to="project.url || currentPage.projectLearnMoreUrl" variant="outline" color="gray" size="sm" class="border border-gray-200 dark:border-gray-600">{{ currentPage.projectLearnMoreLabel }}</UButton>
                   </div>
                 </div>
               </div>
@@ -284,6 +284,14 @@ const MOCK = {
   unitName: 'Research and Analysis Unit',
   description:
     'The Research and Analysis Unit (RAU) at the Illinois Criminal Justice Information Authority (ICJIA) conducts research to improve the quality of justice and increase public safety in Illinois. The unit produces reports, datasets, and research-based resources to inform evidence-based policy and practice across the state.',
+  articlesTitle: 'Latest Articles',
+  articlesButtonLabel: 'View All Articles',
+  articlesButtonUrl: '/articles',
+  topicsSubtitle: 'Browse research by topic area. Each topic links to filtered articles and resources from the Research and Analysis Unit.',
+  resourceViewLabel: 'View',
+  projectLearnMoreLabel: 'Learn More',
+  projectLearnMoreUrl: '#',
+  statisticsTitle: 'Key Statistics',
   statistics: [
     {
       value: '470',
@@ -456,12 +464,60 @@ const router = useRouter()
 const { fetchPageBySlug } = usePages()
 const { loadIndex, getByType } = useSearch()
 
-const page = ref(null)
-const isLoading = ref(true)
+const { data: page, pending: isLoading } = await useAsyncData(
+  'home-page',
+  () => fetchPageBySlug(PAGE_SLUG).catch(() => null)
+)
 
+useSeoMeta({
+  title: 'ICJIA Research Hub',
+  description: 'Illinois Criminal Justice Information Authority — Research and Analysis Unit. Criminal justice research, data, and policy resources for Illinois.',
+  ogTitle: 'ICJIA Research Hub',
+  ogDescription: 'Illinois Criminal Justice Information Authority — Research and Analysis Unit. Criminal justice research, data, and policy resources for Illinois.',
+  ogImage: 'https://v2.hub.icjia-api.cloud/uploads/hero_research_hub_9802a98e5f.png',
+  twitterCard: 'summary_large_image',
+})
+
+onMounted(() => loadIndex())
 
 // Merge Strapi page data over mock defaults — mock fills any missing field
-const currentPage = computed(() => ({ ...MOCK, ...(page.value || {}) }))
+const currentPage = computed(() => {
+  const merged = { ...MOCK, ...(page.value || {}) }
+  if (page.value?.statistics?.length) {
+    merged.statistics = page.value.statistics.map((stat, i) => ({
+      value: stat.count,
+      label: stat.title,
+      description: stat.body,
+      url: stat.url,
+      headerBg: MOCK.statistics[i]?.headerBg ?? 'bg-[#1a3a5c]'
+    }))
+  }
+  if (page.value?.centers?.length) {
+    merged.centers = page.value.centers.map(c => reactive({ ...c, _open: false }))
+  }
+  if (page.value?.hero?.length) {
+    const { title, subtitle } = page.value.hero[0]
+    if (title) merged.title = title
+    if (subtitle) merged.subtitle = subtitle
+  }
+  if (page.value?.infobox?.length) {
+    const { unitName, description } = page.value.infobox[0]
+    if (unitName) merged.unitName = unitName
+    if (description) merged.description = description
+  }
+  if (page.value?.resources?.length) {
+    merged.resources = page.value.resources
+  }
+  const componentFields = [
+    'articlesTitle', 'articlesButtonLabel', 'articlesButtonUrl',
+    'topicsSubtitle', 'resourceViewLabel', 'projectLearnMoreLabel', 'projectLearnMoreUrl', 'statisticsTitle'
+  ]
+  for (const field of componentFields) {
+    const raw = page.value?.[field]
+    if (Array.isArray(raw) && raw[0]?.[field]) merged[field] = raw[0][field]
+  }
+  return merged
+})
 
 // Real articles from search index (top 6); fall back to mock when index empty
 const latestArticles = computed(() => getByType('article').slice(0, 6))
@@ -483,4 +539,17 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
+const projectsCarouselRef = ref(null)
+const carouselAtStart = ref(true)
+
+watch(projectsCarouselRef, (carousel) => {
+  if (!carousel) return
+  const embla = carousel.emblaApi
+  if (!embla) return
+  carouselAtStart.value = !embla.canScrollPrev()
+  embla.on('select', () => {
+    carouselAtStart.value = !embla.canScrollPrev()
+  })
+}, { flush: 'post' })
+
 </script>

@@ -71,6 +71,13 @@ const router = useRouter()
 const route = useRoute()
 const { loadIndex, searchByType, getByType, isLoaded, isLoading, loadError } = useSearch()
 
+useSeoMeta({
+  title: 'Articles | ICJIA Research Hub',
+  description: 'Browse criminal justice research articles from the ICJIA Research and Analysis Unit.',
+  ogTitle: 'Articles | ICJIA Research Hub',
+  ogDescription: 'Browse criminal justice research articles from the ICJIA Research and Analysis Unit.',
+})
+
 // Initialize from URL so topic clicks from Research Hub and shared links work
 const filterTopic = ref(route.query.topic || null)
 const filterAuthor = ref(route.query.author || null)

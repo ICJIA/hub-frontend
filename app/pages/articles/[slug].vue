@@ -168,6 +168,15 @@ const splashImageUrl = computed(() => {
 
 const authorsString = computed(() => article.value?.authors?.map(a => a.title).join(', ') || '')
 
+useSeoMeta({
+  title: () => article.value?.title ? `${article.value.title} | ICJIA Research Hub` : 'Article | ICJIA Research Hub',
+  description: () => article.value?.abstract || 'Criminal justice research from the ICJIA Research and Analysis Unit.',
+  ogTitle: () => article.value?.title || 'ICJIA Research Hub',
+  ogDescription: () => article.value?.abstract || 'Criminal justice research from the ICJIA Research and Analysis Unit.',
+  ogImage: () => splashImageUrl.value || '',
+  twitterCard: 'summary_large_image',
+})
+
 const relatedDatasets = computed(() => {
   const d = article.value?.datasets
   return Array.isArray(d) ? d : []

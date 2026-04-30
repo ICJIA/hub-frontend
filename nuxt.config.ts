@@ -39,6 +39,12 @@ export default defineNuxtConfig({
 
   app: {
     head: {
+      htmlAttrs: { lang: 'en' },
+      meta: [
+        { name: 'robots', content: 'index, follow' },
+        { property: 'og:site_name', content: 'ICJIA Research Hub' },
+        { property: 'og:type', content: 'website' },
+      ],
       script: [
         {
           // crypto.randomUUID() is only available in secure contexts (HTTPS/localhost).
@@ -86,7 +92,13 @@ export default defineNuxtConfig({
         'Content-Security-Policy': 'frame-ancestors *'
       },
     },
-    '/': { prerender: true }
+    '/': { prerender: true },
+    '/preview/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
+    '/appspreview/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
+    '/datasetpreview/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
+    '/previewreadonly/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
+    '/appspreviewreadonly/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
+    '/datasetpreviewreadonly/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
   },
   eslint: {
     config: {

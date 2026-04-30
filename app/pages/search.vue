@@ -101,6 +101,13 @@ const router = useRouter()
 const route = useRoute()
 const { loadIndex, search, isLoaded, isLoading, loadError } = useSearch()
 
+useSeoMeta({
+  title: 'Search | ICJIA Research Hub',
+  description: 'Search criminal justice research, datasets, and apps from the ICJIA Research and Analysis Unit.',
+  ogTitle: 'Search | ICJIA Research Hub',
+  ogDescription: 'Search criminal justice research, datasets, and apps from the ICJIA Research and Analysis Unit.',
+})
+
 const query = ref(route.query.q ? String(route.query.q) : '')
 
 // Keep the input in sync when the user navigates back/forward or edits the URL

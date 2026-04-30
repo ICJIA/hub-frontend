@@ -69,6 +69,13 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const { loadIndex, searchByType, getByType, isLoaded, isLoading, loadError } = useSearch()
 
+useSeoMeta({
+  title: 'Datasets | ICJIA Research Hub',
+  description: 'Browse criminal justice datasets from the ICJIA Research and Analysis Unit.',
+  ogTitle: 'Datasets | ICJIA Research Hub',
+  ogDescription: 'Browse criminal justice datasets from the ICJIA Research and Analysis Unit.',
+})
+
 const filterTopic = ref(null)
 const filterYear = ref(null)
 const filterSearch = ref('')
