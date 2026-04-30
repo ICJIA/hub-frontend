@@ -23,6 +23,15 @@
 
     <template v-else>
 
+      <UAlert
+        v-if="pageError"
+        color="warning"
+        icon="i-lucide-triangle-alert"
+        title="Could not load page content from Strapi"
+        :description="pageError.message"
+        class="mx-4 mt-4"
+      />
+
       <!-- ══════════════════════════════════════════════════
            2. RAU INFO BOX — white section, blue card
       ═══════════════════════════════════════════════════ -->
@@ -485,9 +494,9 @@ const router = useRouter()
 const { fetchPageBySlug } = usePages()
 const { loadIndex, getByType } = useSearch()
 
-const { data: page, pending: isLoading } = await useAsyncData(
+const { data: page, pending: isLoading, error: pageError } = await useAsyncData(
   'home-page',
-  () => fetchPageBySlug(PAGE_SLUG).catch(() => null)
+  () => fetchPageBySlug(PAGE_SLUG)
 )
 
 useSeoMeta({
