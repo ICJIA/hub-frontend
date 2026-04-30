@@ -188,7 +188,7 @@
 <script setup>
 definePageMeta({ middleware: ['preview-access'] })
 
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { generateToken } from '~/utils/previewToken'
 
@@ -362,8 +362,17 @@ const loadApp = async () => {
 const handleBeforeUnload = (e) => { if (hasChanges.value) { e.preventDefault(); e.returnValue = '' } }
 const handleDocumentClick = () => { articleResults.value = []; datasetResults.value = [] }
 
-onMounted(() => { loadApp(); window.addEventListener('beforeunload', handleBeforeUnload); document.addEventListener('click', handleDocumentClick) })
-onBeforeUnmount(() => { window.removeEventListener('beforeunload', handleBeforeUnload); document.removeEventListener('click', handleDocumentClick) })
+useAsyncData(`app-editor-${route.params.id}`, () => loadApp(), { server: false })
+
+watchEffect((onCleanup) => {
+  if (!import.meta.client) return
+  window.addEventListener('beforeunload', handleBeforeUnload)
+  document.addEventListener('click', handleDocumentClick)
+  onCleanup(() => {
+    window.removeEventListener('beforeunload', handleBeforeUnload)
+    document.removeEventListener('click', handleDocumentClick)
+  })
+})
 </script>
 
 <style scoped>

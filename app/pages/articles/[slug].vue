@@ -6,7 +6,7 @@
 
     <div v-else-if="error" class="text-center py-16 bg-gray-100 dark:bg-gray-900 flex-1">
       <UAlert color="error" :description="error" class="mb-4" />
-      <UButton variant="outline" icon="i-heroicons-arrow-left" @click="goBack">Back to Articles</UButton>
+      <UButton variant="outline" icon="i-heroicons-arrow-left" @click="goBack">{{ backLabel }}</UButton>
     </div>
 
     <template v-else-if="article">
@@ -14,7 +14,7 @@
       <div class="bg-white dark:bg-gray-900">
         <div class="max-w-[1300px] mx-auto pt-4 px-4 pb-3 sm:pt-6 sm:px-6 sm:pb-4">
           <UButton variant="outline" icon="i-heroicons-arrow-left" @click="goBack" class="mb-4">
-            Back to Articles
+            {{ backLabel }}
           </UButton>
 
           <!-- Title Row -->
@@ -257,11 +257,13 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
-const goBack = () => router.push('/')
+const backLabel = computed(() => route.query.from === 'articles' ? 'Back to Articles' : 'Back to Home')
+const goBack = () => route.query.from === 'articles' ? router.push('/articles') : router.push('/')
 
 const navigateToArticle = (a) => {
   const slug = a.slug
-  router.push(`/articles/${slug}`)
+  const from = route.query.from ? `?from=${route.query.from}` : ''
+  router.push(`/articles/${slug}${from}`)
 }
 
 const loadNavigation = async () => {

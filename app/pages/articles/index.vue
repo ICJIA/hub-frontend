@@ -64,7 +64,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
@@ -158,9 +158,7 @@ const changePage = (page) => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-const goToArticle = (slug) => router.push(`/articles/${slug}`)
+const goToArticle = (slug) => router.push(`/articles/${slug}?from=articles`)
 
-onMounted(async () => {
-  await loadIndex()
-})
+useAsyncData('search-index', () => loadIndex(), { server: false })
 </script>

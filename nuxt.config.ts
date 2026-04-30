@@ -9,7 +9,7 @@ export default defineNuxtConfig({
         const { buildIndex } = await import('./scripts/lib/build-search-index.mjs')
 
         const apiBaseUrl = process.env.VITE_API_BASE_URL || ''
-        const bearerToken = process.env.VITE_API_BEARER_TOKEN || ''
+        const bearerToken = process.env.API_BEARER_TOKEN || ''
 
         console.log('\n⚙  Building search index...')
         const { index, counts } = await buildIndex({ apiBaseUrl, bearerToken })
@@ -28,6 +28,12 @@ export default defineNuxtConfig({
     }
   },
 
+
+  runtimeConfig: {
+    apiToken: process.env.API_BEARER_TOKEN || '',
+    strapiUrl: process.env.VITE_API_BASE_URL || 'http://localhost:1338',
+    public: {}
+  },
 
   modules: ['@nuxt/ui', '@nuxt/eslint', '@nuxt/a11y'],
   colorMode: {

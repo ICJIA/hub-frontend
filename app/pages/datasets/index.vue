@@ -63,7 +63,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -126,7 +126,5 @@ const changePage = (page) => {
 
 const goToDataset = (slug) => router.push(`/datasets/${slug}`)
 
-onMounted(async () => {
-  await loadIndex()
-})
+useAsyncData('search-index', () => loadIndex(), { server: false })
 </script>

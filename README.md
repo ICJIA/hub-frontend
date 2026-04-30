@@ -18,11 +18,11 @@ Create a `.env` file at the project root:
 
 ```
 VITE_API_BASE_URL=http://localhost:1338
-VITE_API_BEARER_TOKEN=<your-strapi-bearer-token>
+API_BEARER_TOKEN=<your-strapi-bearer-token>
 ```
 
-- `VITE_API_BASE_URL` — URL of your Strapi backend
-- `VITE_API_BEARER_TOKEN` — API token for authenticated operations (editing, publishing, media upload). Public browsing works without it.
+- `VITE_API_BASE_URL` — URL of your Strapi backend (also used by the server-side proxy and search index build)
+- `API_BEARER_TOKEN` — Server-only API token injected by the Nitro proxy. Never exposed to the browser. Required for editing, publishing, and media upload.
 
 ## Running the Development Server
 
@@ -81,6 +81,8 @@ Each content type has its own preview and publish workflow:
 
 These routes are typically opened from within the Strapi admin panel. When opened standalone (not in an iframe), access requires a signed token passed as `?token=` in the query string.
 
+All mutating API calls (save, publish, media upload) are routed through a server-side Nitro proxy (`/api/strapi/[...path]`) that injects the `API_BEARER_TOKEN`. The bearer token is never sent to the browser.
+
 ### Search index
 
 Search is powered by [Fuse.js](https://fusejs.io/) and a pre-built JSON index (`public/search-index.json`) fetched at runtime. The index contains all published articles, apps, and datasets from the Strapi API with Markdown stripped from article body text.
@@ -91,7 +93,7 @@ Search is powered by [Fuse.js](https://fusejs.io/) and a pre-built JSON index (`
 pnpm generate:search
 ```
 
-**Production / CI** — the index is rebuilt automatically by a Nitro `compiled` hook in `nuxt.config.ts` during `pnpm build`. No manual step is needed.
+**Production / CI** — the index is rebuilt automatically by a Nitro `compiled` hook in `nuxt.config.ts` during `pnpm build`. The hook reads `API_BEARER_TOKEN` (not `VITE_API_BEARER_TOKEN`) so set that variable in your CI environment. No manual step is needed.
 
 The `useSearch()` composable ([app/composables/useSearch.ts](app/composables/useSearch.ts)) exposes the full search API:
 
@@ -116,11 +118,15 @@ app/
 │   ├── ContentFilterBar.vue         # Filter dropdowns + inline search + view toggle
 │   └── RichTextEditor.vue           # WYSIWYG editor (Quill-based)
 ├── composables/
-│   └── useSearch.ts                 # Fuse.js search composable (session-scoped state)
+│   ├── useSearch.ts                 # Fuse.js search composable (session-scoped state)
+│   ├── useArticles.js               # Article CRUD via Strapi proxy
+│   ├── useApps.js                   # App CRUD via Strapi proxy
+│   ├── useDatasets.js               # Dataset CRUD via Strapi proxy
+│   └── useMedia.js                  # Media upload/listing via Strapi proxy
 ├── middleware/
 │   └── preview-access.ts            # Token/iframe auth for preview routes
 ├── pages/
-│   ├── index.vue                    # Articles listing
+│   ├── index.vue                    # Homepage (articles, stats, topics, projects)
 │   ├── search.vue                   # Global cross-type search page
 │   ├── article/
 │   │   └── [id].vue                 # Article detail view
@@ -143,10 +149,15 @@ app/
 │   └── datasetpreviewreadonly/
 │       └── [id].vue                 # Dataset publish view
 └── utils/
+    ├── apiConfig.js                 # API base URL + STRAPI_PROXY constant
     └── previewToken.js              # Signed token utilities
+server/
+└── api/
+    └── strapi/
+        └── [...path].ts             # Nitro catch-all proxy → Strapi (injects API_BEARER_TOKEN)
 scripts/
 └── generate-search-index.mjs        # CLI script to build public/search-index.json
-nuxt.config.ts                       # Nitro compiled hook auto-builds search index on deploy
+nuxt.config.ts                       # runtimeConfig + Nitro compiled hook (auto-builds search index)
 ```
 
 ## Troubleshooting
@@ -175,3 +186,7 @@ devServer: {
 **Cannot connect to Strapi**
 
 Make sure your Strapi backend is running and that `VITE_API_BASE_URL` in `.env` points to the correct address.
+
+**Editing/publishing returns 401 or 403**
+
+The bearer token is now injected by the server-side proxy and must be set as `API_BEARER_TOKEN` (no `VITE_` prefix). Ensure this variable is present in `.env` and that the Nuxt server has been restarted after adding it. The old `VITE_API_BEARER_TOKEN` variable is no longer read.

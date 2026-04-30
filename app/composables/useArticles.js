@@ -47,7 +47,7 @@ export const useArticles = () => {
     const params = new URLSearchParams(window.location.search)
     const status = params.get('status') || 'draft'
     const queryParams = new URLSearchParams({ status, populate: '*' })
-    const response = await fetch(`${API_BASE_URL}/api/articles/${id}?${queryParams}`, { headers: getHeadersWithAuth() })
+    const response = await fetch(`${STRAPI_PROXY}/articles/${id}?${queryParams}`, { headers: getHeadersWithAuth() })
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
     const data = await response.json()
     return data.data
@@ -63,7 +63,7 @@ export const useArticles = () => {
     const queryParams = new URLSearchParams()
     if (status) queryParams.append('status', status)
     queryParams.append('populate', '*')
-    const response = await fetch(`${API_BASE_URL}/api/articles/${id}?${queryParams}`, {
+    const response = await fetch(`${STRAPI_PROXY}/articles/${id}?${queryParams}`, {
       method: 'PUT',
       headers: getHeadersWithAuth(),
       body: JSON.stringify({ data: dataToSend })
@@ -77,7 +77,7 @@ export const useArticles = () => {
   }
 
   const publishArticle = async (id) => {
-    const response = await fetch(`${API_BASE_URL}/api/articles/${id}?status=published&populate=*`, {
+    const response = await fetch(`${STRAPI_PROXY}/articles/${id}?status=published&populate=*`, {
       method: 'PUT',
       headers: getHeadersWithAuth(),
       body: JSON.stringify({ data: {} })
@@ -100,7 +100,7 @@ export const useArticles = () => {
       'pagination[pageSize]': 50
     })
     if (search) params.append('filters[title][$containsi]', search)
-    const response = await fetch(`${API_BASE_URL}/api/articles?${params}`, { headers: getHeadersWithAuth() })
+    const response = await fetch(`${STRAPI_PROXY}/articles?${params}`, { headers: getHeadersWithAuth() })
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
     const data = await response.json()
     return data.data || []

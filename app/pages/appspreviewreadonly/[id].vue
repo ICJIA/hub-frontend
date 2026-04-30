@@ -193,7 +193,7 @@
 <script setup>
 definePageMeta({ middleware: ['preview-access'] })
 
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
@@ -259,7 +259,7 @@ const loadApp = async () => {
   finally { loading.value = false }
 }
 
-onMounted(() => { loadApp() })
+useAsyncData(`app-readonly-${route.params.id}`, () => loadApp(), { server: false })
 </script>
 
 <style scoped>

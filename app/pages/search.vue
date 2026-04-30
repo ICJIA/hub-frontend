@@ -94,7 +94,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
@@ -158,7 +158,5 @@ watch(query, (val) => {
   router.replace({ query: trimmed ? { q: trimmed } : {} })
 })
 
-onMounted(async () => {
-  await loadIndex()
-})
+useAsyncData('search-index', () => loadIndex(), { server: false })
 </script>
