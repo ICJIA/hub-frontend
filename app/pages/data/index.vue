@@ -1,17 +1,36 @@
 <template>
   <div class="max-w-[1400px] mx-auto px-4 py-6">
-    <div class="text-center mb-6">
-      <h1 class="text-2xl font-bold">Datasets</h1>
+    <div class="flex items-center gap-2 mb-4">
+      <button
+        :class="activeTab === 'datasets'
+          ? 'bg-primary-600 text-white'
+          : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'"
+        class="px-5 py-2 rounded-full text-sm font-semibold transition-colors"
+        @click="setTab('datasets')"
+      >
+        Datasets
+      </button>
+      <button
+        :class="activeTab === 'apps'
+          ? 'bg-primary-600 text-white'
+          : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'"
+        class="px-5 py-2 rounded-full text-sm font-semibold transition-colors"
+        @click="setTab('apps')"
+      >
+        Apps
+      </button>
     </div>
 
     <ContentFilterBar
       v-model:topic="filterTopic"
+      v-model:author="filterAuthor"
       v-model:year="filterYear"
       v-model:search="filterSearch"
       v-model:view-mode="viewMode"
       :available-topics="availableTopics"
+      :available-authors="availableAuthors"
       :available-years="availableYears"
-      :show-author-filter="false"
+      :show-author-filter="activeTab === 'apps'"
     />
 
     <UAlert
@@ -24,7 +43,7 @@
 
     <div v-else-if="isLoading" class="flex flex-col items-center py-16">
       <UIcon name="i-heroicons-arrow-path" class="w-10 h-10 animate-spin text-primary-500" />
-      <p class="mt-4 text-gray-500">Loading datasets...</p>
+      <p class="mt-4 text-gray-500">Loading {{ activeTab }}...</p>
     </div>
 
     <template v-else>
@@ -39,15 +58,16 @@
             :date="item.date"
             :description="item.summary"
             :categories="item.categories"
-            :show-placeholder="false"
+            :image-url="activeTab === 'apps' ? (item.imageUrl || null) : undefined"
+            :show-placeholder="activeTab === 'apps'"
             :view-mode="viewMode"
-            @click="goToDataset(item.slug)"
+            @click="goToItem(item.slug)"
           />
         </div>
       </div>
 
       <div v-else class="text-center py-16 text-gray-500">
-        <p>No datasets found.</p>
+        <p>No {{ activeTab }} found.</p>
       </div>
 
       <div v-if="totalFiltered > pageSize" class="flex justify-center mt-6">
@@ -67,26 +87,47 @@ import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const { loadIndex, searchByType, getByType, isLoaded, isLoading, loadError } = useSearch()
+const { loadIndex, searchByType, getByType, isLoading, loadError } = useSearch()
 
 useSeoMeta({
-  title: 'Datasets | ICJIA Research Hub',
-  description: 'Browse criminal justice datasets from the ICJIA Research and Analysis Unit.',
-  ogTitle: 'Datasets | ICJIA Research Hub',
-  ogDescription: 'Browse criminal justice datasets from the ICJIA Research and Analysis Unit.',
+  title: 'Data | ICJIA Research Hub',
+  description: 'Browse criminal justice datasets and apps from the ICJIA Research and Analysis Unit.',
+  ogTitle: 'Data | ICJIA Research Hub',
+  ogDescription: 'Browse criminal justice datasets and apps from the ICJIA Research and Analysis Unit.',
 })
 
+const activeTab = ref('datasets')
+
 const filterTopic = ref(null)
+const filterAuthor = ref(null)
 const filterYear = ref(null)
 const filterSearch = ref('')
 const viewMode = ref('grid')
 const currentPage = ref(1)
 const pageSize = 12
 
-const allItems = computed(() => getByType('dataset'))
+const setTab = (tab) => {
+  if (activeTab.value === tab) return
+  activeTab.value = tab
+  filterTopic.value = null
+  filterAuthor.value = null
+  filterYear.value = null
+  filterSearch.value = ''
+  currentPage.value = 1
+}
+
+const contentType = computed(() => activeTab.value === 'datasets' ? 'dataset' : 'app')
+
+const allItems = computed(() => getByType(contentType.value))
 
 const availableTopics = computed(() =>
   [...new Set(allItems.value.flatMap(i => i.categories))].filter(Boolean).sort()
+)
+
+const availableAuthors = computed(() =>
+  activeTab.value === 'apps'
+    ? [...new Set(allItems.value.flatMap(i => i.authors))].filter(Boolean).sort()
+    : []
 )
 
 const availableYears = computed(() => {
@@ -98,11 +139,12 @@ const availableYears = computed(() => {
   return [...years].sort((a, b) => Number(b) - Number(a))
 })
 
-const searchResults = computed(() => searchByType(filterSearch.value, 'dataset'))
+const searchResults = computed(() => searchByType(filterSearch.value, contentType.value))
 
 const filteredItems = computed(() =>
   searchResults.value.filter(item => {
     if (filterTopic.value && !item.categories.includes(filterTopic.value)) return false
+    if (filterAuthor.value && !item.authors?.includes(filterAuthor.value)) return false
     if (filterYear.value && String(new Date(item.date).getFullYear()) !== filterYear.value) return false
     return true
   })
@@ -115,7 +157,7 @@ const paginatedItems = computed(() => {
   return filteredItems.value.slice(start, start + pageSize)
 })
 
-watch([filterSearch, filterTopic, filterYear], () => {
+watch([filterSearch, filterTopic, filterAuthor, filterYear], () => {
   currentPage.value = 1
 })
 
@@ -124,7 +166,10 @@ const changePage = (page) => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-const goToDataset = (slug) => router.push(`/datasets/${slug}`)
+const goToItem = (slug) => {
+  const base = activeTab.value === 'datasets' ? '/datasets' : '/apps'
+  router.push(`${base}/${slug}`)
+}
 
 useAsyncData('search-index', () => loadIndex(), { server: false })
 </script>
