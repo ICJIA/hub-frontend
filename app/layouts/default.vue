@@ -4,7 +4,7 @@
       <div class="max-w-[1400px] mx-auto px-4 py-2 flex items-center justify-between">
         <nav class="flex gap-1">
           <UButton variant="ghost" to="/" size="sm">Research Hub</UButton>
-          <UButton variant="ghost" to="/articles" size="sm">Articles</UButton>
+          <UButton variant="ghost" to="/articles" size="sm">Other Articles</UButton>
           <UButton variant="ghost" to="/data" size="sm">Data</UButton>
         </nav>
         <UColorModeButton />
