@@ -301,6 +301,8 @@
 </template>
 
 <script setup>
+defineRouteRules({ prerender: true })
+
 import { ref, reactive, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -512,41 +514,51 @@ useAsyncData('search-index', () => loadIndex(), { server: false })
 
 // Merge Strapi page data over mock defaults — mock fills any missing field
 const currentPage = computed(() => {
-  const merged = { ...MOCK, ...(page.value || {}) }
-  if (page.value?.statistics?.length) {
-    merged.statistics = page.value.statistics.map((stat, i) => ({
-      value: stat.count,
-      label: stat.title,
-      description: stat.body,
-      url: stat.url,
-      headerBg: MOCK.statistics[i]?.headerBg ?? 'bg-[#1a3a5c]'
-    }))
+  try {
+    const merged = { ...MOCK, ...(page.value || {}) }
+    // The blind spread can overwrite MOCK arrays with raw Strapi data that may
+    // contain null/undefined items. Sanitize all known array fields up front.
+    for (const key of ['projects', 'resources', 'topics', 'centers', 'statistics']) {
+      if (Array.isArray(merged[key])) merged[key] = merged[key].filter(Boolean)
+    }
+    if (page.value?.statistics?.length) {
+      merged.statistics = page.value.statistics.filter(Boolean).map((stat, i) => ({
+        value: stat.count,
+        label: stat.title,
+        description: stat.body,
+        url: stat.url,
+        headerBg: MOCK.statistics[i]?.headerBg ?? 'bg-[#1a3a5c]'
+      }))
+    }
+    if (page.value?.centers?.length) {
+      merged.centers = page.value.centers.filter(Boolean).map(c => reactive({ ...c, _open: false }))
+    }
+    if (page.value?.hero?.length) {
+      const hero = page.value.hero[0]
+      if (hero?.title) merged.title = hero.title
+      if (hero?.subtitle) merged.subtitle = hero.subtitle
+    }
+    if (page.value?.infobox?.length) {
+      const infobox = page.value.infobox[0]
+      if (infobox?.unitName) merged.unitName = infobox.unitName
+      if (infobox?.description) merged.description = infobox.description
+    }
+    if (page.value?.resources?.length) {
+      merged.resources = page.value.resources.filter(Boolean)
+    }
+    const componentFields = [
+      'articlesTitle', 'articlesButtonLabel', 'articlesButtonUrl',
+      'topicsSubtitle', 'resourceViewLabel', 'projectLearnMoreLabel', 'projectLearnMoreUrl', 'statisticsTitle'
+    ]
+    for (const field of componentFields) {
+      const raw = page.value?.[field]
+      if (Array.isArray(raw) && raw[0]?.[field]) merged[field] = raw[0][field]
+    }
+    return merged
+  } catch (e) {
+    console.error('[currentPage]', e)
+    return MOCK
   }
-  if (page.value?.centers?.length) {
-    merged.centers = page.value.centers.map(c => reactive({ ...c, _open: false }))
-  }
-  if (page.value?.hero?.length) {
-    const { title, subtitle } = page.value.hero[0]
-    if (title) merged.title = title
-    if (subtitle) merged.subtitle = subtitle
-  }
-  if (page.value?.infobox?.length) {
-    const { unitName, description } = page.value.infobox[0]
-    if (unitName) merged.unitName = unitName
-    if (description) merged.description = description
-  }
-  if (page.value?.resources?.length) {
-    merged.resources = page.value.resources
-  }
-  const componentFields = [
-    'articlesTitle', 'articlesButtonLabel', 'articlesButtonUrl',
-    'topicsSubtitle', 'resourceViewLabel', 'projectLearnMoreLabel', 'projectLearnMoreUrl', 'statisticsTitle'
-  ]
-  for (const field of componentFields) {
-    const raw = page.value?.[field]
-    if (Array.isArray(raw) && raw[0]?.[field]) merged[field] = raw[0][field]
-  }
-  return merged
 })
 
 // Real articles from search index (top 6); fall back to mock when index empty

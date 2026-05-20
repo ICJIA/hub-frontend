@@ -94,6 +94,9 @@ export default defineNuxtConfig({
       dedupe: ['vue', '@vue/runtime-core', '@vue/runtime-dom']
     }
   },
+  experimental: {
+    inlineRouteRules: true
+  },
   compatibilityDate: '2025-01-15',
 
   routeRules: {
