@@ -64,6 +64,8 @@
 </template>
 
 <script setup>
+defineRouteRules({ prerender: true })
+
 import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 

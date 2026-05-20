@@ -83,6 +83,8 @@
 </template>
 
 <script setup>
+defineRouteRules({ prerender: true })
+
 import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 

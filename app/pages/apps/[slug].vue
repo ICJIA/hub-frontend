@@ -120,6 +120,8 @@
 </template>
 
 <script setup>
+defineRouteRules({ prerender: true })
+
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
