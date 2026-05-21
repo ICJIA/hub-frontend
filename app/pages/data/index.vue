@@ -61,6 +61,7 @@
             :image-url="activeTab === 'apps' ? (item.imageUrl || null) : undefined"
             :show-placeholder="activeTab === 'apps'"
             :view-mode="viewMode"
+            :query="filterSearch || undefined"
             @click="goToItem(item.slug)"
           />
         </div>

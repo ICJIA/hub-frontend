@@ -68,13 +68,13 @@
               @click="navigate(item)"
             >
               <div class="text-base font-semibold mb-1 leading-snug text-gray-900 dark:text-gray-100">
-                {{ item.title }}
+                <HighlightText :text="item.title" :query="query" />
               </div>
               <div v-if="item.date" class="text-xs text-gray-500 dark:text-gray-400 mb-2">
                 {{ formatDate(item.date) }}
               </div>
               <p v-if="item.summary" class="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                {{ truncate(item.summary, 150) }}
+                <HighlightText :text="truncate(item.summary, 150)" :query="query" />
               </p>
               <div v-if="item.categories?.length" class="flex flex-wrap gap-1">
                 <UBadge

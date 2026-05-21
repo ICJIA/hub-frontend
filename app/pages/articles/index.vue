@@ -42,6 +42,7 @@
             :categories="item.categories"
             :image-url="item.imageUrl || null"
             :view-mode="viewMode"
+            :query="filterSearch || undefined"
             @click="goToArticle(item.slug)"
           />
         </div>

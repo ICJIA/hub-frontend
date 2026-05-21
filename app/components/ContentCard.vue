@@ -33,9 +33,13 @@
       <span class="text-white text-sm">No Image</span>
     </div>
     <div class="p-4">
-      <div class="text-lg font-semibold mb-1 leading-snug text-gray-900 dark:text-gray-100">{{ title }}</div>
+      <div class="text-lg font-semibold mb-1 leading-snug text-gray-900 dark:text-gray-100">
+        <HighlightText :text="title" :query="query" />
+      </div>
       <div v-if="date" class="text-xs text-gray-500 dark:text-gray-400 mb-2">{{ formatDate(date) }}</div>
-      <p v-if="description" class="text-sm text-gray-500 dark:text-gray-400 mb-3">{{ truncate(description, 150) }}</p>
+      <p v-if="description" class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+        <HighlightText :text="truncate(description, 150)" :query="query" />
+      </p>
       <div v-if="categories?.length" class="flex flex-wrap gap-1">
         <UBadge
           v-for="category in categories"
@@ -59,7 +63,8 @@ const props = defineProps({
   categories: { type: Array, default: () => [] },
   imageUrl: { type: String, default: null },
   viewMode: { type: String, default: 'grid' },
-  showPlaceholder: { type: Boolean, default: true }
+  showPlaceholder: { type: Boolean, default: true },
+  query: { type: String, default: undefined }
 })
 
 defineEmits(['click'])
