@@ -193,49 +193,24 @@
 <script setup>
 definePageMeta({ middleware: ['preview-access'] })
 
-import { ref, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-
+const { loading, error, viewMode, publishing, createPublishHandler } = usePreviewReadonly()
+const { formatDate, resolveImageUrl } = usePreviewUtils()
 const route = useRoute()
 const router = useRouter()
-const toast = useToast()
 const { fetchAppPreviewById, publishApp } = useApps()
 
 const app = ref(null)
-const loading = ref(true)
-const error = ref(null)
-const viewMode = ref('desktop')
-const publishing = ref(false)
 
-const handlePublish = async () => {
-  publishing.value = true
-  try {
-    await publishApp(route.params.id)
-    toast.add({ title: 'App published successfully!', color: 'green' })
-  } catch (err) {
-    toast.add({ title: `Failed to publish: ${err.message}`, color: 'red' })
-  } finally { publishing.value = false }
-}
+const handlePublish = createPublishHandler(publishApp, 'App published successfully!')
 
 const imageUrl = computed(() => {
   const img = Array.isArray(app.value?.image) ? app.value.image[0] : app.value?.image
-  if (!img?.url) return null
-  return img.url.startsWith('/') ? `${API_BASE_URL}${img.url}` : img.url
+  return resolveImageUrl(img)
 })
 
 const contributorsString = computed(() => app.value?.contributors?.map(c => c.title).join(', ') || '')
 const relatedArticles = computed(() => app.value?.articles || [])
 const relatedDatasets = computed(() => app.value?.datasets || [])
-
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-}
-
-const resolveImageUrl = (img) => {
-  if (!img?.url) return ''
-  return img.url.startsWith('/') ? `${API_BASE_URL}${img.url}` : img.url
-}
 
 const viewPublishedApp = () => {
   const id = app.value?.documentId || app.value?.id

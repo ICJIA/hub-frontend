@@ -188,11 +188,8 @@
 <script setup>
 definePageMeta({ middleware: ['preview-access'] })
 
-import { ref, computed, watchEffect } from 'vue'
-import { useRoute } from 'vue-router'
-import { generateToken } from '~/utils/previewToken'
-
-const route = useRoute()
+const { route, loading, saving, error, hasChanges, isModified, markChanged, openPreview, makeFormattedDate, checkDraftStatus } = usePreviewEditor('/appspreviewreadonly')
+const { resolveImageUrl } = usePreviewUtils()
 const toast = useToast()
 const { fetchAppPreviewById, updateApp } = useApps()
 const { uploadMedia } = useMedia()
@@ -201,37 +198,24 @@ const { fetchDatasetsBasic } = useDatasets()
 
 const originalApp = ref(null)
 const editableApp = ref(null)
-const loading = ref(true)
-const saving = ref(false)
 const uploadingImage = ref(false)
-const error = ref(null)
-const hasChanges = ref(false)
-const isModified = ref(false)
 const imageInput = ref(null)
 
-const articleSearch = ref('')
-const articleResults = ref([])
-const searchingArticles = ref(false)
-const datasetSearch = ref('')
-const datasetResults = ref([])
-const searchingDatasets = ref(false)
+const formattedDate = makeFormattedDate(editableApp, 'date')
 
-const markChanged = () => { hasChanges.value = true }
+const articleRel = useRelatedSearch(fetchArticlesBasic)
+const { query: articleSearch, searching: searchingArticles, results: articleResults } = articleRel
+const searchArticles = () => articleRel.search()
+const filteredArticleResults = computed(() => articleRel.filteredFor(editableApp.value?.articles || []))
+const addArticle = (article) => articleRel.addTo(editableApp.value.articles, article, markChanged)
+const removeArticle = (article) => articleRel.removeFrom(editableApp.value.articles, article, markChanged)
 
-const formattedDate = computed({
-  get() {
-    if (!editableApp.value?.date) return ''
-    return new Date(editableApp.value.date).toISOString().split('T')[0]
-  },
-  set(value) { editableApp.value.date = value; markChanged() }
-})
-
-const openPreview = () => {
-  const id = route.params.id
-  const params = new URLSearchParams(window.location.search)
-  params.set('token', generateToken())
-  window.open(`/appspreviewreadonly/${id}?${params.toString()}`, '_blank')
-}
+const datasetRel = useRelatedSearch(fetchDatasetsBasic)
+const { query: datasetSearch, searching: searchingDatasets, results: datasetResults } = datasetRel
+const searchDatasets = () => datasetRel.search()
+const filteredDatasetResults = computed(() => datasetRel.filteredFor(editableApp.value?.datasets || []))
+const addDataset = (dataset) => datasetRel.addTo(editableApp.value.datasets, dataset, markChanged)
+const removeDataset = (dataset) => datasetRel.removeFrom(editableApp.value.datasets, dataset, markChanged)
 
 const addCategory = () => { if (!editableApp.value.categories) editableApp.value.categories = []; editableApp.value.categories.push(''); markChanged() }
 const removeCategory = (index) => { editableApp.value.categories.splice(index, 1); markChanged() }
@@ -240,11 +224,7 @@ const removeTag = (index) => { editableApp.value.tags.splice(index, 1); markChan
 const addContributor = () => { if (!editableApp.value.contributors) editableApp.value.contributors = []; editableApp.value.contributors.push({ title: '' }); markChanged() }
 const removeContributor = (index) => { editableApp.value.contributors.splice(index, 1); markChanged() }
 
-const imageUrl = (img) => {
-  if (!img?.url) return ''
-  return img.url.startsWith('/') ? `${API_BASE_URL}${img.url}` : img.url
-}
-
+const imageUrl = (img) => resolveImageUrl(img) || ''
 const triggerImageUpload = () => { imageInput.value.click() }
 
 const handleImageUpload = async (event) => {
@@ -264,56 +244,9 @@ const handleImageUpload = async (event) => {
 
 const removeImage = () => { editableApp.value.image = null; markChanged() }
 
-const filteredArticleResults = computed(() => {
-  const selectedIds = new Set((editableApp.value?.articles || []).map(a => a.documentId || a.id))
-  return articleResults.value.filter(a => !selectedIds.has(a.documentId || a.id))
-})
-
-const searchArticles = async () => {
-  searchingArticles.value = true
-  try { articleResults.value = await fetchArticlesBasic(articleSearch.value) }
-  catch (err) { toast.add({ title: `Failed to search articles: ${err.message}`, color: 'red' }) }
-  finally { searchingArticles.value = false }
-}
-
-const addArticle = (article) => {
-  if (!editableApp.value.articles) editableApp.value.articles = []
-  const alreadyAdded = editableApp.value.articles.some(a => (a.documentId || a.id) === (article.documentId || article.id))
-  if (!alreadyAdded) { editableApp.value.articles.push(article); markChanged() }
-}
-
-const removeArticle = (article) => {
-  editableApp.value.articles = editableApp.value.articles.filter(a => (a.documentId || a.id) !== (article.documentId || article.id))
-  markChanged()
-}
-
-const filteredDatasetResults = computed(() => {
-  const selectedIds = new Set((editableApp.value?.datasets || []).map(d => d.documentId || d.id))
-  return datasetResults.value.filter(d => !selectedIds.has(d.documentId || d.id))
-})
-
-const searchDatasets = async () => {
-  searchingDatasets.value = true
-  try { datasetResults.value = await fetchDatasetsBasic(datasetSearch.value) }
-  catch (err) { toast.add({ title: `Failed to search datasets: ${err.message}`, color: 'red' }) }
-  finally { searchingDatasets.value = false }
-}
-
-const addDataset = (dataset) => {
-  if (!editableApp.value.datasets) editableApp.value.datasets = []
-  const alreadyAdded = editableApp.value.datasets.some(d => (d.documentId || d.id) === (dataset.documentId || dataset.id))
-  if (!alreadyAdded) { editableApp.value.datasets.push(dataset); markChanged() }
-}
-
-const removeDataset = (dataset) => {
-  editableApp.value.datasets = editableApp.value.datasets.filter(d => (d.documentId || d.id) !== (dataset.documentId || dataset.id))
-  markChanged()
-}
-
 const saveApp = async () => {
   saving.value = true
   try {
-    const id = route.params.id
     const dataToSave = {
       title: editableApp.value.title, slug: editableApp.value.slug, date: editableApp.value.date,
       external: editableApp.value.external, url: editableApp.value.url,
@@ -324,7 +257,7 @@ const saveApp = async () => {
       funding: editableApp.value.funding, citation: editableApp.value.citation,
       articles: editableApp.value.articles, datasets: editableApp.value.datasets,
     }
-    const updated = await updateApp(id, dataToSave, 'draft')
+    const updated = await updateApp(route.params.id, dataToSave, 'draft')
     originalApp.value = JSON.parse(JSON.stringify(updated))
     editableApp.value = normalizeApp(updated)
     hasChanges.value = false; isModified.value = true
@@ -348,30 +281,23 @@ const normalizeApp = (data) => {
 const loadApp = async () => {
   loading.value = true; error.value = null
   try {
-    const id = route.params.id
-    const data = await fetchAppPreviewById(id)
+    const data = await fetchAppPreviewById(route.params.id)
     originalApp.value = JSON.parse(JSON.stringify(data))
     editableApp.value = normalizeApp(data)
-    const params = new URLSearchParams(window.location.search)
-    if (data.publishedAt === null || params.get('status') === 'draft') isModified.value = true
+    checkDraftStatus(data)
   } catch (err) {
     error.value = `Failed to load app: ${err.message}`
   } finally { loading.value = false }
 }
 
-const handleBeforeUnload = (e) => { if (hasChanges.value) { e.preventDefault(); e.returnValue = '' } }
 const handleDocumentClick = () => { articleResults.value = []; datasetResults.value = [] }
 
 useAsyncData(`app-editor-${route.params.id}`, () => loadApp(), { server: false })
 
 watchEffect((onCleanup) => {
   if (!import.meta.client) return
-  window.addEventListener('beforeunload', handleBeforeUnload)
   document.addEventListener('click', handleDocumentClick)
-  onCleanup(() => {
-    window.removeEventListener('beforeunload', handleBeforeUnload)
-    document.removeEventListener('click', handleDocumentClick)
-  })
+  onCleanup(() => document.removeEventListener('click', handleDocumentClick))
 })
 </script>
 

@@ -207,46 +207,25 @@
 <script setup>
 definePageMeta({ middleware: ['preview-access'] })
 
-import { ref, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
 import { marked } from 'marked'
 import markedFootnote from 'marked-footnote'
 
 marked.use(markedFootnote())
 
+const { loading, error, viewMode, publishing, createPublishHandler } = usePreviewReadonly()
+const { formatDate, fixAssetUrls, resolveImageUrl } = usePreviewUtils()
 const route = useRoute()
 const router = useRouter()
-const toast = useToast()
 const { fetchArticlePreviewById, publishArticle } = useArticles()
+
 const article = ref(null)
-const loading = ref(true)
-const error = ref(null)
-const viewMode = ref('desktop')
-const publishing = ref(false)
 const prevArticle = ref(null)
 const nextArticle = ref(null)
 const authorArticles = ref([])
 
-const handlePublish = async () => {
-  publishing.value = true
-  try {
-    await publishArticle(route.params.id)
-    toast.add({ title: 'Article published successfully!', color: 'green' })
-  } catch (err) {
-    toast.add({ title: `Failed to publish: ${err.message}`, color: 'red' })
-  } finally { publishing.value = false }
-}
+const handlePublish = createPublishHandler(publishArticle, 'Article published successfully!')
 
-const splashImageUrl = computed(() => {
-  if (!article.value?.splash) return null
-  if (typeof article.value.splash === 'object' && article.value.splash.url) {
-    if (article.value.splash.url.startsWith('/')) return `${API_BASE_URL}${article.value.splash.url}`
-    return article.value.splash.url
-  }
-  if (typeof article.value.splash === 'string') return article.value.splash
-  return null
-})
-
+const splashImageUrl = computed(() => resolveImageUrl(article.value?.splash))
 const authorsString = computed(() => article.value?.authors?.map(a => a.title).join(', ') || '')
 
 const relatedDatasets = computed(() => {
@@ -258,8 +237,6 @@ const relatedApps = computed(() => {
   const a = article.value?.apps
   return Array.isArray(a) ? a : []
 })
-
-const fixAssetUrls = (html) => html ? html.replace(/(src=["'])(\/[^"']*["'])/g, `$1${API_BASE_URL}$2`) : html
 
 const fixFootnotes = (md) => {
   md = md.replace(/([^\n])\[\^(\d+)\]:/g, '$1\n\n[^$2]:')
@@ -300,11 +277,6 @@ const renderedMarkdown = computed(() => {
   return fixAssetUrls(html)
 })
 
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-}
-
 const navigateToArticle = (a) => {
   const id = a.documentId || a.id
   const qs = window.location.search
@@ -316,15 +288,13 @@ const viewPublishedArticle = () => {
   if (id) router.push(`/articles/${id}`)
 }
 
-const getPreviewHeaders = () => getHeadersWithAuth()
-
 const loadNavigation = async () => {
   try {
     const params = new URLSearchParams(window.location.search)
     const status = params.get('status') || 'draft'
     const response = await fetch(
       `${STRAPI_PROXY}/articles?status=${status}&pagination[pageSize]=100&sort=date:desc`,
-      { headers: getPreviewHeaders() }
+      { headers: getHeadersWithAuth() }
     )
     if (!response.ok) return
     const data = await response.json()
@@ -348,7 +318,7 @@ const loadAuthorArticles = async () => {
     const status = params.get('status') || 'draft'
     const response = await fetch(
       `${STRAPI_PROXY}/articles?status=${status}&pagination[pageSize]=5&filters[authors][title][$containsi]=${encodeURIComponent(firstAuthor)}`,
-      { headers: getPreviewHeaders() }
+      { headers: getHeadersWithAuth() }
     )
     if (!response.ok) return
     const data = await response.json()

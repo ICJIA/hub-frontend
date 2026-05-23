@@ -115,12 +115,9 @@
 <script setup>
 definePageMeta({ middleware: ['preview-access'] })
 
-import { ref, computed, watchEffect } from 'vue'
-import { useRoute } from 'vue-router'
 import TurndownService from 'turndown'
 import { marked } from 'marked'
 import markedFootnote from 'marked-footnote'
-import { generateToken } from '~/utils/previewToken'
 
 const turndownService = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced', bulletListMarker: '-' })
 turndownService.addRule('span', {
@@ -161,49 +158,21 @@ turndownService.addRule('table', {
   }
 })
 
-const route = useRoute()
+const { route, loading, saving, error, hasChanges, isModified, markChanged, openPreview, makeFormattedDate, checkDraftStatus } = usePreviewEditor('/previewreadonly')
+const { fixAssetUrls, resolveImageUrl } = usePreviewUtils()
 const toast = useToast()
 const { fetchArticlePreviewById, updateArticle } = useArticles()
 const { uploadMedia } = useMedia()
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:1338'
 
 const originalArticle = ref(null)
 const editableArticle = ref(null)
 const editorContent = ref('')
-const loading = ref(true)
-const saving = ref(false)
 const uploading = ref(false)
-const error = ref(null)
-const hasChanges = ref(false)
-const isModified = ref(false)
 const imageInput = ref(null)
 const mainEditorRef = ref(null)
 
-const splashImageUrl = computed(() => {
-  if (!editableArticle.value?.Splash) return null
-  if (typeof editableArticle.value.Splash === 'object' && editableArticle.value.Splash.url) {
-    if (editableArticle.value.Splash.url.startsWith('/')) return `${API_BASE_URL}${editableArticle.value.Splash.url}`
-    return editableArticle.value.Splash.url
-  }
-  if (typeof editableArticle.value.Splash === 'string') return editableArticle.value.Splash
-  return null
-})
-
-const formattedDate = computed({
-  get() {
-    if (!editableArticle.value?.Date) return ''
-    return new Date(editableArticle.value.Date).toISOString().split('T')[0]
-  },
-  set(value) { editableArticle.value.Date = value }
-})
-
-const markChanged = () => { hasChanges.value = true }
-const openPreview = () => {
-  const id = route.params.id
-  const params = new URLSearchParams(window.location.search)
-  params.set('token', generateToken())
-  window.open(`/previewreadonly/${id}?${params.toString()}`, '_blank')
-}
+const splashImageUrl = computed(() => resolveImageUrl(editableArticle.value?.Splash))
+const formattedDate = makeFormattedDate(editableArticle, 'Date')
 
 const addCategory = () => { if (!editableArticle.value.Categories) editableArticle.value.Categories = []; editableArticle.value.Categories.push(''); markChanged() }
 const removeCategory = (index) => { editableArticle.value.Categories.splice(index, 1); markChanged() }
@@ -231,7 +200,6 @@ const removeImage = () => { editableArticle.value.Splash = null; if (imageInput.
 const saveArticle = async () => {
   saving.value = true
   try {
-    const id = route.params.id
     const markdownContent = turndownService.turndown(editorContent.value || '')
     const dataToSave = {
       Title: editableArticle.value.Title, Abstract: editableArticle.value.Abstract,
@@ -242,7 +210,7 @@ const saveArticle = async () => {
       Funding: editableArticle.value.Funding, Citation: editableArticle.value.Citation,
       Doi: editableArticle.value.Doi, Splash: editableArticle.value.Splash
     }
-    const updatedArticle = await updateArticle(id, dataToSave, 'draft')
+    const updatedArticle = await updateArticle(route.params.id, dataToSave, 'draft')
     originalArticle.value = JSON.parse(JSON.stringify(updatedArticle))
     editableArticle.value = updatedArticle
     hasChanges.value = false; isModified.value = true
@@ -251,8 +219,6 @@ const saveArticle = async () => {
     toast.add({ title: `Failed to save: ${err.message}`, color: 'red' })
   } finally { saving.value = false }
 }
-
-const fixAssetUrls = (html) => html ? html.replace(/(src=["'])(\/[^"']*["'])/g, `$1${API_BASE_URL}$2`) : html
 
 const convertMarkdownToHtml = (markdown) => {
   if (!markdown) return ''
@@ -269,26 +235,17 @@ const convertMarkdownToHtml = (markdown) => {
 const loadArticle = async () => {
   loading.value = true; error.value = null
   try {
-    const id = route.params.id
-    const data = await fetchArticlePreviewById(id)
+    const data = await fetchArticlePreviewById(route.params.id)
     originalArticle.value = JSON.parse(JSON.stringify(data))
     editableArticle.value = data
-    if (data.publishedAt === null || route.query.status === 'draft') isModified.value = true
+    checkDraftStatus(data)
     if (data.Markdown) editorContent.value = convertMarkdownToHtml(data.Markdown)
   } catch (err) {
     error.value = `Failed to load article: ${err.message}`
   } finally { loading.value = false }
 }
 
-const handleBeforeUnload = (e) => { if (hasChanges.value) { e.preventDefault(); e.returnValue = '' } }
-
 useAsyncData(`article-editor-${route.params.id}`, () => loadArticle(), { server: false })
-
-watchEffect((onCleanup) => {
-  if (!import.meta.client) return
-  window.addEventListener('beforeunload', handleBeforeUnload)
-  onCleanup(() => window.removeEventListener('beforeunload', handleBeforeUnload))
-})
 </script>
 
 <style scoped>
