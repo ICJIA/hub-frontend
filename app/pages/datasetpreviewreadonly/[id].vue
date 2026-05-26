@@ -331,31 +331,15 @@
 <script setup>
 definePageMeta({ middleware: ['preview-access'] })
 
-import { ref, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-
+const { loading, error, viewMode, publishing, createPublishHandler } = usePreviewReadonly()
+const { formatDate, resolveImageUrl, formatFileSize } = usePreviewUtils()
 const route = useRoute()
 const router = useRouter()
-const toast = useToast()
 const { fetchDatasetPreviewById, publishDataset } = useDatasets()
 
 const dataset = ref(null)
-const loading = ref(true)
-const error = ref(null)
-const viewMode = ref('desktop')
-const publishing = ref(false)
 
-const handlePublish = async () => {
-  publishing.value = true
-  try { await publishDataset(route.params.id); toast.add({ title: 'Dataset published successfully!', color: 'green' }) }
-  catch (err) { toast.add({ title: `Failed to publish: ${err.message}`, color: 'red' }) }
-  finally { publishing.value = false }
-}
-
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-}
+const handlePublish = createPublishHandler(publishDataset, 'Dataset published successfully!')
 
 const notesList = computed(() => {
   const n = dataset.value?.notes
@@ -373,17 +357,7 @@ const datafileList = computed(() => {
   return []
 })
 
-const datafileUrl = (file) => {
-  if (!file?.url) return '#'
-  return file.url.startsWith('/') ? `${API_BASE_URL}${file.url}` : file.url
-}
-
-const formatFileSize = (bytes) => {
-  if (!bytes) return ''
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
+const datafileUrl = (file) => resolveImageUrl(file) || '#'
 
 const viewPublishedDataset = () => {
   const id = dataset.value?.documentId || dataset.value?.id
