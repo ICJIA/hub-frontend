@@ -87,19 +87,24 @@
 defineRouteRules({ prerender: true })
 
 import { ref, computed, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
+const route = useRoute()
 const { loadIndex, searchByType, getByType, isLoading, loadError } = useSearch()
 
+const resolvedTab = computed(() =>
+  route.query.tab === 'apps' ? 'apps' : 'datasets'
+)
+
 useSeoMeta({
-  title: 'Data | ICJIA Research Hub',
+  title: computed(() => resolvedTab.value === 'apps' ? 'Apps | ICJIA Research Hub' : 'Datasets | ICJIA Research Hub'),
   description: 'Browse criminal justice datasets and apps from the ICJIA Research and Analysis Unit.',
-  ogTitle: 'Data | ICJIA Research Hub',
+  ogTitle: computed(() => resolvedTab.value === 'apps' ? 'Apps | ICJIA Research Hub' : 'Datasets | ICJIA Research Hub'),
   ogDescription: 'Browse criminal justice datasets and apps from the ICJIA Research and Analysis Unit.',
 })
 
-const activeTab = ref('datasets')
+const activeTab = computed(() => resolvedTab.value)
 
 const filterTopic = ref(null)
 const filterAuthor = ref(null)
@@ -111,13 +116,21 @@ const pageSize = 12
 
 const setTab = (tab) => {
   if (activeTab.value === tab) return
-  activeTab.value = tab
   filterTopic.value = null
   filterAuthor.value = null
   filterYear.value = null
   filterSearch.value = ''
   currentPage.value = 1
+  router.push({ query: tab === 'datasets' ? {} : { tab } })
 }
+
+watch(resolvedTab, () => {
+  filterTopic.value = null
+  filterAuthor.value = null
+  filterYear.value = null
+  filterSearch.value = ''
+  currentPage.value = 1
+})
 
 const contentType = computed(() => activeTab.value === 'datasets' ? 'dataset' : 'app')
 

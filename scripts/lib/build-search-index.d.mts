@@ -1,6 +1,6 @@
 export interface SearchIndexItem {
   id: number
-  type: 'article' | 'app' | 'dataset'
+  type: 'article' | 'app' | 'dataset' | 'project' | 'projecthome'
   slug: string
   title: string
   summary: string
@@ -13,7 +13,7 @@ export interface SearchIndexItem {
 
 export interface BuildIndexResult {
   index: SearchIndexItem[]
-  counts: { articles: number; apps: number; datasets: number }
+  counts: { articles: number; apps: number; datasets: number; projects: number; projecthomes: number }
 }
 
 export function stripMarkdown(text: string): string

@@ -11,7 +11,7 @@
         @update:model-value="val => { $emit('update:topic', val); $emit('change') }"
       />
 
-      <USelect placeholder="All Centers" size="sm" class="w-36 shrink-0" disabled />
+      <!-- <USelect placeholder="All Centers" size="sm" class="w-36 shrink-0" disabled /> -->
 
       <USelect
         v-if="showAuthorFilter"

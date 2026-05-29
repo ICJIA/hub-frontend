@@ -2,7 +2,7 @@ import Fuse, { type IFuseOptions } from 'fuse.js'
 
 export interface SearchItem {
   id: number
-  type: 'article' | 'app' | 'dataset'
+  type: 'article' | 'app' | 'dataset' | 'project'
   slug: string
   title: string
   summary: string

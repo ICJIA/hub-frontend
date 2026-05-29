@@ -41,7 +41,7 @@ export async function fetchAllItems(endpoint, { apiBaseUrl, headers }) {
       'pagination[pageSize]': String(pageSize),
       sort: 'date:desc'
     })
-
+    console.log(`${apiBaseUrl}/api/${endpoint}?${params}`);
     const res = await fetch(`${apiBaseUrl}/api/${endpoint}?${params}`, { headers })
     if (!res.ok) throw new Error(`[${endpoint}] HTTP ${res.status}: ${res.statusText}`)
 
@@ -68,10 +68,13 @@ export async function buildIndex({ apiBaseUrl, bearerToken }) {
     ...(bearerToken && { Authorization: `Bearer ${bearerToken}` })
   }
 
-  const [articles, apps, datasets] = await Promise.all([
+  const [articles, apps, datasets, projects, projecthomes] = await Promise.all([
     fetchAllItems('articles', { apiBaseUrl, headers }),
     fetchAllItems('apps', { apiBaseUrl, headers }),
-    fetchAllItems('datasets', { apiBaseUrl, headers })
+    fetchAllItems('datasets', { apiBaseUrl, headers }),
+    fetchAllItems('projects', { apiBaseUrl, headers }),
+    fetchAllItems('projecthomes', { apiBaseUrl, headers })
+
   ])
 
   const resolveUrl = (url) => {
@@ -119,8 +122,32 @@ export async function buildIndex({ apiBaseUrl, bearerToken }) {
       authors: [],
       date: d.date ?? '',
       imageUrl: ''
+    })),
+    ...projects.map(p => ({
+      id: p.id,
+      type: 'project',
+      slug: p.slug ?? '',
+      title: p.Title ?? p.title ?? '',
+      summary: p.SubTitle ?? p.tagline ?? '',
+      content: stripMarkdown(p.Body ?? p.body ?? '').slice(0, 3000),
+      categories: [],
+      authors: Array.isArray(p.Authors) ? p.Authors.filter(Boolean) : [],
+      date: p.date ?? '',
+      imageUrl: ''
+    })),
+    ...projecthomes.map(h => ({
+      id: h.id,
+      type: 'projecthome',
+      slug: 'projects',
+      title: h.Herotitle ?? '',
+      summary: h.Herosubtitle ?? '',
+      content: [h.Title, h.subtitle].filter(Boolean).join(' '),
+      categories: [],
+      authors: [],
+      date: h.updatedAt ?? '',
+      imageUrl: ''
     }))
   ]
 
-  return { index, counts: { articles: articles.length, apps: apps.length, datasets: datasets.length } }
+  return { index, counts: { articles: articles.length, apps: apps.length, datasets: datasets.length, projects: projects.length, projecthomes: projecthomes.length } }
 }
