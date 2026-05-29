@@ -4,6 +4,11 @@
       <h1 class="text-2xl font-bold">Research Articles</h1>
     </div>
 
+    <CategoryChips
+      :categories="categoryCounts"
+      :total="allItems.length"
+    />
+
     <ContentFilterBar
       v-model:topic="filterTopic"
       v-model:author="filterAuthor"
@@ -95,6 +100,18 @@ const allItems = computed(() => getByType('article'))
 const availableTopics = computed(() =>
   [...new Set(allItems.value.flatMap(i => i.categories))].filter(Boolean).sort()
 )
+
+const categoryCounts = computed(() => {
+  const counts = {}
+  for (const item of allItems.value) {
+    for (const cat of item.categories ?? []) {
+      if (cat) counts[cat] = (counts[cat] ?? 0) + 1
+    }
+  }
+  return Object.entries(counts)
+    .map(([label, count]) => ({ label, count }))
+    .sort((a, b) => b.count - a.count)
+})
 
 const availableAuthors = computed(() =>
   [...new Set(allItems.value.flatMap(i => i.authors))].filter(Boolean).sort()
