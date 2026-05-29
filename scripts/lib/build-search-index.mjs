@@ -68,11 +68,12 @@ export async function buildIndex({ apiBaseUrl, bearerToken }) {
     ...(bearerToken && { Authorization: `Bearer ${bearerToken}` })
   }
 
-  const [articles, apps, datasets, projects] = await Promise.all([
+  const [articles, apps, datasets, projects, projecthomes] = await Promise.all([
     fetchAllItems('articles', { apiBaseUrl, headers }),
     fetchAllItems('apps', { apiBaseUrl, headers }),
     fetchAllItems('datasets', { apiBaseUrl, headers }),
-    fetchAllItems('projects', { apiBaseUrl, headers })
+    fetchAllItems('projects', { apiBaseUrl, headers }),
+    fetchAllItems('projecthomes', { apiBaseUrl, headers })
 
   ])
 
@@ -133,8 +134,20 @@ export async function buildIndex({ apiBaseUrl, bearerToken }) {
       authors: Array.isArray(p.Authors) ? p.Authors.filter(Boolean) : [],
       date: p.date ?? '',
       imageUrl: ''
+    })),
+    ...projecthomes.map(h => ({
+      id: h.id,
+      type: 'projecthome',
+      slug: 'projects',
+      title: h.Herotitle ?? '',
+      summary: h.Herosubtitle ?? '',
+      content: [h.Title, h.subtitle].filter(Boolean).join(' '),
+      categories: [],
+      authors: [],
+      date: h.updatedAt ?? '',
+      imageUrl: ''
     }))
   ]
 
-  return { index, counts: { articles: articles.length, apps: apps.length, datasets: datasets.length, projects: projects.length } }
+  return { index, counts: { articles: articles.length, apps: apps.length, datasets: datasets.length, projects: projects.length, projecthomes: projecthomes.length } }
 }
