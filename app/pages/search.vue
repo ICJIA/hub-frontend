@@ -7,7 +7,7 @@
         ref="inputEl"
         v-model="query"
         size="lg"
-        placeholder="Search articles, apps, and datasets…"
+        placeholder="Search articles, apps, datasets, and files…"
         icon="i-lucide-search"
         :trailing-icon="query ? 'i-lucide-x' : undefined"
         class="w-full max-w-2xl"
@@ -34,7 +34,7 @@
     <!-- Empty query prompt -->
     <div v-else-if="!query.trim() && isLoaded" class="py-12 text-center text-gray-500">
       <UIcon name="i-lucide-search" class="w-10 h-10 mx-auto mb-3 opacity-40" />
-      <p>Enter a search term above to find articles, apps, and datasets.</p>
+      <p>Enter a search term above to find articles, apps, datasets, and files.</p>
     </div>
 
     <!-- No results -->
@@ -60,39 +60,68 @@
         <div class="grid grid-cols-12 gap-4">
           <div
             v-for="result in group.items"
-            :key="`${result.type}-${result.slug}`"
+            :key="`${result.type}-${result.slug || result.fileUrl || result.url}`"
             class="col-span-12 sm:col-span-6 md:col-span-4"
           >
             <div
               class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 h-full cursor-pointer hover:shadow-md transition-shadow"
               @click="navigate(result)"
             >
-              <div class="text-base font-semibold mb-1 leading-snug text-gray-900 dark:text-gray-100">
-                {{ result.item?.title ?? result.slug }}
-              </div>
-              <div v-if="result.item?.date" class="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                {{ formatDate(result.item.date) }}
-              </div>
-
-              <!-- Pagefind excerpt with native <mark> highlighting -->
-              <p
-                v-if="result.excerpt"
-                class="text-sm text-gray-500 dark:text-gray-400 mb-3 [&_mark]:bg-yellow-200 [&_mark]:dark:bg-yellow-700 [&_mark]:rounded-sm [&_mark]:text-inherit [&_mark]:not-italic"
-                v-html="result.excerpt"
-              />
-              <p v-else-if="result.item?.summary" class="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                {{ truncate(result.item.summary, 150) }}
-              </p>
-
-              <div v-if="result.item?.categories?.length" class="flex flex-wrap gap-1">
+              <!-- File result card -->
+              <template v-if="result.type === 'file'">
+                <div class="flex items-start gap-2 mb-2">
+                  <UIcon
+                    :name="result.fileType === 'pdf' ? 'i-lucide-file-text' : 'i-lucide-table-2'"
+                    class="w-5 h-5 mt-0.5 shrink-0 text-gray-400"
+                  />
+                  <div class="text-base font-semibold leading-snug text-gray-900 dark:text-gray-100 break-all">
+                    {{ result.fileName || result.url.split('/').pop() }}
+                  </div>
+                </div>
                 <UBadge
-                  v-for="cat in result.item.categories"
-                  :key="cat"
-                  color="primary"
+                  :color="result.fileType === 'pdf' ? 'error' : 'success'"
                   variant="subtle"
                   size="sm"
-                >{{ cat }}</UBadge>
-              </div>
+                  class="mb-2"
+                >
+                  {{ result.fileType?.toUpperCase() }}
+                </UBadge>
+                <p
+                  v-if="result.excerpt"
+                  class="text-sm text-gray-500 dark:text-gray-400 [&_mark]:bg-yellow-200 [&_mark]:dark:bg-yellow-700 [&_mark]:rounded-sm [&_mark]:text-inherit [&_mark]:not-italic"
+                  v-html="result.excerpt"
+                />
+              </template>
+
+              <!-- Article / app / dataset result card -->
+              <template v-else>
+                <div class="text-base font-semibold mb-1 leading-snug text-gray-900 dark:text-gray-100">
+                  {{ result.item?.title ?? result.slug }}
+                </div>
+                <div v-if="result.item?.date" class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                  {{ formatDate(result.item.date) }}
+                </div>
+
+                <!-- Pagefind excerpt with native <mark> highlighting -->
+                <p
+                  v-if="result.excerpt"
+                  class="text-sm text-gray-500 dark:text-gray-400 mb-3 [&_mark]:bg-yellow-200 [&_mark]:dark:bg-yellow-700 [&_mark]:rounded-sm [&_mark]:text-inherit [&_mark]:not-italic"
+                  v-html="result.excerpt"
+                />
+                <p v-else-if="result.item?.summary" class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                  {{ truncate(result.item.summary, 150) }}
+                </p>
+
+                <div v-if="result.item?.categories?.length" class="flex flex-wrap gap-1">
+                  <UBadge
+                    v-for="cat in result.item.categories"
+                    :key="cat"
+                    color="primary"
+                    variant="subtle"
+                    size="sm"
+                  >{{ cat }}</UBadge>
+                </div>
+              </template>
             </div>
           </div>
         </div>
@@ -155,9 +184,11 @@ watch(query, (val) => {
 })
 
 const groupedResults = computed(() => {
-  const groups = { article: [], app: [], dataset: [] }
+  const groups = { article: [], app: [], dataset: [], file: [] }
   for (const result of results.value) {
-    groups[result.type]?.push(result)
+    if (result.type in groups) {
+      groups[result.type].push(result)
+    }
   }
   return Object.entries(groups)
     .filter(([, items]) => items.length > 0)
@@ -165,7 +196,7 @@ const groupedResults = computed(() => {
 })
 
 const typeLabel = (type) => {
-  const map = { article: 'Articles', app: 'Apps', dataset: 'Datasets' }
+  const map = { article: 'Articles', app: 'Apps', dataset: 'Datasets', file: 'Files' }
   return map[type] ?? type
 }
 
@@ -173,12 +204,29 @@ const typeIcon = (type) => {
   const map = {
     article: 'i-lucide-file-text',
     app: 'i-lucide-layout-dashboard',
-    dataset: 'i-lucide-database'
+    dataset: 'i-lucide-database',
+    file: 'i-lucide-paperclip'
   }
   return map[type] ?? 'i-lucide-file'
 }
 
 const navigate = (result) => {
+  if (result.type === 'file') {
+    if (result.fileType === 'pdf') {
+      // Open in the PDF viewer page with the current search query for highlighting
+      router.push({
+        path: '/pdf-viewer',
+        query: {
+          file: result.fileUrl,
+          ...(query.value.trim() ? { q: query.value.trim() } : {})
+        }
+      })
+    } else {
+      // Excel / CSV — trigger a download in a new tab
+      window.open(result.fileUrl, '_blank', 'noopener,noreferrer')
+    }
+    return
+  }
   router.push(result.url)
 }
 

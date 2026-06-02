@@ -22,7 +22,7 @@ if (!existsSync(siteDir)) {
   process.exit(1)
 }
 
-// Optionally download PDF attachments so pagefind can index them
+// Optionally download PDF and Excel/CSV attachments so pagefind can index them
 const apiBaseUrl = process.env.VITE_API_BASE_URL
 const bearerToken = process.env.API_BEARER_TOKEN
 if (apiBaseUrl && bearerToken) {
@@ -34,8 +34,17 @@ if (apiBaseUrl && bearerToken) {
     console.warn('  PDF attachment download failed (non-fatal):', e.message)
     console.warn('  Continuing without PDF content in index.\n')
   }
+
+  console.log('\n⚙  Processing Excel/CSV attachments for indexing...')
+  try {
+    const { downloadExcelAttachments } = await import('./lib/download-excel-attachments.mjs')
+    await downloadExcelAttachments({ siteDir, apiBaseUrl, bearerToken })
+  } catch (e) {
+    console.warn('  Excel/CSV attachment processing failed (non-fatal):', e.message)
+    console.warn('  Continuing without Excel/CSV content in index.\n')
+  }
 } else {
-  console.log('\n  VITE_API_BASE_URL / API_BEARER_TOKEN not set — skipping PDF attachment download.')
+  console.log('\n  VITE_API_BASE_URL / API_BEARER_TOKEN not set — skipping attachment downloads.')
 }
 
 // Run pagefind to crawl HTML (and any local PDFs) and build the index

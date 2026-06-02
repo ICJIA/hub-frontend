@@ -18,8 +18,14 @@ export interface PagefindResult {
   url: string
   /** HTML string with <mark> tags for matched terms — safe to v-html. */
   excerpt: string
-  type: 'article' | 'app' | 'dataset' | 'project'
+  type: 'article' | 'app' | 'dataset' | 'project' | 'file'
   slug: string
+  /** For file results: the actual downloadable/viewable file URL. */
+  fileUrl?: string
+  /** Display name for file results. */
+  fileName?: string
+  /** Distinguishes indexed media types. */
+  fileType?: 'pdf' | 'excel'
 }
 
 interface RawPagefindResult {
@@ -93,6 +99,34 @@ export const usePagefind = () => {
     )
 
     return rawResults.map((raw) => {
+      // ── File results: PDFs indexed directly, Excel via HTML stubs ──────────
+      if (raw.url.endsWith('.pdf')) {
+        return {
+          item: null,
+          url: raw.url,
+          excerpt: raw.excerpt,
+          type: 'file',
+          slug: '',
+          fileType: 'pdf',
+          fileUrl: raw.url,
+          fileName: raw.meta?.title ?? raw.url.split('/').pop() ?? ''
+        }
+      }
+
+      if (/\/attachments\/excel\//.test(raw.url)) {
+        return {
+          item: null,
+          url: raw.url,
+          excerpt: raw.excerpt,
+          type: 'file',
+          slug: '',
+          fileType: 'excel',
+          fileUrl: raw.meta?.fileUrl ?? '',
+          fileName: raw.meta?.title ?? ''
+        }
+      }
+
+      // ── Content results: articles, apps, datasets ────────────────────────
       // Derive content type and slug from the URL path:
       //   /articles/my-slug  → type='article',  slug='my-slug'
       //   /apps/my-slug      → type='app',      slug='my-slug'

@@ -88,7 +88,9 @@ export default defineNuxtConfig({
       }
     },
     optimizeDeps: {
-      exclude: ['reka-ui']
+      // pdfjs-dist uses browser APIs (DOMMatrix) that error in Node.js.
+      // Excluding it from pre-bundling prevents Vite from evaluating it server-side.
+      exclude: ['reka-ui', 'pdfjs-dist']
     },
     resolve: {
       dedupe: ['vue', '@vue/runtime-core', '@vue/runtime-dom']
