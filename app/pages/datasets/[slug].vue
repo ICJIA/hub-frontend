@@ -53,7 +53,7 @@
         <div class="max-w-[1300px] mx-auto py-4 px-4 sm:py-6 sm:px-6">
           <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
             <!-- Main Content -->
-            <div class="flex-1 min-w-0 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+            <div data-pagefind-body class="flex-1 min-w-0 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
               <div class="bg-[#1a3a5c] text-white px-6 py-4">
                 <h2 class="text-lg font-bold">Overview: {{ dataset.title }}</h2>
               </div>
@@ -163,7 +163,7 @@
             </div>
 
             <!-- Right Sidebar -->
-            <div class="w-full lg:w-[260px] lg:flex-shrink-0 space-y-4">
+            <div data-pagefind-ignore class="w-full lg:w-[260px] lg:flex-shrink-0 space-y-4">
               <SidebarCard v-if="dataset.citation" title="Suggested Citation">
                 <p class="text-sm text-gray-600 dark:text-gray-100 leading-relaxed break-words" v-html="dataset.citation"></p>
               </SidebarCard>

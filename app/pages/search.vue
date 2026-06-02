@@ -16,7 +16,7 @@
       />
     </div>
 
-    <!-- Index not available -->
+    <!-- Index not available (no build yet, or build error) -->
     <UAlert
       v-if="loadError"
       color="warning"
@@ -38,7 +38,7 @@
     </div>
 
     <!-- No results -->
-    <div v-else-if="query.trim() && results.length === 0 && isLoaded" class="py-12 text-center text-gray-500">
+    <div v-else-if="query.trim() && results.length === 0 && isLoaded && !isSearching" class="py-12 text-center text-gray-500">
       <UIcon name="i-lucide-search-x" class="w-10 h-10 mx-auto mb-3 opacity-40" />
       <p>No results for <strong>{{ query }}</strong>.</p>
     </div>
@@ -59,26 +59,34 @@
 
         <div class="grid grid-cols-12 gap-4">
           <div
-            v-for="item in group.items"
-            :key="`${item.type}-${item.id}`"
+            v-for="result in group.items"
+            :key="`${result.type}-${result.slug}`"
             class="col-span-12 sm:col-span-6 md:col-span-4"
           >
             <div
               class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 h-full cursor-pointer hover:shadow-md transition-shadow"
-              @click="navigate(item)"
+              @click="navigate(result)"
             >
               <div class="text-base font-semibold mb-1 leading-snug text-gray-900 dark:text-gray-100">
-                <HighlightText :text="item.title" :query="query" />
+                {{ result.item?.title ?? result.slug }}
               </div>
-              <div v-if="item.date" class="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                {{ formatDate(item.date) }}
+              <div v-if="result.item?.date" class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                {{ formatDate(result.item.date) }}
               </div>
-              <p v-if="item.summary" class="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                <HighlightText :text="truncate(item.summary, 150)" :query="query" />
+
+              <!-- Pagefind excerpt with native <mark> highlighting -->
+              <p
+                v-if="result.excerpt"
+                class="text-sm text-gray-500 dark:text-gray-400 mb-3 [&_mark]:bg-yellow-200 [&_mark]:dark:bg-yellow-700 [&_mark]:rounded-sm [&_mark]:text-inherit [&_mark]:not-italic"
+                v-html="result.excerpt"
+              />
+              <p v-else-if="result.item?.summary" class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                {{ truncate(result.item.summary, 150) }}
               </p>
-              <div v-if="item.categories?.length" class="flex flex-wrap gap-1">
+
+              <div v-if="result.item?.categories?.length" class="flex flex-wrap gap-1">
                 <UBadge
-                  v-for="cat in item.categories"
+                  v-for="cat in result.item.categories"
                   :key="cat"
                   color="primary"
                   variant="subtle"
@@ -101,29 +109,55 @@ import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
-const { loadIndex, search, isLoaded, isLoading, loadError } = useSearch()
+
+const { load, search, isLoaded, isLoading, loadError } = usePagefind()
 
 useSeoMeta({
   title: 'Search | ICJIA Research Hub',
   description: 'Search criminal justice research, datasets, and apps from the ICJIA Research and Analysis Unit.',
   ogTitle: 'Search | ICJIA Research Hub',
-  ogDescription: 'Search criminal justice research, datasets, and apps from the ICJIA Research and Analysis Unit.',
+  ogDescription: 'Search criminal justice research, datasets, and apps from the ICJIA Research and Analysis Unit.'
 })
 
 const query = ref(route.query.q ? String(route.query.q) : '')
 
-// Keep the input in sync when the user navigates back/forward or edits the URL
+// Keep query in sync with back/forward navigation and direct URL edits
 watch(() => route.query.q, (q) => {
   const next = q ? String(q) : ''
   if (next !== query.value) query.value = next
 })
 
-const results = computed(() => search(query.value))
+// Load the pagefind index once on mount (client-only)
+useAsyncData('search-index', () => load(), { server: false })
+
+const results = ref([])
+const isSearching = ref(false)
+
+const runSearch = async (q) => {
+  const trimmed = q.trim()
+  if (!trimmed) { results.value = []; return }
+
+  isSearching.value = true
+  try {
+    results.value = await search(trimmed)
+  } finally {
+    isSearching.value = false
+  }
+}
+
+// Re-run when the query changes or when the index finishes loading
+watch([query, isLoaded], ([q]) => runSearch(q), { immediate: true })
+
+// Sync query → URL so searches are bookmarkable
+watch(query, (val) => {
+  const trimmed = val.trim()
+  router.replace({ query: trimmed ? { q: trimmed } : {} })
+})
 
 const groupedResults = computed(() => {
   const groups = { article: [], app: [], dataset: [] }
-  for (const item of results.value) {
-    groups[item.type]?.push(item)
+  for (const result of results.value) {
+    groups[result.type]?.push(result)
   }
   return Object.entries(groups)
     .filter(([, items]) => items.length > 0)
@@ -144,21 +178,18 @@ const typeIcon = (type) => {
   return map[type] ?? 'i-lucide-file'
 }
 
-const navigate = (item) => {
-  const paths = {
-    article: `/articles/${item.slug}`,
-    app: `/apps/${item.slug}`,
-    dataset: `/datasets/${item.slug}`
-  }
-  router.push(paths[item.type])
+const navigate = (result) => {
+  router.push(result.url)
 }
 
-// Sync query → URL so the search is bookmarkable / shareable.
-// Writes the trimmed value so leading/trailing spaces don't pollute shared links.
-watch(query, (val) => {
-  const trimmed = val.trim()
-  router.replace({ query: trimmed ? { q: trimmed } : {} })
-})
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
 
-useAsyncData('search-index', () => loadIndex(), { server: false })
+const truncate = (text, len) => (text?.length > len ? text.slice(0, len) + '…' : text ?? '')
 </script>

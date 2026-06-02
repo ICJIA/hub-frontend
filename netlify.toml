@@ -1,5 +1,5 @@
 [build]
-  command = "pnpm build"
+  command = "pnpm build && pnpm pagefind:build"
   publish = ".output/public"
 
 [build.environment]

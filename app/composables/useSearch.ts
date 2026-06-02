@@ -91,5 +91,5 @@ export const useSearch = () => {
     return _fuse.search(query, { limit: 60 }).map(r => r.item)
   }
 
-  return { loadIndex, search, searchByType, getByType, isLoaded, isLoading, loadError }
+  return { loadIndex, search, searchByType, getByType, items, isLoaded, isLoading, loadError }
 }
