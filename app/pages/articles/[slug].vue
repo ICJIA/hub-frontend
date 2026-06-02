@@ -41,12 +41,12 @@
               <UIcon name="i-heroicons-calendar-days" class="w-4 h-4" />
               Last Updated: {{ formatDate(article.date) }}
             </span>
-            <a href="#" class="flex items-center gap-1.5 hover:text-blue-600 transition-colors">
+            <a v-if="mainfileUrl" :href="mainfileUrl" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 hover:text-blue-600 transition-colors">
               <UIcon name="i-heroicons-document" class="w-4 h-4" /> View PDF
             </a>
-            <a href="#" class="flex items-center gap-1.5 hover:text-blue-600 transition-colors">
+            <button v-if="mainfileUrl" @click="downloadPdf" class="flex items-center gap-1.5 hover:text-blue-600 transition-colors">
               <UIcon name="i-heroicons-arrow-down-tray" class="w-4 h-4" /> Download PDF
-            </a>
+            </button>
             <a href="#" class="flex items-center gap-1.5 hover:text-blue-600 transition-colors">
               <UIcon name="i-heroicons-bookmark" class="w-4 h-4" /> Cite Article
             </a>
@@ -167,6 +167,24 @@ const splashImageUrl = computed(() => {
   }
   if (typeof article.value.splash === 'string') return article.value.splash
   return null
+})
+
+const downloadPdf = async () => {
+  if (!mainfileUrl.value) return
+  const res = await fetch(mainfileUrl.value)
+  const blob = await res.blob()
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = article.value?.mainfile?.name || 'document.pdf'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+const mainfileUrl = computed(() => {
+  const url = article.value?.mainfile?.url
+  if (!url) return null
+  return url.startsWith('/') ? `${API_BASE_URL}${url}` : url
 })
 
 const authorsString = computed(() => article.value?.authors?.map(a => a.title).join(', ') || '')
