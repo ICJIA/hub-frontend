@@ -25,11 +25,13 @@ if (!existsSync(siteDir)) {
 // Optionally download PDF and Excel/CSV attachments so pagefind can index them
 const apiBaseUrl = process.env.VITE_API_BASE_URL
 const bearerToken = process.env.API_BEARER_TOKEN
+// Per-file fetch timeout — override with ATTACHMENT_TIMEOUT_MS for slow connections
+const timeoutMs = Number(process.env.ATTACHMENT_TIMEOUT_MS) || 120_000
 if (apiBaseUrl && bearerToken) {
-  console.log('\n⚙  Downloading PDF attachments for indexing...')
+  console.log(`\n⚙  Downloading PDF attachments for indexing (per-file timeout: ${Math.round(timeoutMs / 1000)}s)...`)
   try {
     const { downloadAttachments } = await import('./lib/download-pdf-attachments.mjs')
-    await downloadAttachments({ siteDir, apiBaseUrl, bearerToken })
+    await downloadAttachments({ siteDir, apiBaseUrl, bearerToken, timeoutMs })
   } catch (e) {
     console.warn('  PDF attachment download failed (non-fatal):', e.message)
     console.warn('  Continuing without PDF content in index.\n')
@@ -38,7 +40,7 @@ if (apiBaseUrl && bearerToken) {
   console.log('\n⚙  Processing Excel/CSV attachments for indexing...')
   try {
     const { downloadExcelAttachments } = await import('./lib/download-excel-attachments.mjs')
-    await downloadExcelAttachments({ siteDir, apiBaseUrl, bearerToken })
+    await downloadExcelAttachments({ siteDir, apiBaseUrl, bearerToken, timeoutMs })
   } catch (e) {
     console.warn('  Excel/CSV attachment processing failed (non-fatal):', e.message)
     console.warn('  Continuing without Excel/CSV content in index.\n')

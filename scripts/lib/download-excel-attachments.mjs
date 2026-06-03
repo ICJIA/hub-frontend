@@ -12,13 +12,14 @@
 
 import { mkdirSync, existsSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { fetchWithTimeout, formatBytes } from './download-utils.mjs'
 
 const EXCEL_EXTS = ['.xlsx', '.xls', '.csv']
 
 /**
- * @param {{ siteDir: string, apiBaseUrl: string, bearerToken: string }} options
+ * @param {{ siteDir: string, apiBaseUrl: string, bearerToken: string, timeoutMs?: number }} options
  */
-export async function downloadExcelAttachments({ siteDir, apiBaseUrl, bearerToken }) {
+export async function downloadExcelAttachments({ siteDir, apiBaseUrl, bearerToken, timeoutMs = 120_000 }) {
   const authHeaders = {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${bearerToken}`
@@ -31,6 +32,8 @@ export async function downloadExcelAttachments({ siteDir, apiBaseUrl, bearerToke
 
   let downloaded = 0
   let skipped = 0
+  let failed = 0
+  let seen = 0
 
   for (const ext of EXCEL_EXTS) {
     let page = 1
@@ -50,6 +53,7 @@ export async function downloadExcelAttachments({ siteDir, apiBaseUrl, bearerToke
       if (!files?.length) break
 
       for (const file of files) {
+        seen++
         const remoteUrl = file.url?.startsWith('/') ? `${apiBaseUrl}${file.url}` : file.url
         if (!remoteUrl) continue
 
@@ -59,17 +63,27 @@ export async function downloadExcelAttachments({ siteDir, apiBaseUrl, bearerToke
 
         if (existsSync(stubPath)) {
           skipped++
+          process.stdout.write(`  [${seen}] ⤼ cached: ${file.name}\n`)
           continue
         }
 
-        const fileRes = await fetch(remoteUrl, { headers: authHeaders })
-        if (!fileRes.ok) {
-          console.warn(`  Skipping "${file.name}": HTTP ${fileRes.status}`)
+        process.stdout.write(`  [${seen}] ⇣ fetching: ${file.name} ...`)
+        let fileBuffer
+        try {
+          const fileRes = await fetchWithTimeout(remoteUrl, { headers: authHeaders }, timeoutMs)
+          if (!fileRes.ok) {
+            failed++
+            process.stdout.write(` HTTP ${fileRes.status}, skipped\n`)
+            continue
+          }
+          const buffer = await fileRes.arrayBuffer()
+          fileBuffer = Buffer.from(buffer)
+        } catch (e) {
+          failed++
+          const msg = e?.name === 'AbortError' ? `timed out after ${Math.round(timeoutMs / 1000)}s` : e?.message ?? 'unknown error'
+          process.stdout.write(` ✗ ${msg}, skipped\n`)
           continue
         }
-
-        const buffer = await fileRes.arrayBuffer()
-        const fileBuffer = Buffer.from(buffer)
 
         if (!existsSync(localPath)) {
           writeFileSync(localPath, fileBuffer)
@@ -93,7 +107,7 @@ export async function downloadExcelAttachments({ siteDir, apiBaseUrl, bearerToke
             textContent = parts.join(' ')
           }
         } catch (e) {
-          console.warn(`  Could not extract text from "${file.name}": ${e.message}`)
+          console.warn(`\n  Could not extract text from "${file.name}": ${e.message}`)
         }
 
         // Normalise whitespace and cap length to avoid huge index entries
@@ -103,7 +117,7 @@ export async function downloadExcelAttachments({ siteDir, apiBaseUrl, bearerToke
         writeFileSync(stubPath, buildStub(displayName, localName, textContent))
 
         downloaded++
-        console.log(`  + ${file.name} → attachments/excel/${file.hash}.html`)
+        process.stdout.write(` ${formatBytes(fileBuffer.byteLength)} → attachments/excel/${file.hash}.html\n`)
       }
 
       page++
@@ -111,11 +125,7 @@ export async function downloadExcelAttachments({ siteDir, apiBaseUrl, bearerToke
     }
   }
 
-  if (downloaded > 0) {
-    console.log(`✓ Processed ${downloaded} Excel/CSV file(s), skipped ${skipped} already-cached.`)
-  } else {
-    console.log(`  No new Excel/CSV files found (${skipped} already cached).`)
-  }
+  console.log(`✓ Excel/CSV: ${downloaded} processed, ${skipped} cached, ${failed} failed (${seen} total seen).`)
 }
 
 function buildStub(displayName, localName, textContent) {

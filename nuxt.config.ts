@@ -14,18 +14,20 @@ export default defineNuxtConfig({
         if (!bearerToken) throw new Error('API_BEARER_TOKEN is not set — cannot build search index')
 
         console.log('\n⚙  Building search index...')
-        const { index, counts } = await buildIndex({ apiBaseUrl, bearerToken })
+        const { index, fileParents, counts } = await buildIndex({ apiBaseUrl, bearerToken })
 
         const outputDir = nitro.options.output.publicDir
         if (!existsSync(outputDir)) mkdirSync(outputDir, { recursive: true })
         writeFileSync(join(outputDir, 'search-index.json'), JSON.stringify(index))
+        writeFileSync(join(outputDir, 'file-parents.json'), JSON.stringify(fileParents))
 
         // Also write to public/ so `nuxt dev` serves it after a build
         const publicDir = join(nitro.options.rootDir, 'public')
         if (!existsSync(publicDir)) mkdirSync(publicDir, { recursive: true })
         writeFileSync(join(publicDir, 'search-index.json'), JSON.stringify(index))
+        writeFileSync(join(publicDir, 'file-parents.json'), JSON.stringify(fileParents))
 
-        console.log(`✓ Search index: ${index.length} items (${counts.articles} articles · ${counts.apps} apps · ${counts.datasets} datasets)\n`)
+        console.log(`✓ Search index: ${index.length} items, ${Object.keys(fileParents).length} file → parent mappings (${counts.articles} articles · ${counts.apps} apps · ${counts.datasets} datasets)\n`)
       }
     }
   },

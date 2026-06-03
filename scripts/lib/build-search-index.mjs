@@ -56,11 +56,96 @@ export async function fetchAllItems(endpoint, { apiBaseUrl, headers }) {
   return items
 }
 
+const EXCEL_EXTS = new Set(['.xlsx', '.xls', '.csv'])
+
+/**
+ * Normalise a Strapi file reference into the lightweight shape we embed on
+ * search-index items. Returns null when the input isn't a usable file ref.
+ *
+ * `indexedUrl` is where pagefind crawls (and what search results point at);
+ * `fileUrl` is the raw Strapi URL used for direct download / browser viewer.
+ */
+function normaliseFile(file, apiBaseUrl) {
+  if (!file?.hash) return null
+  const ext = String(file.ext ?? '').toLowerCase()
+  const isPdf = ext === '.pdf'
+  const isExcel = EXCEL_EXTS.has(ext)
+  const fileType = isPdf ? 'pdf' : isExcel ? 'excel' : 'other'
+
+  const indexedUrl = isPdf
+    ? `/attachments/${file.hash}.pdf`
+    : isExcel
+      ? `/attachments/excel/${file.hash}.html`
+      : null
+
+  const rawUrl = file.url ?? ''
+  const fileUrl = rawUrl.startsWith('/') ? `${apiBaseUrl}${rawUrl}` : rawUrl
+
+  return {
+    hash: file.hash,
+    name: file.name ?? `${file.hash}${ext}`,
+    ext,
+    fileType,
+    fileUrl,
+    indexedUrl
+  }
+}
+
+/** Pull the file list off an article (single `mainfile`) or dataset (`datafile` array). */
+function collectFiles(item, fieldName, apiBaseUrl) {
+  const ref = item?.[fieldName]
+  if (!ref) return []
+  const list = Array.isArray(ref) ? ref : [ref]
+  return list.map(f => normaliseFile(f, apiBaseUrl)).filter(Boolean)
+}
+
+/**
+ * Build a hash → [parents] map from the file references on articles and
+ * datasets. Used at search-time to show "Found in: <Article Title>" on file
+ * result cards. A single file can be referenced by multiple parents, hence
+ * the array.
+ */
+function buildFileParents({ articles, datasets }) {
+  /** @type {Record<string, Array<{ type: string, slug: string, title: string, url: string }>>} */
+  const map = {}
+
+  const addRef = (file, parent) => {
+    const hash = file?.hash
+    if (!hash) return
+    if (!map[hash]) map[hash] = []
+    // Avoid duplicates if the same parent references the same file twice
+    if (!map[hash].some(p => p.type === parent.type && p.slug === parent.slug)) {
+      map[hash].push(parent)
+    }
+  }
+
+  for (const a of articles) {
+    const slug = a.slug ?? ''
+    if (!slug) continue
+    const parent = { type: 'article', slug, title: a.title ?? '', url: `/articles/${slug}` }
+    addRef(a.mainfile, parent)
+  }
+
+  for (const d of datasets) {
+    const slug = d.slug ?? ''
+    if (!slug) continue
+    const parent = { type: 'dataset', slug, title: d.title ?? '', url: `/datasets/${slug}` }
+    const datafile = d.datafile
+    if (Array.isArray(datafile)) {
+      for (const f of datafile) addRef(f, parent)
+    } else if (datafile && typeof datafile === 'object') {
+      addRef(datafile, parent)
+    }
+  }
+
+  return map
+}
+
 /**
  * Fetch all content from Strapi and return a normalised search index array.
  *
  * @param {{ apiBaseUrl: string, bearerToken: string }} options
- * @returns {{ index: object[], counts: { articles: number, apps: number, datasets: number } }}
+ * @returns {{ index: object[], fileParents: Record<string, Array<object>>, counts: { articles: number, apps: number, datasets: number } }}
  */
 export async function buildIndex({ apiBaseUrl, bearerToken }) {
   const headers = {
@@ -95,7 +180,8 @@ export async function buildIndex({ apiBaseUrl, bearerToken }) {
         ? a.authors.map(x => (typeof x === 'string' ? x : (x?.title || x?.name || x?.Name || '')).trim()).filter(Boolean)
         : [],
       date: a.date ?? '',
-      imageUrl: resolveUrl(a.splash?.url ?? '')
+      imageUrl: resolveUrl(a.splash?.url ?? ''),
+      files: collectFiles(a, 'mainfile', apiBaseUrl)
     })),
     ...apps.map(a => ({
       id: a.id,
@@ -121,7 +207,8 @@ export async function buildIndex({ apiBaseUrl, bearerToken }) {
       categories: Array.isArray(d.categories) ? d.categories.filter(Boolean) : [],
       authors: [],
       date: d.date ?? '',
-      imageUrl: ''
+      imageUrl: '',
+      files: collectFiles(d, 'datafile', apiBaseUrl)
     })),
     ...projects.map(p => ({
       id: p.id,
@@ -149,5 +236,11 @@ export async function buildIndex({ apiBaseUrl, bearerToken }) {
     }))
   ]
 
-  return { index, counts: { articles: articles.length, apps: apps.length, datasets: datasets.length, projects: projects.length, projecthomes: projecthomes.length } }
+  const fileParents = buildFileParents({ articles, datasets })
+
+  return {
+    index,
+    fileParents,
+    counts: { articles: articles.length, apps: apps.length, datasets: datasets.length, projects: projects.length, projecthomes: projecthomes.length }
+  }
 }

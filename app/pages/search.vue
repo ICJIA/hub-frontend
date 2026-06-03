@@ -3,17 +3,25 @@
     <div class="mb-6">
       <h1 class="text-2xl font-bold mb-4">Search</h1>
 
-      <UInput
-        ref="inputEl"
-        v-model="query"
-        size="lg"
-        placeholder="Search articles, apps, datasets, and files…"
-        icon="i-lucide-search"
-        :trailing-icon="query ? 'i-lucide-x' : undefined"
-        class="w-full max-w-2xl"
-        @keydown.escape="query = ''"
-        @click:trailing="query = ''"
-      />
+      <div class="relative w-full max-w-2xl">
+        <UInput
+          ref="inputEl"
+          v-model="query"
+          size="lg"
+          placeholder="Search articles, apps, datasets, and files…"
+          icon="i-lucide-search"
+          class="w-full"
+          @keydown.escape="query = ''"
+        />
+        <button
+          v-if="query"
+          class="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+          aria-label="Clear search"
+          @mousedown.prevent="query = ''"
+        >
+          <UIcon name="i-lucide-x" class="w-4 h-4" />
+        </button>
+      </div>
     </div>
 
     <!-- Index not available (no build yet, or build error) -->
@@ -74,9 +82,21 @@
                     :name="result.fileType === 'pdf' ? 'i-lucide-file-text' : 'i-lucide-table-2'"
                     class="w-5 h-5 mt-0.5 shrink-0 text-gray-400"
                   />
-                  <div class="text-base font-semibold leading-snug text-gray-900 dark:text-gray-100 break-all">
+                  <div class="text-base font-semibold leading-snug text-gray-900 dark:text-gray-100 break-all flex-1 min-w-0">
                     {{ result.fileName || result.url.split('/').pop() }}
                   </div>
+                  <a
+                    v-if="result.fileType === 'pdf' && result.fileUrl"
+                    :href="nativePdfUrl(result.fileUrl)"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="shrink-0 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                    title="Open in browser PDF viewer"
+                    aria-label="Open PDF in browser viewer (new tab)"
+                    @click.stop
+                  >
+                    <UIcon name="i-lucide-external-link" class="w-4 h-4" />
+                  </a>
                 </div>
                 <UBadge
                   :color="result.fileType === 'pdf' ? 'error' : 'success'"
@@ -91,6 +111,21 @@
                   class="text-sm text-gray-500 dark:text-gray-400 [&_mark]:bg-yellow-200 [&_mark]:dark:bg-yellow-700 [&_mark]:rounded-sm [&_mark]:text-inherit [&_mark]:not-italic"
                   v-html="result.excerpt"
                 />
+                <div
+                  v-if="result.parents?.length"
+                  class="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400"
+                >
+                  <span class="font-medium">Found in:</span>
+                  <a
+                    v-for="(parent, i) in result.parents"
+                    :key="`${parent.type}-${parent.slug}`"
+                    :href="parent.url"
+                    class="ml-1 text-blue-600 dark:text-blue-400 hover:underline"
+                    @click.stop
+                  >
+                    {{ parent.title }}<span v-if="i < result.parents.length - 1">,</span>
+                  </a>
+                </div>
               </template>
 
               <!-- Article / app / dataset result card -->
@@ -120,6 +155,56 @@
                     variant="subtle"
                     size="sm"
                   >{{ cat }}</UBadge>
+                </div>
+
+                <!-- Attached files: show ALL files on the article/dataset, and
+                     mark the ones whose contents also matched the query. -->
+                <div
+                  v-if="result.item?.files?.length"
+                  class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700"
+                >
+                  <div class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                    Attached file{{ result.item.files.length !== 1 ? 's' : '' }}
+                    ({{ result.item.files.length }}<template v-if="result.attachedFiles?.length">, {{ result.attachedFiles.length }} contain{{ result.attachedFiles.length === 1 ? 's' : '' }} match</template>):
+                  </div>
+                  <ul class="space-y-2">
+                    <li
+                      v-for="file in result.item.files"
+                      :key="file.hash"
+                      class="flex items-start gap-2 text-sm"
+                    >
+                      <UIcon
+                        :name="fileIcon(file.fileType)"
+                        class="w-4 h-4 mt-0.5 shrink-0"
+                        :class="matchForFile(result, file.hash) ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-400'"
+                      />
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                          <a
+                            href="#"
+                            class="text-blue-600 dark:text-blue-400 hover:underline break-all"
+                            :class="matchForFile(result, file.hash) ? 'font-semibold' : ''"
+                            @click.stop.prevent="navigateFile(file)"
+                          >
+                            {{ file.name }}
+                          </a>
+                          <UBadge
+                            v-if="matchForFile(result, file.hash)"
+                            color="warning"
+                            variant="subtle"
+                            size="xs"
+                          >
+                            contains match
+                          </UBadge>
+                        </div>
+                        <p
+                          v-if="matchForFile(result, file.hash)?.excerpt"
+                          class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 [&_mark]:bg-yellow-200 [&_mark]:dark:bg-yellow-700 [&_mark]:rounded-sm [&_mark]:text-inherit [&_mark]:not-italic"
+                          v-html="matchForFile(result, file.hash).excerpt"
+                        />
+                      </div>
+                    </li>
+                  </ul>
                 </div>
               </template>
             </div>
@@ -183,13 +268,44 @@ watch(query, (val) => {
   router.replace({ query: trimmed ? { q: trimmed } : {} })
 })
 
+// Group results and attach file hits under their parent article/dataset when
+// that parent also appears in the result set. Orphan file hits (parent not
+// matched) stay in the standalone Files section.
 const groupedResults = computed(() => {
   const groups = { article: [], app: [], dataset: [], file: [] }
-  for (const result of results.value) {
-    if (result.type in groups) {
-      groups[result.type].push(result)
+  const attachedFiles = new Map() // `${type}:${slug}` → file results
+
+  // Pass 1: index parent matches and collect attachments
+  const parentKeys = new Set()
+  for (const r of results.value) {
+    if (r.type === 'article' || r.type === 'dataset') {
+      parentKeys.add(`${r.type}:${r.slug}`)
     }
   }
+
+  // Pass 2: bucket each result; attach files when a parent matched
+  for (const r of results.value) {
+    if (r.type === 'file' && r.parents?.length) {
+      const attachKey = r.parents
+        .map(p => `${p.type}:${p.slug}`)
+        .find(k => parentKeys.has(k))
+      if (attachKey) {
+        if (!attachedFiles.has(attachKey)) attachedFiles.set(attachKey, [])
+        attachedFiles.get(attachKey).push(r)
+        continue
+      }
+    }
+    if (r.type in groups) groups[r.type].push(r)
+  }
+
+  // Decorate parent items with their attached files
+  for (const type of ['article', 'dataset']) {
+    groups[type] = groups[type].map(r => ({
+      ...r,
+      attachedFiles: attachedFiles.get(`${type}:${r.slug}`) ?? []
+    }))
+  }
+
   return Object.entries(groups)
     .filter(([, items]) => items.length > 0)
     .map(([type, items]) => ({ type, items }))
@@ -240,4 +356,44 @@ const formatDate = (dateString) => {
 }
 
 const truncate = (text, len) => (text?.length > len ? text.slice(0, len) + '…' : text ?? '')
+
+// Append `#search=<query>` to PDF URLs so Chromium's native viewer highlights
+// the term on open. Strips any pre-existing hash so we don't double-up.
+const nativePdfUrl = (url) => {
+  const q = query.value.trim()
+  const base = url.split('#')[0]
+  return q ? `${base}#search=${encodeURIComponent(q)}` : base
+}
+
+const fileIcon = (fileType) => {
+  if (fileType === 'pdf') return 'i-lucide-file-text'
+  if (fileType === 'excel') return 'i-lucide-table-2'
+  return 'i-lucide-file'
+}
+
+// Look up the matching pagefind file result (if any) for a file attached to
+// this parent. Returns the file result so the caller can render the excerpt.
+const matchForFile = (parentResult, hash) => {
+  if (!parentResult.attachedFiles?.length) return null
+  return parentResult.attachedFiles.find((f) => {
+    const fileHash = (f.url.split('/').pop() ?? '').replace(/\.(pdf|html)$/i, '')
+    return fileHash === hash
+  }) ?? null
+}
+
+// Drives clicks on inline attached-file links inside a parent card. Uses the
+// raw Strapi file URL (so even non-indexed files like .docx are openable).
+const navigateFile = (file) => {
+  if (file.fileType === 'pdf') {
+    router.push({
+      path: '/pdf-viewer',
+      query: {
+        file: file.fileUrl,
+        ...(query.value.trim() ? { q: query.value.trim() } : {})
+      }
+    })
+  } else {
+    window.open(file.fileUrl, '_blank', 'noopener,noreferrer')
+  }
+}
 </script>

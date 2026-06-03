@@ -23,12 +23,13 @@ const bearerToken = process.env.VITE_API_BEARER_TOKEN || ''
 console.log('Building search index...')
 console.log(`  API: ${apiBaseUrl}`)
 
-const { index, counts } = await buildIndex({ apiBaseUrl, bearerToken })
+const { index, fileParents, counts } = await buildIndex({ apiBaseUrl, bearerToken })
 
 const publicDir = join(rootDir, 'public')
 if (!existsSync(publicDir)) mkdirSync(publicDir, { recursive: true })
 writeFileSync(join(publicDir, 'search-index.json'), JSON.stringify(index))
+writeFileSync(join(publicDir, 'file-parents.json'), JSON.stringify(fileParents))
 
 console.log(`✓ Search index written to public/search-index.json`)
 console.log(`  ${counts.articles} articles · ${counts.apps} apps · ${counts.datasets} datasets`)
-console.log(`  Total: ${index.length} items`)
+console.log(`  Total: ${index.length} items · ${Object.keys(fileParents).length} file → parent mappings`)
