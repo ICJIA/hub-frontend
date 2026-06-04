@@ -278,8 +278,14 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
-const backLabel = computed(() => route.query.from === 'articles' ? 'Back to Articles' : 'Back to Home')
-const goBack = () => route.query.from === 'articles' ? router.push('/articles') : router.push('/')
+const navFrom = useState('nav:article-from', () => null)
+const cameFromArticles = computed(() => navFrom.value === 'articles' || route.query.from === 'articles')
+const backLabel = computed(() => cameFromArticles.value ? 'Back to Articles' : 'Back to Home')
+const goBack = () => {
+  const dest = cameFromArticles.value ? '/articles' : '/'
+  navFrom.value = null
+  router.push(dest)
+}
 
 const navigateToArticle = (a) => {
   const slug = a.slug

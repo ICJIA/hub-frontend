@@ -1,13 +1,13 @@
 <template>
   <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
     <!-- Sticky header -->
-    <div class="sticky top-0 z-20 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+    <div class="sticky top-12 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
       <div class="max-w-5xl mx-auto px-4 py-2 flex items-center gap-3">
         <UButton
           icon="i-lucide-arrow-left"
           variant="ghost"
           size="sm"
-          aria-label="Back to search"
+          aria-label="Go back"
           @click="goBack"
         />
         <div class="flex-1 min-w-0">
@@ -20,17 +20,15 @@
         </div>
         <div class="flex items-center gap-1 shrink-0">
           <template v-if="matchCount > 0">
-            <UButton icon="i-lucide-chevron-up" variant="ghost" size="sm" aria-label="Previous match" @click="prevMatch" />
-            <UButton icon="i-lucide-chevron-down" variant="ghost" size="sm" aria-label="Next match" @click="nextMatch" />
+            <UButton icon="i-lucide-chevron-up" color="primary" variant="solid" size="sm" aria-label="Previous match" class="text-white" @click="prevMatch" />
+            <UButton icon="i-lucide-chevron-down" color="primary" variant="solid" size="sm" aria-label="Next match" class="text-white" @click="nextMatch" />
           </template>
           <UButton
-            :to="fileUrl"
-            target="_blank"
             icon="i-lucide-download"
             variant="outline"
             size="sm"
             label="Download"
-            external
+            @click="downloadFile"
           />
         </div>
       </div>
@@ -103,7 +101,17 @@ const route = useRoute()
 const router = useRouter()
 
 const fileUrl = computed(() => String(route.query.file ?? ''))
-const searchQuery = computed(() => String(route.query.q ?? ''))
+
+// Highlight term comes from `?q=…` (preferred) or falls back to a `#search=…`
+// hash fragment so URLs shaped like Chromium's native viewer still highlight
+// when opened in this in-app route.
+const searchQuery = computed(() => {
+  const q = String(route.query.q ?? '')
+  if (q) return q
+  const hash = String(route.hash ?? '')
+  const match = hash.match(/[#&]search=([^&]+)/)
+  return match?.[1] ? decodeURIComponent(match[1].replace(/\+/g, ' ')) : ''
+})
 const fileName = computed(() => {
   const url = fileUrl.value
   if (!url) return 'Document'
@@ -141,7 +149,28 @@ function prevMatch() {
   matchEls.value[currentMatch.value]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
 
+async function downloadFile() {
+  if (!fileUrl.value) return
+  const res = await fetch(fileUrl.value)
+  const blob = await res.blob()
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = fileName.value
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 function goBack() {
+  // Prefer in-SPA history so we return to wherever the user came from
+  // (article, dataset, app, search results, etc.). Vue Router sets
+  // history.state.back to null on the first navigation, so we fall back to
+  // the search page only when there's no previous entry.
+  const hasPrevious = typeof window !== 'undefined' && window.history.state?.back != null
+  if (hasPrevious) {
+    router.back()
+    return
+  }
   const q = searchQuery.value.trim()
   router.push(q ? { path: '/search', query: { q } } : '/search')
 }
@@ -212,16 +241,32 @@ async function renderPage(pageNum: number) {
       })
       await textLayer.render()
 
-      // Highlight spans whose text contains the search term
+      // Highlight only the matched characters within each span. PDF text layers
+      // split content one-span-per-word (or less), so we inject <mark> elements
+      // around the exact matching substring rather than highlighting the whole span.
       if (searchQuery.value.trim()) {
-        const term = searchQuery.value.toLowerCase().trim()
+        const escHtml = (s: string) =>
+          s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        const escRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+        const terms = searchQuery.value.trim().split(/\s+/).filter(t => t.length > 1)
         const newMatches: Element[] = []
-        textLayerDiv.querySelectorAll('span').forEach((span) => {
-          if (span.textContent?.toLowerCase().includes(term)) {
-            span.classList.add('pdf-highlight')
-            newMatches.push(span)
-          }
-        })
+
+        if (terms.length) {
+          const regex = new RegExp(
+            `(${terms.map(t => escRe(escHtml(t))).join('|')})`,
+            'gi'
+          )
+          textLayerDiv.querySelectorAll('span').forEach((span) => {
+            const raw = span.textContent
+            if (!raw) return
+            const escaped = escHtml(raw)
+            const marked = escaped.replace(regex, '<mark class="pdf-highlight">$1</mark>')
+            if (marked === escaped) return
+            span.innerHTML = marked
+            span.querySelectorAll<Element>('mark.pdf-highlight').forEach(m => newMatches.push(m))
+          })
+        }
 
         if (newMatches.length) {
           matchEls.value = [...matchEls.value, ...newMatches]
@@ -261,7 +306,8 @@ onMounted(async () => {
       import.meta.url
     ).href
 
-    _pdfDoc = await lib.getDocument(fileUrl.value).promise
+    // pdfjs-dist v6 dropped the string-shorthand — must pass { url } (or { data }).
+    _pdfDoc = await lib.getDocument({ url: fileUrl.value }).promise
     const pdfDoc = _pdfDoc as any
 
     // Load all page dimensions concurrently (fast — just reads metadata, no rendering)
@@ -359,9 +405,10 @@ onUnmounted(() => {
   display: contents;
 }
 
-/* Search term highlight — shows as a yellow band over the rendered canvas text */
-.pdfTextLayer .pdf-highlight {
+/* Search term highlight — wraps only the matched characters, not the whole span */
+.pdfTextLayer mark.pdf-highlight {
   background-color: rgba(255, 213, 0, 0.55);
   border-radius: 2px;
+  color: transparent;
 }
 </style>

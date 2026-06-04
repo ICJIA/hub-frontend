@@ -13,9 +13,9 @@
     "test:watch": "vitest",
     "a11y": "npx tsx scripts/a11y-audit.ts",
     "a11y:test": "vitest run tests/a11y",
-    "generate:search": "node scripts/generate-search-index.mjs",
-    "pagefind:build": "node scripts/pagefind-build.mjs",
-    "build:full": "nuxt build && node scripts/pagefind-build.mjs"
+    "generate:search": "node --env-file=.env scripts/generate-search-index.mjs",
+    "pagefind:build": "node --env-file=.env scripts/pagefind-build.mjs",
+    "build:full": "nuxt build && node --env-file=.env scripts/pagefind-build.mjs"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.98",
@@ -26,7 +26,6 @@
     "@nuxt/ui": "^4.5.1",
     "@vuepic/vue-datepicker": "^12.1.0",
     "@vueup/vue-quill": "^1.2.0",
-    "fuse.js": "^7.3.0",
     "marked": "^17.0.1",
     "marked-footnote": "^1.4.0",
     "nuxt": "^4.4.2",

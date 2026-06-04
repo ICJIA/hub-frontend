@@ -91,6 +91,7 @@ import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
+const navDataFrom = useState('nav:data-from', () => null)
 const { loadIndex, searchByType, getByType, isLoading, loadError } = useSearch()
 
 const resolvedTab = computed(() =>
@@ -183,6 +184,7 @@ const changePage = (page) => {
 }
 
 const goToItem = (slug) => {
+  navDataFrom.value = activeTab.value
   const base = activeTab.value === 'datasets' ? '/datasets' : '/apps'
   router.push(`${base}/${slug}`)
 }

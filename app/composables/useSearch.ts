@@ -1,4 +1,13 @@
-import Fuse, { type IFuseOptions } from 'fuse.js'
+export interface AttachedFile {
+  hash: string
+  name: string
+  ext: string
+  fileType: 'pdf' | 'excel' | 'other'
+  /** Direct (Strapi) URL for download or external viewer. */
+  fileUrl: string
+  /** Local indexed URL where pagefind crawls — null when the file type isn't indexed. */
+  indexedUrl: string | null
+}
 
 export interface SearchItem {
   id: number
@@ -11,20 +20,7 @@ export interface SearchItem {
   authors: string[]
   date: string
   imageUrl: string
-}
-
-const FUSE_OPTIONS: IFuseOptions<SearchItem> = {
-  keys: [
-    { name: 'title', weight: 0.4 },
-    { name: 'summary', weight: 0.3 },
-    { name: 'content', weight: 0.15 },
-    { name: 'categories', weight: 0.1 },
-    { name: 'authors', weight: 0.05 }
-  ],
-  threshold: 0.4,
-  minMatchCharLength: 2,
-  includeScore: true,
-  ignoreLocation: true
+  files?: AttachedFile[]
 }
 
 // Module-level singletons — client-only.
@@ -32,7 +28,6 @@ const FUSE_OPTIONS: IFuseOptions<SearchItem> = {
 // be written during SSR. loadIndex() guards against this with an
 // import.meta.client check; callers must only invoke it from onMounted or
 // other client-side lifecycle hooks, never from setup() or useAsyncData.
-let _fuse: Fuse<SearchItem> | null = null
 let _inflight: Promise<void> | null = null
 
 export const useSearch = () => {
@@ -58,7 +53,6 @@ export const useSearch = () => {
       try {
         const data = await $fetch<SearchItem[]>('/search-index.json')
         items.value = data
-        _fuse = new Fuse(data, FUSE_OPTIONS)
         isLoaded.value = true
       } catch {
         loadError.value = 'Search index not available. Run `pnpm generate:search` locally, or deploy to build it automatically.'
@@ -76,20 +70,22 @@ export const useSearch = () => {
     items.value.filter(i => i.type === type)
 
   /**
-   * Fuzzy-search items of a specific type.
+   * Filter items of a specific type by a case-insensitive substring match
+   * across title, summary, content, categories, and authors.
    * Returns the full set for that type when the query is empty.
    */
   const searchByType = (query: string, type: SearchItem['type']): SearchItem[] => {
     const base = items.value.filter(i => i.type === type)
-    if (!query.trim() || !_fuse) return base
-    return _fuse.search(query).map(r => r.item).filter(i => i.type === type)
+    if (!query.trim()) return base
+    const q = query.toLowerCase()
+    return base.filter(item =>
+      item.title.toLowerCase().includes(q) ||
+      item.summary.toLowerCase().includes(q) ||
+      item.content.toLowerCase().includes(q) ||
+      item.categories.some(c => c.toLowerCase().includes(q)) ||
+      item.authors.some(a => a.toLowerCase().includes(q))
+    )
   }
 
-  /** Global cross-type fuzzy search (used by /search page). */
-  const search = (query: string): SearchItem[] => {
-    if (!query.trim() || !_fuse) return []
-    return _fuse.search(query, { limit: 60 }).map(r => r.item)
-  }
-
-  return { loadIndex, search, searchByType, getByType, items, isLoaded, isLoading, loadError }
+  return { loadIndex, searchByType, getByType, items, isLoaded, isLoading, loadError }
 }

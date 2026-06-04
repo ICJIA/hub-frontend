@@ -39,10 +39,18 @@
         icon="i-lucide-search"
         size="sm"
         class="flex-1 min-w-[160px]"
-        :trailing-icon="localSearch ? 'i-lucide-x' : undefined"
-        @click:trailing="clearSearch"
         @keydown.escape="clearSearch"
-      />
+      >
+        <template v-if="localSearch" #trailing>
+          <button
+            type="button"
+            class="flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none"
+            @click.stop="clearSearch"
+          >
+            <UIcon name="i-lucide-x" class="w-4 h-4" />
+          </button>
+        </template>
+      </UInput>
 
       <div class="flex border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden shrink-0">
         <button

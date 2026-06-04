@@ -73,7 +73,7 @@ function normaliseFile(file, apiBaseUrl) {
   const fileType = isPdf ? 'pdf' : isExcel ? 'excel' : 'other'
 
   const indexedUrl = isPdf
-    ? `/attachments/${file.hash}.pdf`
+    ? `/attachments/pdf/${file.hash}.html`
     : isExcel
       ? `/attachments/excel/${file.hash}.html`
       : null

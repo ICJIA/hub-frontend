@@ -34,6 +34,9 @@ export async function downloadExcelAttachments({ siteDir, apiBaseUrl, bearerToke
   let skipped = 0
   let failed = 0
   let seen = 0
+  // Guard against infinite loops: track hashes across all pages per extension
+  // in case the upload API ignores pagination params and returns all files every time.
+  const seenHashes = new Set()
 
   for (const ext of EXCEL_EXTS) {
     let page = 1
@@ -50,10 +53,15 @@ export async function downloadExcelAttachments({ siteDir, apiBaseUrl, bearerToke
       if (!res.ok) throw new Error(`Strapi upload API HTTP ${res.status}: ${res.statusText}`)
 
       const files = await res.json()
-      if (!files?.length) break
+      if (!Array.isArray(files) || files.length === 0) break
 
+      let newInBatch = 0
       for (const file of files) {
+        if (!file.hash || seenHashes.has(file.hash)) continue
+        seenHashes.add(file.hash)
+        newInBatch++
         seen++
+
         const remoteUrl = file.url?.startsWith('/') ? `${apiBaseUrl}${file.url}` : file.url
         if (!remoteUrl) continue
 
@@ -63,7 +71,6 @@ export async function downloadExcelAttachments({ siteDir, apiBaseUrl, bearerToke
 
         if (existsSync(stubPath)) {
           skipped++
-          process.stdout.write(`  [${seen}] ⤼ cached: ${file.name}\n`)
           continue
         }
 
@@ -120,8 +127,9 @@ export async function downloadExcelAttachments({ siteDir, apiBaseUrl, bearerToke
         process.stdout.write(` ${formatBytes(fileBuffer.byteLength)} → attachments/excel/${file.hash}.html\n`)
       }
 
-      page++
+      if (newInBatch === 0) break
       if (files.length < PAGE_SIZE) break
+      page++
     }
   }
 

@@ -32,9 +32,6 @@ importers:
       '@vueup/vue-quill':
         specifier: ^1.2.0
         version: 1.2.0(vue@3.5.31(typescript@5.9.3))
-      fuse.js:
-        specifier: ^7.3.0
-        version: 7.3.0
       marked:
         specifier: ^17.0.1
         version: 17.0.5

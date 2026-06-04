@@ -48,7 +48,10 @@
             :image-url="item.imageUrl || null"
             :view-mode="viewMode"
             :query="filterSearch || undefined"
+            :files="item.files || []"
+            :matched-files="fileMatchesBySlug.get(item.slug) || []"
             @click="goToArticle(item.slug)"
+            @file-click="navigateFile"
           />
         </div>
       </div>
@@ -77,7 +80,9 @@ import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
+const navFrom = useState('nav:article-from', () => null)
 const { loadIndex, searchByType, getByType, isLoaded, isLoading, loadError } = useSearch()
+const { load: loadPagefind, search: pagefindSearch, isLoaded: pagefindLoaded } = usePagefind()
 
 useSeoMeta({
   title: 'Articles | ICJIA Research Hub',
@@ -129,7 +134,94 @@ const availableYears = computed(() => {
   return [...years].sort((a, b) => Number(b) - Number(a))
 })
 
-const searchResults = computed(() => searchByType(filterSearch.value, 'article'))
+// Pagefind results (file matches inside PDFs/Excel attached to articles).
+// Populated client-side once pagefind has loaded; empty otherwise so the page
+// still works during prerender / before the engine is ready.
+const pagefindResults = ref([])
+
+const runPagefind = async (q) => {
+  const trimmed = q.trim()
+  if (!trimmed || !pagefindLoaded.value) {
+    pagefindResults.value = []
+    return
+  }
+  pagefindResults.value = await pagefindSearch(trimmed)
+}
+
+// Re-run when the query changes OR when pagefind finishes loading
+watch([filterSearch, pagefindLoaded], ([q]) => runPagefind(q), { immediate: true })
+
+// Reverse lookup: file hash → article slug, built from the search index.
+// Used as a fallback when file-parents.json is missing or empty.
+const fileHashToSlug = computed(() => {
+  const map = new Map()
+  for (const item of allItems.value) {
+    for (const f of item.files ?? []) {
+      if (f.hash) map.set(f.hash, item.slug)
+    }
+  }
+  return map
+})
+
+const hashFromUrl = (url) =>
+  (url?.split('/').pop() ?? '').replace(/\.(pdf|html)$/i, '')
+
+// slug → pagefind file results for that article (used to mark "contains match").
+// Primary source: parents from file-parents.json. Fallback: hash reverse-lookup
+// from the search index so results still surface when file-parents.json is absent.
+const fileMatchesBySlug = computed(() => {
+  const map = new Map()
+  for (const r of pagefindResults.value) {
+    if (r.type !== 'file') continue
+    const slugs = new Set()
+    if (r.parents?.length) {
+      for (const p of r.parents) {
+        if (p.type === 'article') slugs.add(p.slug)
+      }
+    }
+    if (slugs.size === 0) {
+      const slug = fileHashToSlug.value.get(hashFromUrl(r.url))
+      if (slug) slugs.add(slug)
+    }
+    for (const slug of slugs) {
+      if (!map.has(slug)) map.set(slug, [])
+      map.get(slug).push(r)
+    }
+  }
+  return map
+})
+
+// Articles where pagefind matched either body content or an attached file
+const pagefindMatchedSlugs = computed(() => {
+  const slugs = new Set()
+  for (const r of pagefindResults.value) {
+    if (r.type === 'article' && r.slug) slugs.add(r.slug)
+    if (r.type === 'file') {
+      if (r.parents?.length) {
+        for (const p of r.parents) if (p.type === 'article') slugs.add(p.slug)
+      } else {
+        const slug = fileHashToSlug.value.get(hashFromUrl(r.url))
+        if (slug) slugs.add(slug)
+      }
+    }
+  }
+  return slugs
+})
+
+// Union text-filter results with articles that only pagefind matched (e.g. term
+// lives only in an attached PDF). Empty query falls back to all articles.
+const searchResults = computed(() => {
+  const textResults = searchByType(filterSearch.value, 'article')
+  if (!filterSearch.value.trim()) return textResults
+
+  const bySlug = new Map(textResults.map(r => [r.slug, r]))
+  for (const slug of pagefindMatchedSlugs.value) {
+    if (bySlug.has(slug)) continue
+    const article = allItems.value.find(a => a.slug === slug)
+    if (article) bySlug.set(slug, article)
+  }
+  return [...bySlug.values()]
+})
 
 const filteredItems = computed(() =>
   searchResults.value.filter(item => {
@@ -178,7 +270,27 @@ const changePage = (page) => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-const goToArticle = (slug) => router.push(`/articles/${slug}?from=articles`)
+const goToArticle = (slug) => {
+  navFrom.value = 'articles'
+  router.push(`/articles/${slug}`)
+}
+
+// PDF clicks open the in-app viewer with the current query so matches highlight.
+// Excel/CSV opens the file directly in a new tab.
+const navigateFile = (file) => {
+  if (file.fileType === 'pdf') {
+    router.push({
+      path: '/pdf-viewer',
+      query: {
+        file: file.fileUrl,
+        ...(filterSearch.value.trim() ? { q: filterSearch.value.trim() } : {})
+      }
+    })
+  } else {
+    window.open(file.fileUrl, '_blank', 'noopener,noreferrer')
+  }
+}
 
 useAsyncData('search-index', () => loadIndex(), { server: false })
+useAsyncData('articles-pagefind', () => loadPagefind(), { server: false })
 </script>

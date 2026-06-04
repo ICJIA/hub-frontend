@@ -3,8 +3,9 @@
  * static site output. Run after `nuxt build` via `pnpm pagefind:build`,
  * or together with `pnpm build:full`.
  *
- * Optionally downloads PDF attachments from Strapi into
- * .output/public/attachments/ so their text content is indexed too.
+ * Optionally downloads PDF and Excel/CSV attachments from Strapi, then converts
+ * them to HTML stubs so pagefind can index their text content.
+ * (Pagefind v1.x only processes HTML files, not PDFs directly.)
  */
 
 import { execSync } from 'node:child_process'
@@ -49,12 +50,24 @@ if (apiBaseUrl && bearerToken) {
   console.log('\n  VITE_API_BASE_URL / API_BEARER_TOKEN not set — skipping attachment downloads.')
 }
 
-// Run pagefind to crawl HTML (and any local PDFs) and build the index
+// Convert downloaded PDFs to HTML stubs so pagefind can index their text.
+// This runs even without API keys — it works on whatever PDFs are already cached.
+console.log('\n⚙  Generating HTML stubs from PDF attachments...')
+try {
+  const { generatePdfStubs } = await import('./lib/generate-pdf-stubs.mjs')
+  await generatePdfStubs({ siteDir })
+} catch (e) {
+  console.warn('  PDF stub generation failed (non-fatal):', e.message)
+  console.warn('  Continuing without PDF content in index.\n')
+}
+
+// Run pagefind over HTML only — PDFs are not processable by pagefind directly;
+// their content is indexed via the HTML stubs generated above.
 const pagefindBin = join(rootDir, 'node_modules', '.bin', 'pagefind')
 const pagefindArgs = [
   `--site "${siteDir}"`,
   `--output-path "${join(siteDir, 'pagefind')}"`,
-  '--glob "**/*.{html,pdf}"'
+  '--glob "**/*.html"'
 ].join(' ')
 
 console.log('\n⚙  Building pagefind index...')

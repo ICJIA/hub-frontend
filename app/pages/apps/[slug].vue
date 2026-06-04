@@ -6,7 +6,7 @@
 
     <div v-else-if="error" class="text-center py-16 bg-gray-100 dark:bg-gray-900 flex-1">
       <UAlert color="error" :description="error" class="mb-4" />
-      <UButton variant="outline" icon="i-heroicons-arrow-left" @click="goBack">Back to Data</UButton>
+      <UButton variant="outline" icon="i-heroicons-arrow-left" @click="goBack">{{ backLabel }}</UButton>
     </div>
 
     <template v-else-if="app">
@@ -14,7 +14,7 @@
       <div class="bg-white dark:bg-gray-900">
         <div class="max-w-[1300px] mx-auto pt-4 px-4 pb-3 sm:pt-6 sm:px-6 sm:pb-4">
           <UButton variant="outline" icon="i-heroicons-arrow-left" @click="goBack" class="mb-4">
-            Back to Data
+            {{ backLabel }}
           </UButton>
 
           <!-- Title Row -->
@@ -157,7 +157,13 @@ useSeoMeta({
   ogImage: () => imageUrl.value || '',
 })
 
-const goBack = () => router.push('/data')
+const navDataFrom = useState('nav:data-from', () => null)
+const backLabel = computed(() => navDataFrom.value === 'apps' ? 'Back to Apps' : '{{ backLabel }}')
+const goBack = () => {
+  const tab = navDataFrom.value
+  navDataFrom.value = null
+  router.push(tab === 'apps' ? '/data?tab=apps' : '/data')
+}
 const goToArticle = (item) => router.push(`/articles/${item.slug}`)
 const goToDataset = (item) => router.push(`/datasets/${item.slug}`)
 </script>

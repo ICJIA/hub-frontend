@@ -31,6 +31,10 @@ export async function downloadAttachments({ siteDir, apiBaseUrl, bearerToken, ti
   let failed = 0
   let seen = 0
   const PAGE_SIZE = 50
+  // Guard against infinite loops: the Strapi upload API (/api/upload/files) may
+  // ignore pagination params and return all files on every page. Track processed
+  // hashes so we stop when a page contains nothing new.
+  const seenHashes = new Set()
 
   while (true) {
     const params = new URLSearchParams({
@@ -43,10 +47,15 @@ export async function downloadAttachments({ siteDir, apiBaseUrl, bearerToken, ti
     if (!res.ok) throw new Error(`Strapi upload API HTTP ${res.status}: ${res.statusText}`)
 
     const files = await res.json()
-    if (!files?.length) break
+    if (!Array.isArray(files) || files.length === 0) break
 
+    let newInBatch = 0
     for (const file of files) {
+      if (!file.hash || seenHashes.has(file.hash)) continue
+      seenHashes.add(file.hash)
+      newInBatch++
       seen++
+
       const remoteUrl = file.url?.startsWith('/') ? `${apiBaseUrl}${file.url}` : file.url
       if (!remoteUrl) continue
 
@@ -56,7 +65,6 @@ export async function downloadAttachments({ siteDir, apiBaseUrl, bearerToken, ti
 
       if (existsSync(localPath)) {
         skipped++
-        process.stdout.write(`  [${seen}] ⤼ cached: ${file.name}\n`)
         continue
       }
 
@@ -80,8 +88,10 @@ export async function downloadAttachments({ siteDir, apiBaseUrl, bearerToken, ti
       }
     }
 
-    page++
+    // No new hashes in this batch → the API is re-sending files we already saw
+    if (newInBatch === 0) break
     if (files.length < PAGE_SIZE) break
+    page++
   }
 
   console.log(`✓ PDFs: ${downloaded} downloaded, ${skipped} cached, ${failed} failed (${seen} total seen).`)
