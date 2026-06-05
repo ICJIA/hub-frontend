@@ -11,11 +11,25 @@
 import { execSync } from 'node:child_process'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { existsSync } from 'node:fs'
+import { existsSync, cpSync, readFileSync } from 'node:fs'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const rootDir = resolve(__dirname, '..')
 const siteDir = join(rootDir, '.output', 'public')
+
+// Load .env when present (local dev). CI/Netlify inject env vars directly.
+const dotenvPath = join(rootDir, '.env')
+if (existsSync(dotenvPath)) {
+  for (const line of readFileSync(dotenvPath, 'utf-8').split('\n')) {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) continue
+    const eqIdx = trimmed.indexOf('=')
+    if (eqIdx < 1) continue
+    const key = trimmed.slice(0, eqIdx).trim()
+    const val = trimmed.slice(eqIdx + 1).trim()
+    if (key && !(key in process.env)) process.env[key] = val
+  }
+}
 
 if (!existsSync(siteDir)) {
   console.error(`\n✗ Site directory not found: ${siteDir}`)
@@ -72,4 +86,10 @@ const pagefindArgs = [
 
 console.log('\n⚙  Building pagefind index...')
 execSync(`"${pagefindBin}" ${pagefindArgs}`, { stdio: 'inherit', cwd: rootDir })
-console.log('✓ Pagefind index written to .output/public/pagefind/\n')
+console.log('✓ Pagefind index written to .output/public/pagefind/')
+
+// Copy to project public/ so the Nuxt dev server (`pnpm dev`) can also serve it.
+// .output/public/ is rebuilt on every `nuxt build` but public/ persists.
+const devPublicDir = join(rootDir, 'public', 'pagefind')
+cpSync(join(siteDir, 'pagefind'), devPublicDir, { recursive: true })
+console.log('✓ Pagefind index copied to public/pagefind/ (for dev server)\n')

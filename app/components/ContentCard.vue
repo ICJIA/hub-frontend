@@ -76,11 +76,6 @@
               >
                 <HighlightText :text="file.name" :query="query" />
               </a>
-              <p
-                v-if="matchFor(file.hash)?.excerpt"
-                class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 [&_mark]:bg-yellow-200 [&_mark]:dark:bg-yellow-700 [&_mark]:rounded-sm [&_mark]:text-inherit [&_mark]:not-italic"
-                v-html="matchFor(file.hash).excerpt"
-              />
             </div>
           </li>
         </ul>

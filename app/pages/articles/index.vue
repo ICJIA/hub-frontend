@@ -81,6 +81,7 @@ import { useRouter, useRoute } from 'vue-router'
 const router = useRouter()
 const route = useRoute()
 const navFrom = useState('nav:article-from', () => null)
+const navSearchQuery = useState('nav:search-query', () => '')
 const { loadIndex, searchByType, getByType, isLoaded, isLoading, loadError } = useSearch()
 const { load: loadPagefind, search: pagefindSearch, isLoaded: pagefindLoaded } = usePagefind()
 
@@ -272,6 +273,7 @@ const changePage = (page) => {
 
 const goToArticle = (slug) => {
   navFrom.value = 'articles'
+  navSearchQuery.value = filterSearch.value
   router.push(`/articles/${slug}`)
 }
 

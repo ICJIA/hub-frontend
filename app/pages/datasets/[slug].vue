@@ -53,7 +53,7 @@
         <div class="max-w-[1300px] mx-auto py-4 px-4 sm:py-6 sm:px-6">
           <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
             <!-- Main Content -->
-            <div data-pagefind-body class="flex-1 min-w-0 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+            <div ref="contentRef" data-pagefind-body class="flex-1 min-w-0 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
               <div class="bg-[#1a3a5c] text-white px-6 py-4">
                 <h2 class="text-lg font-bold">Overview: {{ dataset.title }}</h2>
               </div>
@@ -203,8 +203,9 @@
 <script setup>
 defineRouteRules({ prerender: true })
 
-import { computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useSearchHighlight } from '~/composables/useSearchHighlight'
 
 const router = useRouter()
 const route = useRoute()
@@ -257,12 +258,19 @@ const datafileUrl = (file) => {
 }
 
 const navDataFrom = useState('nav:data-from', () => null)
+const navDataSearch = useState('nav:data-search', () => '')
 const backLabel = computed(() => navDataFrom.value === 'apps' ? 'Back to Apps' : 'Back to Datasets')
 const goBack = () => {
   const tab = navDataFrom.value
+  const q = navDataSearch.value
   navDataFrom.value = null
-  router.push(tab === 'apps' ? '/data?tab=apps' : '/data')
+  const query = { ...(tab === 'apps' ? { tab: 'apps' } : {}), ...(q ? { search: q } : {}) }
+  router.push({ path: '/data', query })
 }
 const goToApp = (item) => router.push(`/apps/${item.slug}`)
 const goToArticle = (item) => router.push(`/articles/${item.slug}`)
+
+const contentRef = ref(null)
+const { applyHighlight } = useSearchHighlight(contentRef, navDataSearch)
+watch([dataset, navDataSearch], applyHighlight, { immediate: false })
 </script>

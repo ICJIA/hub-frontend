@@ -13,9 +13,9 @@
     "test:watch": "vitest",
     "a11y": "npx tsx scripts/a11y-audit.ts",
     "a11y:test": "vitest run tests/a11y",
-    "generate:search": "node --env-file=.env scripts/generate-search-index.mjs",
-    "pagefind:build": "node --env-file=.env scripts/pagefind-build.mjs",
-    "build:full": "nuxt build && node --env-file=.env scripts/pagefind-build.mjs"
+    "generate:search": "node scripts/generate-search-index.mjs",
+    "pagefind:build": "node scripts/pagefind-build.mjs",
+    "build:full": "nuxt build && node scripts/pagefind-build.mjs"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.98",

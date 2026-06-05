@@ -9,13 +9,27 @@
  * in nuxt.config.ts during `nuxt build`.
  */
 
-import { writeFileSync, mkdirSync, existsSync } from 'node:fs'
+import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'node:fs'
 import { resolve, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { buildIndex } from './lib/build-search-index.mjs'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const rootDir = resolve(__dirname, '..')
+
+// Load .env when present (local dev). CI/Netlify inject env vars directly.
+const dotenvPath = join(rootDir, '.env')
+if (existsSync(dotenvPath)) {
+  for (const line of readFileSync(dotenvPath, 'utf-8').split('\n')) {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) continue
+    const eqIdx = trimmed.indexOf('=')
+    if (eqIdx < 1) continue
+    const key = trimmed.slice(0, eqIdx).trim()
+    const val = trimmed.slice(eqIdx + 1).trim()
+    if (key && !(key in process.env)) process.env[key] = val
+  }
+}
 
 const apiBaseUrl = process.env.VITE_API_BASE_URL || ''
 const bearerToken = process.env.VITE_API_BEARER_TOKEN || ''
