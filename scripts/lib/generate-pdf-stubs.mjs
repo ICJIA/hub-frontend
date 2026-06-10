@@ -26,7 +26,7 @@ async function extractPdfText(pdfPath, timeoutMs = 60_000) {
   const { signal } = controller
   let timeoutId
 
-  const timeoutPromise = new Promise(resolve => {
+  const timeoutPromise = new Promise((resolve) => {
     timeoutId = setTimeout(() => {
       controller.abort()
       resolve('')
