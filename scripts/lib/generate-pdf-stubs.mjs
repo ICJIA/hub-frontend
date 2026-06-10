@@ -22,6 +22,17 @@ const WORKER_SRC = fileURLToPath(
 )
 
 async function extractPdfText(pdfPath, timeoutMs = 60_000) {
+  const controller = new AbortController()
+  const { signal } = controller
+  let timeoutId
+
+  const timeoutPromise = new Promise(resolve => {
+    timeoutId = setTimeout(() => {
+      controller.abort()
+      resolve('')
+    }, timeoutMs)
+  })
+
   const doExtract = async () => {
     const { getDocument, GlobalWorkerOptions } = await import('pdfjs-dist/legacy/build/pdf.mjs')
     GlobalWorkerOptions.workerSrc = WORKER_SRC
@@ -38,6 +49,7 @@ async function extractPdfText(pdfPath, timeoutMs = 60_000) {
 
     const parts = []
     for (let i = 1; i <= doc.numPages; i++) {
+      if (signal.aborted) break
       const page = await doc.getPage(i)
       const content = await page.getTextContent()
       const text = content.items
@@ -48,16 +60,17 @@ async function extractPdfText(pdfPath, timeoutMs = 60_000) {
     }
 
     // doc.destroy() was removed in pdfjs-dist v6
-    try { await doc.destroy() } catch {}
+    if (typeof doc.destroy === 'function') await doc.destroy()
     return parts.join('\n').replace(/\s+/g, ' ').trim().slice(0, 500_000)
   }
 
   try {
-    return await Promise.race([
-      doExtract(),
-      new Promise(resolve => setTimeout(() => resolve(''), timeoutMs))
-    ])
-  } catch {
+    const result = await Promise.race([doExtract(), timeoutPromise])
+    clearTimeout(timeoutId)
+    return result
+  } catch (err) {
+    clearTimeout(timeoutId)
+    console.warn(`  ⚠ PDF extraction error (${pdfPath}): ${err.message}`)
     return ''
   }
 }
@@ -90,7 +103,9 @@ export async function generatePdfStubs({ siteDir }) {
           }
         }
       }
-    } catch {}
+    } catch (err) {
+      console.warn(`  ⚠ Could not parse search-index.json: ${err.message}`)
+    }
   }
 
   const pdfFiles = readdirSync(attachDir).filter(f => f.endsWith('.pdf'))
@@ -126,7 +141,7 @@ export async function generatePdfStubs({ siteDir }) {
   console.log(`✓ PDF stubs: ${processed} created, ${skipped} cached.`)
 }
 
-function buildStub(displayName, localUrl, strapiUrl, textContent) {
+function buildStub(displayName, _localUrl, strapiUrl, textContent) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>

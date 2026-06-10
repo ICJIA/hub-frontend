@@ -43,7 +43,7 @@ export async function downloadAttachments({ siteDir, apiBaseUrl, bearerToken, ti
       'pagination[pageSize]': String(PAGE_SIZE)
     })
 
-    const res = await fetch(`${apiBaseUrl}/api/upload/files?${params}`, { headers: authHeaders })
+    const res = await fetchWithTimeout(`${apiBaseUrl}/api/upload/files?${params}`, { headers: authHeaders }, timeoutMs)
     if (!res.ok) throw new Error(`Strapi upload API HTTP ${res.status}: ${res.statusText}`)
 
     const files = await res.json()

@@ -44,10 +44,11 @@
         <template v-if="localSearch" #trailing>
           <button
             type="button"
-            class="flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none"
+            aria-label="Clear search"
+            class="flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
             @click.stop="clearSearch"
           >
-            <UIcon name="i-lucide-x" class="w-4 h-4" />
+            <UIcon name="i-lucide-x" class="w-4 h-4" aria-hidden="true" />
           </button>
         </template>
       </UInput>

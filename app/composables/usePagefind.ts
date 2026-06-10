@@ -41,7 +41,7 @@ interface RawPagefindResult {
   url: string
   excerpt: string
   meta: Record<string, string>
-  sub_results?: Array<{ title: string; url: string; excerpt: string }>
+  sub_results?: Array<{ title: string, url: string, excerpt: string }>
 }
 
 // Module-level singletons — client-only, never written during SSR.
@@ -72,7 +72,10 @@ export const usePagefind = () => {
   const load = async (): Promise<void> => {
     if (!import.meta.client) return
     if (isLoaded.value) return
-    if (_inflight) { await _inflight; return }
+    if (_inflight) {
+      await _inflight
+      return
+    }
 
     isLoading.value = true
     loadError.value = null
@@ -92,8 +95,8 @@ export const usePagefind = () => {
         fileParents.value = parentMap
         isLoaded.value = true
       } catch {
-        loadError.value =
-          'Search index not available. Run `pnpm build:full` (or `pnpm build && pnpm pagefind:build`) to generate it.'
+        loadError.value
+          = 'Search index not available. Run `pnpm build:full` (or `pnpm build && pnpm pagefind:build`) to generate it.'
       } finally {
         isLoading.value = false
         _inflight = null
@@ -157,28 +160,30 @@ export const usePagefind = () => {
         }
       }
 
-      // ── Content results: articles, apps, datasets ────────────────────────
+      // ── Content results: articles, apps, datasets, projects ─────────────
       // Derive content type and slug from the URL path:
       //   /articles/my-slug  → type='article',  slug='my-slug'
       //   /apps/my-slug      → type='app',      slug='my-slug'
       //   /datasets/my-slug  → type='dataset',  slug='my-slug'
-      const match = raw.url.match(/^\/(articles|apps|datasets)\/([^/?#]+)/)
-      const urlSegment = match?.[1]
-      const slug = match?.[2] ?? ''
+      //   /projects/my-slug  → type='project',  slug='my-slug'
+      const match = raw.url.match(/^\/(articles|apps|datasets|projects)\/([^/?#]+)/)
+      if (!match) return null
+
+      const urlSegment = match[1]
+      const slug = match[2]
 
       const typeMap: Record<string, PagefindResult['type']> = {
         articles: 'article',
         apps: 'app',
-        datasets: 'dataset'
+        datasets: 'dataset',
+        projects: 'project'
       }
-      const type: PagefindResult['type'] = typeMap[urlSegment ?? ''] ?? 'article'
+      const type = typeMap[urlSegment] as PagefindResult['type']
 
-      const item = urlSegment
-        ? (metaItems.value.find((i: SearchItem) => i.type === type && i.slug === slug) ?? null)
-        : null
+      const item = metaItems.value.find((i: SearchItem) => i.type === type && i.slug === slug) ?? null
 
       return { item, url: raw.url, excerpt: raw.excerpt, type, slug }
-    })
+    }).filter((r): r is PagefindResult => r !== null)
   }
 
   return { load, search, isLoaded, isLoading, loadError }

@@ -32,7 +32,7 @@ if (existsSync(dotenvPath)) {
 }
 
 const apiBaseUrl = process.env.VITE_API_BASE_URL || ''
-const bearerToken = process.env.VITE_API_BEARER_TOKEN || ''
+const bearerToken = process.env.API_BEARER_TOKEN || ''
 
 console.log('Building search index...')
 console.log(`  API: ${apiBaseUrl}`)
