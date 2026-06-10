@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /Users/jahson/Documents/Github/strapi5/hub-frontend log --oneline --all)",
+      "Bash(git -C /Users/jahson/Documents/Github/strapi5/hub-frontend show cc58d6f --stat)",
+      "Bash(git -C /Users/jahson/Documents/Github/strapi5/hub-frontend show b597183 --stat)",
+      "Bash(git -C /Users/jahson/Documents/Github/strapi5/hub-frontend status)",
+      "Bash(git -C /Users/jahson/Documents/Github/strapi5/hub-frontend show b597183 -- app/composables/useSearchHighlight.ts)",
+      "Bash(git -C /Users/jahson/Documents/Github/strapi5/hub-frontend log --oneline pagefind-fixes)"
+    ]
+  }
+}

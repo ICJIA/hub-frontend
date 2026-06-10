@@ -41,6 +41,9 @@ Thumbs.db
 # Generated search index (rebuilt at deploy via Nitro compiled hook)
 public/search-index.json
 
+# Pagefind search index (generated at build time)
+public/pagefind/
+
 # Test / coverage
 coverage
 .nyc_output
