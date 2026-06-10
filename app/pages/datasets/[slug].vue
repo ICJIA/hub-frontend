@@ -1,51 +1,114 @@
 <template>
   <div class="min-h-screen flex flex-col">
-    <div v-if="loading" class="flex justify-center py-16 bg-gray-100 dark:bg-gray-900 flex-1">
-      <UIcon name="i-heroicons-arrow-path" class="w-10 h-10 animate-spin text-primary-500" />
+    <div
+      v-if="loading"
+      class="flex justify-center py-16 bg-gray-100 dark:bg-gray-900 flex-1"
+    >
+      <UIcon
+        name="i-heroicons-arrow-path"
+        class="w-10 h-10 animate-spin text-primary-500"
+      />
     </div>
 
-    <div v-else-if="error" class="text-center py-16 bg-gray-100 dark:bg-gray-900 flex-1">
-      <UAlert color="error" :description="error" class="mb-4" />
-      <UButton variant="outline" icon="i-heroicons-arrow-left" @click="goBack">Back to Data</UButton>
+    <div
+      v-else-if="error"
+      class="text-center py-16 bg-gray-100 dark:bg-gray-900 flex-1"
+    >
+      <UAlert
+        color="error"
+        :description="error"
+        class="mb-4"
+      />
+      <UButton
+        variant="outline"
+        icon="i-heroicons-arrow-left"
+        @click="goBack"
+      >
+        {{ backLabel }}
+      </UButton>
     </div>
 
     <template v-else-if="dataset">
       <!-- White header section -->
       <div class="bg-white dark:bg-gray-900">
         <div class="max-w-[1300px] mx-auto pt-4 px-4 pb-3 sm:pt-6 sm:px-6 sm:pb-4">
-          <UButton variant="outline" icon="i-heroicons-arrow-left" @click="goBack" class="mb-4">
-            Back to Data
+          <UButton
+            variant="outline"
+            icon="i-heroicons-arrow-left"
+            class="mb-4"
+            @click="goBack"
+          >
+            {{ backLabel }}
           </UButton>
 
           <!-- Title Row -->
           <div class="flex flex-col gap-3 mb-3 sm:flex-row sm:items-start sm:justify-between">
             <div class="flex items-start gap-3">
               <div class="w-10 h-10 bg-primary-500 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
-                <UIcon name="i-heroicons-circle-stack" class="w-6 h-6 text-white" />
+                <UIcon
+                  name="i-heroicons-circle-stack"
+                  class="w-6 h-6 text-white"
+                />
               </div>
               <div>
-                <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight sm:text-2xl">{{ dataset.title }}</h1>
+                <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight sm:text-2xl">
+                  {{ dataset.title }}
+                </h1>
               </div>
             </div>
           </div>
 
           <!-- Meta Row -->
           <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 dark:text-gray-400 ml-0 sm:ml-[52px] mb-3">
-            <span v-if="dataset.date" class="flex items-center gap-1.5">
-              <UIcon name="i-heroicons-calendar-days" class="w-4 h-4" />
+            <span
+              v-if="dataset.date"
+              class="flex items-center gap-1.5"
+            >
+              <UIcon
+                name="i-heroicons-calendar-days"
+                class="w-4 h-4"
+              />
               Last Updated: {{ formatDate(dataset.date) }}
             </span>
-            <UBadge v-if="dataset.external" color="warning" variant="subtle">External</UBadge>
-            <UBadge v-if="dataset.project" color="info" variant="subtle">Project</UBadge>
+            <UBadge
+              v-if="dataset.external"
+              color="warning"
+              variant="subtle"
+            >
+              External
+            </UBadge>
+            <UBadge
+              v-if="dataset.project"
+              color="info"
+              variant="subtle"
+            >
+              Project
+            </UBadge>
           </div>
 
           <!-- Tags / Categories -->
-          <div v-if="dataset.categories?.length || dataset.tags?.length" class="flex flex-wrap gap-2 ml-0 sm:ml-[52px]">
-            <UBadge v-for="cat in dataset.categories" :key="cat" color="primary" variant="subtle">{{ cat }}</UBadge>
-            <UBadge v-for="tag in dataset.tags" :key="tag" variant="subtle">{{ tag }}</UBadge>
+          <div
+            v-if="dataset.categories?.length || dataset.tags?.length"
+            class="flex flex-wrap gap-2 ml-0 sm:ml-[52px]"
+          >
+            <UBadge
+              v-for="cat in dataset.categories"
+              :key="cat"
+              color="primary"
+              variant="subtle"
+            >
+              {{ cat }}
+            </UBadge>
+            <UBadge
+              v-for="tag in dataset.tags"
+              :key="tag"
+              variant="subtle"
+            >
+              {{ tag }}
+            </UBadge>
           </div>
         </div>
-        <div class="h-[1px] w-full bg-gray-200 dark:bg-gray-700"></div>
+        <div class="h-[1px] w-full bg-gray-200 dark:bg-gray-700" />
       </div>
 
       <!-- Gray content area -->
@@ -53,36 +116,72 @@
         <div class="max-w-[1300px] mx-auto py-4 px-4 sm:py-6 sm:px-6">
           <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
             <!-- Main Content -->
-            <div class="flex-1 min-w-0 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+            <div
+              ref="contentRef"
+              data-pagefind-body
+              class="flex-1 min-w-0 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden"
+            >
               <div class="bg-[#1a3a5c] text-white px-6 py-4">
-                <h2 class="text-lg font-bold">Overview: {{ dataset.title }}</h2>
+                <h2 class="text-lg font-bold">
+                  Overview: {{ dataset.title }}
+                </h2>
               </div>
 
               <div class="p-6 space-y-8">
                 <!-- Summary -->
                 <div v-if="dataset.description">
                   <div class="flex items-center gap-2 mb-3">
-                    <UIcon name="i-heroicons-information-circle" class="w-6 h-6 text-blue-700" />
-                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">Summary</h3>
+                    <UIcon
+                      name="i-heroicons-information-circle"
+                      class="w-6 h-6 text-blue-700"
+                    />
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">
+                      Summary
+                    </h3>
                   </div>
-                  <p class="text-gray-700 dark:text-gray-100 leading-relaxed">{{ dataset.description }}</p>
+                  <p class="text-gray-700 dark:text-gray-100 leading-relaxed">
+                    {{ dataset.description }}
+                  </p>
                 </div>
 
                 <!-- Key Findings (Notes) -->
                 <div v-if="notesList.length">
                   <div class="flex items-center gap-2 mb-4">
-                    <UIcon name="i-heroicons-list-bullet" class="w-6 h-6 text-blue-700" />
-                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">Key Findings</h3>
+                    <UIcon
+                      name="i-heroicons-list-bullet"
+                      class="w-6 h-6 text-blue-700"
+                    />
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">
+                      Key Findings
+                    </h3>
                   </div>
                   <div class="space-y-4">
-                    <div v-for="(note, i) in notesList" :key="i" class="flex gap-4">
-                      <div class="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold mt-0.5">{{ i + 1 }}</div>
+                    <div
+                      v-for="(note, i) in notesList"
+                      :key="i"
+                      class="flex gap-4"
+                    >
+                      <div class="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold mt-0.5">
+                        {{ i + 1 }}
+                      </div>
                       <div>
                         <template v-if="typeof note === 'object' && note !== null">
-                          <p class="font-bold text-gray-800 dark:text-gray-100">{{ note.title || note.heading }}</p>
-                          <p v-if="note.description || note.text || note.body" class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ note.description || note.text || note.body }}</p>
+                          <p class="font-bold text-gray-800 dark:text-gray-100">
+                            {{ note.title || note.heading }}
+                          </p>
+                          <p
+                            v-if="note.description || note.text || note.body"
+                            class="text-gray-600 dark:text-gray-400 text-sm mt-1"
+                          >
+                            {{ note.description || note.text || note.body }}
+                          </p>
                         </template>
-                        <p v-else class="text-gray-700 dark:text-gray-100">{{ note }}</p>
+                        <p
+                          v-else
+                          class="text-gray-700 dark:text-gray-100"
+                        >
+                          {{ note }}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -92,10 +191,18 @@
                 <div v-if="dataset.variables?.length || datafileList.length">
                   <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
                     <div class="flex items-center gap-2">
-                      <UIcon name="i-heroicons-circle-stack" class="w-6 h-6 text-blue-700" />
-                      <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">Dataset: {{ dataset.title }}</h3>
+                      <UIcon
+                        name="i-heroicons-circle-stack"
+                        class="w-6 h-6 text-blue-700"
+                      />
+                      <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">
+                        Dataset: {{ dataset.title }}
+                      </h3>
                     </div>
-                    <div v-if="datafileList.length" class="flex flex-wrap gap-2">
+                    <div
+                      v-if="datafileList.length"
+                      class="flex flex-wrap gap-2"
+                    >
                       <UButton
                         v-for="file in datafileList"
                         :key="file.id"
@@ -111,26 +218,54 @@
                       </UButton>
                     </div>
                   </div>
-                  <div v-if="dataset.variables?.length" class="overflow-x-auto">
+                  <div
+                    v-if="dataset.variables?.length"
+                    class="overflow-x-auto"
+                  >
                     <table class="w-full text-sm border-collapse">
                       <thead>
                         <tr class="border-b-2 border-gray-200 dark:border-gray-600">
                           <th class="text-left p-3 font-semibold text-gray-700 dark:text-gray-100">
-                            <div class="flex items-center gap-1">Name <UIcon name="i-heroicons-information-circle" class="w-4 h-4 text-gray-400" /></div>
+                            <div class="flex items-center gap-1">
+                              Name <UIcon
+                                name="i-heroicons-information-circle"
+                                class="w-4 h-4 text-gray-400"
+                              />
+                            </div>
                           </th>
                           <th class="text-left p-3 font-semibold text-gray-700 dark:text-gray-100">
-                            <div class="flex items-center gap-1">Type <UIcon name="i-heroicons-information-circle" class="w-4 h-4 text-gray-400" /></div>
+                            <div class="flex items-center gap-1">
+                              Type <UIcon
+                                name="i-heroicons-information-circle"
+                                class="w-4 h-4 text-gray-400"
+                              />
+                            </div>
                           </th>
                           <th class="text-left p-3 font-semibold text-gray-700 dark:text-gray-100">
-                            <div class="flex items-center gap-1">Definition <UIcon name="i-heroicons-information-circle" class="w-4 h-4 text-gray-400" /></div>
+                            <div class="flex items-center gap-1">
+                              Definition <UIcon
+                                name="i-heroicons-information-circle"
+                                class="w-4 h-4 text-gray-400"
+                              />
+                            </div>
                           </th>
                         </tr>
                       </thead>
                       <tbody>
-                        <tr v-for="(v, i) in dataset.variables" :key="i" :class="i % 2 === 1 ? 'bg-gray-50 dark:bg-gray-700/50' : ''">
-                          <td class="p-3 border-b border-gray-100 dark:border-gray-700 font-medium text-gray-800 dark:text-gray-200">{{ v.name }}</td>
-                          <td class="p-3 border-b border-gray-100 dark:border-gray-700 text-gray-700 dark:text-gray-100">{{ v.type }}</td>
-                          <td class="p-3 border-b border-gray-100 dark:border-gray-700 text-gray-700 dark:text-gray-100">{{ v.definition }}</td>
+                        <tr
+                          v-for="(v, i) in dataset.variables"
+                          :key="i"
+                          :class="i % 2 === 1 ? 'bg-gray-50 dark:bg-gray-700/50' : ''"
+                        >
+                          <td class="p-3 border-b border-gray-100 dark:border-gray-700 font-medium text-gray-800 dark:text-gray-200">
+                            {{ v.name }}
+                          </td>
+                          <td class="p-3 border-b border-gray-100 dark:border-gray-700 text-gray-700 dark:text-gray-100">
+                            {{ v.type }}
+                          </td>
+                          <td class="p-3 border-b border-gray-100 dark:border-gray-700 text-gray-700 dark:text-gray-100">
+                            {{ v.definition }}
+                          </td>
                         </tr>
                       </tbody>
                     </table>
@@ -139,18 +274,31 @@
 
                 <!-- Sources -->
                 <div v-if="dataset.sources?.length">
-                  <h3 class="text-base font-bold mb-3 text-gray-800 dark:text-gray-100">Sources</h3>
-                  <div v-for="(source, i) in dataset.sources" :key="i" class="mb-3">
+                  <h3 class="text-base font-bold mb-3 text-gray-800 dark:text-gray-100">
+                    Sources
+                  </h3>
+                  <div
+                    v-for="(source, i) in dataset.sources"
+                    :key="i"
+                    class="mb-3"
+                  >
                     <strong class="text-sm text-gray-800 dark:text-gray-200">{{ source.title }}</strong>
                     <div v-if="source.url && source.url !== 'undefined'">
-                      <a :href="source.url" target="_blank" rel="noopener noreferrer" class="text-blue-600 text-sm">{{ source.url }}</a>
+                      <a
+                        :href="source.url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-blue-600 text-sm"
+                      >{{ source.url }}</a>
                     </div>
                   </div>
                 </div>
 
                 <!-- Time Period -->
                 <div v-if="dataset.timeperiod">
-                  <h3 class="text-base font-bold mb-3 text-gray-800 dark:text-gray-100">Time Period</h3>
+                  <h3 class="text-base font-bold mb-3 text-gray-800 dark:text-gray-100">
+                    Time Period
+                  </h3>
                   <div class="border border-gray-200 dark:border-gray-600 rounded-lg max-w-[400px]">
                     <div class="p-4 flex flex-wrap gap-4 text-sm text-gray-700 dark:text-gray-100">
                       <div><span class="font-medium text-gray-500 dark:text-gray-400">Year Type:</span> {{ dataset.timeperiod.yeartype || '—' }}</div>
@@ -163,32 +311,50 @@
             </div>
 
             <!-- Right Sidebar -->
-            <div class="w-full lg:w-[260px] lg:flex-shrink-0 space-y-4">
-              <SidebarCard v-if="dataset.citation" title="Suggested Citation">
-                <p class="text-sm text-gray-600 dark:text-gray-100 leading-relaxed break-words" v-html="dataset.citation"></p>
+            <div
+              data-pagefind-ignore
+              class="w-full lg:w-[260px] lg:flex-shrink-0 space-y-4"
+            >
+              <SidebarCard
+                v-if="dataset.citation"
+                title="Suggested Citation"
+              >
+                <p
+                  class="text-sm text-gray-600 dark:text-gray-100 leading-relaxed break-words"
+                  v-html="dataset.citation"
+                />
               </SidebarCard>
 
-              <SidebarCard v-if="relatedApps.length || relatedArticles.length" title="Related Content">
+              <SidebarCard
+                v-if="relatedApps.length || relatedArticles.length"
+                title="Related Content"
+              >
                 <div class="space-y-2">
                   <a
                     v-for="app in relatedApps"
                     :key="app.slug || app.documentId || app.id"
                     href="#"
-                    @click.prevent="goToApp(app)"
                     class="block text-sm text-blue-600 hover:underline leading-snug"
+                    @click.prevent="goToApp(app)"
                   >{{ app.Title || app.title }}</a>
                   <a
                     v-for="article in relatedArticles"
                     :key="article.slug"
                     href="#"
-                    @click.prevent="goToArticle(article)"
                     class="block text-sm text-blue-600 hover:underline leading-snug"
+                    @click.prevent="goToArticle(article)"
                   >{{ article.Title || article.title }}</a>
                 </div>
               </SidebarCard>
 
-              <SidebarCard v-if="dataset.funding" title="Funding Acknowledgement">
-                <p class="text-sm text-gray-600 dark:text-gray-100 leading-relaxed" v-html="dataset.funding"></p>
+              <SidebarCard
+                v-if="dataset.funding"
+                title="Funding Acknowledgement"
+              >
+                <p
+                  class="text-sm text-gray-600 dark:text-gray-100 leading-relaxed"
+                  v-html="dataset.funding"
+                />
               </SidebarCard>
             </div>
           </div>
@@ -201,10 +367,11 @@
 </template>
 
 <script setup>
-defineRouteRules({ prerender: true })
-
-import { computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useSearchHighlight } from '~/composables/useSearchHighlight'
+
+defineRouteRules({ prerender: true })
 
 const router = useRouter()
 const route = useRoute()
@@ -227,7 +394,7 @@ useSeoMeta({
   title: () => dataset.value?.title ? `${dataset.value.title} | ICJIA Research Hub` : 'Dataset | ICJIA Research Hub',
   description: () => dataset.value?.description || 'Criminal justice dataset from the ICJIA Research and Analysis Unit.',
   ogTitle: () => dataset.value?.title || 'ICJIA Research Hub',
-  ogDescription: () => dataset.value?.description || 'Criminal justice dataset from the ICJIA Research and Analysis Unit.',
+  ogDescription: () => dataset.value?.description || 'Criminal justice dataset from the ICJIA Research and Analysis Unit.'
 })
 
 const notesList = computed(() => {
@@ -235,7 +402,11 @@ const notesList = computed(() => {
   if (!n) return []
   if (Array.isArray(n)) return n
   if (typeof n === 'string') {
-    try { return JSON.parse(n) } catch { return [n] }
+    try {
+      return JSON.parse(n)
+    } catch {
+      return [n]
+    }
   }
   return []
 })
@@ -256,7 +427,20 @@ const datafileUrl = (file) => {
   return file.url.startsWith('/') ? `${API_BASE_URL}${file.url}` : file.url
 }
 
-const goBack = () => router.push('/data')
-const goToApp = (item) => router.push(`/apps/${item.slug}`)
-const goToArticle = (item) => router.push(`/articles/${item.slug}`)
+const navDataFrom = useState('nav:data-from', () => null)
+const navDataSearch = useState('nav:data-search', () => '')
+const backLabel = computed(() => navDataFrom.value === 'apps' ? 'Back to Apps' : 'Back to Datasets')
+const goBack = () => {
+  const tab = navDataFrom.value
+  const q = navDataSearch.value
+  navDataFrom.value = null
+  const query = { ...(tab === 'apps' ? { tab: 'apps' } : {}), ...(q ? { search: q } : {}) }
+  router.push({ path: '/data', query })
+}
+const goToApp = item => router.push(`/apps/${item.slug}`)
+const goToArticle = item => router.push(`/articles/${item.slug}`)
+
+const contentRef = ref(null)
+const { applyHighlight } = useSearchHighlight(contentRef, navDataSearch)
+watch([dataset, navDataSearch], applyHighlight, { immediate: false })
 </script>

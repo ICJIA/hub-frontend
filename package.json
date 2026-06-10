@@ -13,7 +13,9 @@
     "test:watch": "vitest",
     "a11y": "npx tsx scripts/a11y-audit.ts",
     "a11y:test": "vitest run tests/a11y",
-    "generate:search": "node scripts/generate-search-index.mjs"
+    "generate:search": "node scripts/generate-search-index.mjs",
+    "pagefind:build": "node scripts/pagefind-build.mjs",
+    "build:full": "nuxt build && node scripts/pagefind-build.mjs"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.98",
@@ -27,6 +29,7 @@
     "marked": "^17.0.1",
     "marked-footnote": "^1.4.0",
     "nuxt": "^4.4.2",
+    "pdfjs-dist": "^6.0.227",
     "quill-better-table": "^1.2.10",
     "tailwindcss": "^4.2.1",
     "turndown": "^7.2.2",
@@ -40,10 +43,12 @@
     "axe-core": "^4.11.1",
     "eslint": "^10.0.3",
     "happy-dom": "^20.8.4",
+    "pagefind": "^1.5.2",
     "playwright-core": "^1.58.2",
     "typescript": "^5.9.3",
     "vitest": "^4.1.0",
-    "vue-tsc": "^3.2.5"
+    "vue-tsc": "^3.2.5",
+    "xlsx": "^0.18.5"
   },
   "packageManager": "pnpm@10.32.1"
 }

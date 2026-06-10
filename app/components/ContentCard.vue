@@ -32,7 +32,7 @@
     >
       <span class="text-white text-sm">No Image</span>
     </div>
-    <div class="p-4">
+    <div class="p-4 flex-1 min-w-0">
       <div class="text-lg font-semibold mb-1 leading-snug text-gray-900 dark:text-gray-100">
         <HighlightText :text="title" :query="query" />
       </div>
@@ -49,12 +49,43 @@
           size="sm"
         >{{ category }}</UBadge>
       </div>
+
+      <!-- Attached files: only files whose contents matched the query are shown. -->
+      <div
+        v-if="matchedFilesList.length && query"
+        class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700"
+      >
+        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+          Matched file{{ matchedFilesList.length !== 1 ? 's' : '' }} ({{ matchedFilesList.length }}):
+        </div>
+        <ul class="space-y-2">
+          <li
+            v-for="file in matchedFilesList"
+            :key="file.hash"
+            class="flex items-start gap-2 text-sm"
+          >
+            <UIcon
+              :name="fileIcon(file.fileType)"
+              class="w-4 h-4 mt-0.5 shrink-0 text-yellow-600 dark:text-yellow-400"
+            />
+            <div class="flex-1 min-w-0">
+              <a
+                href="#"
+                class="text-blue-600 dark:text-blue-400 hover:underline break-all font-semibold"
+                @click.stop.prevent="$emit('file-click', file)"
+              >
+                <HighlightText :text="file.name" :query="query" />
+              </a>
+            </div>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 
 const props = defineProps({
   title: { type: String, required: true },
@@ -64,13 +95,41 @@ const props = defineProps({
   imageUrl: { type: String, default: null },
   viewMode: { type: String, default: 'grid' },
   showPlaceholder: { type: Boolean, default: true },
-  query: { type: String, default: undefined }
+  query: { type: String, default: undefined },
+  /** All files attached to the parent record (article/dataset). */
+  files: { type: Array, default: () => [] },
+  /** Pagefind file results whose content matched the query — keyed by hash via matchFor(). */
+  matchedFiles: { type: Array, default: () => [] }
 })
 
-defineEmits(['click'])
+defineEmits(['click', 'file-click'])
 
 const imageLoaded = ref(false)
-
-// Reset when the image src changes (e.g. navigating between pages)
 watch(() => props.imageUrl, () => { imageLoaded.value = false })
+
+// hash-keyed lookup so the template can ask "did this file match?" cheaply.
+// The pagefind file result URL is /attachments/<hash>.pdf or
+// /attachments/excel/<hash>.html — strip the path + extension to get the hash.
+const matchedByHash = computed(() => {
+  const map = new Map()
+  for (const m of props.matchedFiles ?? []) {
+    const hash = (m.url?.split('/').pop() ?? '').replace(/\.(pdf|html)$/i, '')
+    if (hash) map.set(hash, m)
+  }
+  return map
+})
+
+const matchFor = (hash) => matchedByHash.value.get(hash) ?? null
+const matchedFilesList = computed(() => {
+  const q = props.query?.toLowerCase().trim()
+  return (props.files ?? []).filter(f =>
+    matchFor(f.hash) || (q && f.name.toLowerCase().includes(q))
+  )
+})
+
+const fileIcon = (fileType) => {
+  if (fileType === 'pdf') return 'i-lucide-file-text'
+  if (fileType === 'excel') return 'i-lucide-table-2'
+  return 'i-lucide-file'
+}
 </script>

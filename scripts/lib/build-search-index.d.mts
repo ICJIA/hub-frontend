@@ -1,3 +1,12 @@
+export interface AttachedFile {
+  hash: string
+  name: string
+  ext: string
+  fileType: 'pdf' | 'excel' | 'other'
+  fileUrl: string
+  indexedUrl: string | null
+}
+
 export interface SearchIndexItem {
   id: number
   type: 'article' | 'app' | 'dataset' | 'project' | 'projecthome'
@@ -9,10 +18,19 @@ export interface SearchIndexItem {
   authors: string[]
   date: string
   imageUrl: string
+  files?: AttachedFile[]
+}
+
+export interface FileParent {
+  type: 'article' | 'dataset'
+  slug: string
+  title: string
+  url: string
 }
 
 export interface BuildIndexResult {
   index: SearchIndexItem[]
+  fileParents: Record<string, FileParent[]>
   counts: { articles: number; apps: number; datasets: number; projects: number; projecthomes: number }
 }
 

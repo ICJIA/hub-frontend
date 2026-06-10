@@ -60,7 +60,7 @@
         <div class="max-w-[1300px] mx-auto py-4 px-4 sm:py-6 sm:px-6">
           <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
             <!-- Main Content -->
-            <div class="flex-1 min-w-0 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div ref="contentRef" data-pagefind-body class="flex-1 min-w-0 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
               <!-- Overview Card -->
               <div class="bg-white dark:bg-gray-800 rounded-tl-lg rounded-tr-lg overflow-hidden shadow-sm mb-6">
                 <div class="bg-[#1a3a5c] text-white px-6 py-4">
@@ -94,7 +94,7 @@
             </div>
 
             <!-- Right Sidebar -->
-            <div class="w-full lg:w-[260px] lg:flex-shrink-0 space-y-4">
+            <div data-pagefind-ignore class="w-full lg:w-[260px] lg:flex-shrink-0 space-y-4">
               <SidebarCard v-if="tocItems.length" title="Table Of Contents">
                 <ol class="space-y-2">
                   <li v-for="(item, idx) in tocItems" :key="item.id" class="flex items-start gap-2">
@@ -136,6 +136,7 @@ defineRouteRules({ prerender: true })
 import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { marked } from 'marked'
+import { useSearchHighlight } from '~/composables/useSearchHighlight'
 import markedFootnote from 'marked-footnote'
 
 if (!marked._footnotePluginAdded) {
@@ -278,8 +279,20 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
-const backLabel = computed(() => route.query.from === 'articles' ? 'Back to Articles' : 'Back to Home')
-const goBack = () => route.query.from === 'articles' ? router.push('/articles') : router.push('/')
+const navFrom = useState('nav:article-from', () => null)
+const navSearchQuery = useState('nav:search-query', () => '')
+const cameFromArticles = computed(() => navFrom.value === 'articles' || route.query.from === 'articles')
+const backLabel = computed(() => cameFromArticles.value ? 'Back to Articles' : 'Back to Home')
+const goBack = () => {
+  const query = cameFromArticles.value && navSearchQuery.value ? { search: navSearchQuery.value } : {}
+  const dest = cameFromArticles.value ? { path: '/articles', query } : '/'
+  navFrom.value = null
+  router.push(dest)
+}
+
+const contentRef = ref(null)
+const { applyHighlight } = useSearchHighlight(contentRef, navSearchQuery)
+watch([article, navSearchQuery], applyHighlight, { immediate: false })
 
 const navigateToArticle = (a) => {
   const slug = a.slug
