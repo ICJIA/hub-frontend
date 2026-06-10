@@ -6,7 +6,7 @@
 
     <div v-else-if="error" class="text-center py-16 bg-gray-100 dark:bg-gray-900 flex-1">
       <UAlert color="error" :description="error" class="mb-4" />
-      <UButton variant="outline" icon="i-heroicons-arrow-left" @click="goBack">Back to Data</UButton>
+      <UButton variant="outline" icon="i-heroicons-arrow-left" @click="goBack">{{ backLabel }}</UButton>
     </div>
 
     <template v-else-if="app">
@@ -14,7 +14,7 @@
       <div class="bg-white dark:bg-gray-900">
         <div class="max-w-[1300px] mx-auto pt-4 px-4 pb-3 sm:pt-6 sm:px-6 sm:pb-4">
           <UButton variant="outline" icon="i-heroicons-arrow-left" @click="goBack" class="mb-4">
-            Back to Data
+            {{ backLabel }}
           </UButton>
 
           <!-- Title Row -->
@@ -60,7 +60,7 @@
         <div class="max-w-[1300px] mx-auto py-4 px-4 sm:py-6 sm:px-6">
           <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
             <!-- Main Content -->
-            <div class="flex-1 min-w-0 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div ref="contentRef" data-pagefind-body class="flex-1 min-w-0 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
               <!-- Overview Card -->
               <div class="bg-white dark:bg-gray-800 rounded-tl-lg rounded-tr-lg overflow-hidden shadow-sm mb-6">
                 <div class="bg-[#1a3a5c] text-white px-6 py-4">
@@ -82,7 +82,7 @@
             </div>
 
             <!-- Right Sidebar -->
-            <div class="w-full lg:w-[260px] lg:flex-shrink-0 space-y-4">
+            <div data-pagefind-ignore class="w-full lg:w-[260px] lg:flex-shrink-0 space-y-4">
               <SidebarCard v-if="app.citation" title="Suggested Citation">
                 <p class="text-sm text-gray-600 dark:text-gray-100 leading-relaxed word-break" v-html="app.citation"></p>
               </SidebarCard>
@@ -122,8 +122,9 @@
 <script setup>
 defineRouteRules({ prerender: true })
 
-import { computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useSearchHighlight } from '~/composables/useSearchHighlight'
 
 const router = useRouter()
 const route = useRoute()
@@ -157,7 +158,20 @@ useSeoMeta({
   ogImage: () => imageUrl.value || '',
 })
 
-const goBack = () => router.push('/data')
+const navDataFrom = useState('nav:data-from', () => null)
+const navDataSearch = useState('nav:data-search', () => '')
+const backLabel = computed(() => navDataFrom.value === 'apps' ? 'Back to Apps' : 'Back to Data')
+const goBack = () => {
+  const tab = navDataFrom.value
+  const q = navDataSearch.value
+  navDataFrom.value = null
+  const query = { ...(tab === 'apps' ? { tab: 'apps' } : {}), ...(q ? { search: q } : {}) }
+  router.push({ path: '/data', query })
+}
 const goToArticle = (item) => router.push(`/articles/${item.slug}`)
 const goToDataset = (item) => router.push(`/datasets/${item.slug}`)
+
+const contentRef = ref(null)
+const { applyHighlight } = useSearchHighlight(contentRef, navDataSearch)
+watch([app, navDataSearch], applyHighlight, { immediate: false })
 </script>

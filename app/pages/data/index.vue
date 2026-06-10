@@ -91,6 +91,8 @@ import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
+const navDataFrom = useState('nav:data-from', () => null)
+const navDataSearch = useState('nav:data-search', () => '')
 const { loadIndex, searchByType, getByType, isLoading, loadError } = useSearch()
 
 const resolvedTab = computed(() =>
@@ -109,7 +111,7 @@ const activeTab = computed(() => resolvedTab.value)
 const filterTopic = ref(null)
 const filterAuthor = ref(null)
 const filterYear = ref(null)
-const filterSearch = ref('')
+const filterSearch = ref(Array.isArray(route.query.search) ? route.query.search[0] ?? '' : route.query.search ?? '')
 const viewMode = ref('grid')
 const currentPage = ref(1)
 const pageSize = 12
@@ -183,6 +185,8 @@ const changePage = (page) => {
 }
 
 const goToItem = (slug) => {
+  navDataFrom.value = activeTab.value
+  navDataSearch.value = filterSearch.value
   const base = activeTab.value === 'datasets' ? '/datasets' : '/apps'
   router.push(`${base}/${slug}`)
 }
