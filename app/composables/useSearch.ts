@@ -79,11 +79,11 @@ export const useSearch = () => {
     if (!query.trim()) return base
     const q = query.toLowerCase()
     return base.filter(item =>
-      item.title.toLowerCase().includes(q) ||
-      item.summary.toLowerCase().includes(q) ||
-      item.content.toLowerCase().includes(q) ||
-      item.categories.some(c => c.toLowerCase().includes(q)) ||
-      item.authors.some(a => a.toLowerCase().includes(q))
+      item.title.toLowerCase().includes(q)
+      || item.summary.toLowerCase().includes(q)
+      || item.content.toLowerCase().includes(q)
+      || item.categories.some(c => c.toLowerCase().includes(q))
+      || item.authors.some(a => a.toLowerCase().includes(q))
     )
   }
 

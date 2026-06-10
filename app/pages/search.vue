@@ -246,16 +246,19 @@ useAsyncData('search-index', () => load(), { server: false })
 
 const results = ref([])
 const isSearching = ref(false)
+let searchSeq = 0
 
 const runSearch = async (q) => {
   const trimmed = q.trim()
+  const seq = ++searchSeq
   if (!trimmed) { results.value = []; return }
 
   isSearching.value = true
   try {
-    results.value = await search(trimmed)
+    const res = await search(trimmed)
+    if (seq === searchSeq) results.value = res
   } finally {
-    isSearching.value = false
+    if (seq === searchSeq) isSearching.value = false
   }
 }
 
@@ -328,6 +331,7 @@ const typeIcon = (type) => {
 
 const navigate = (result) => {
   if (result.type === 'file') {
+    if (!result.fileUrl) return
     if (result.fileType === 'pdf') {
       // Open in the PDF viewer page with the current search query for highlighting
       router.push({
@@ -384,6 +388,7 @@ const matchForFile = (parentResult, hash) => {
 // Drives clicks on inline attached-file links inside a parent card. Uses the
 // raw Strapi file URL (so even non-indexed files like .docx are openable).
 const navigateFile = (file) => {
+  if (!file.fileUrl) return
   if (file.fileType === 'pdf') {
     router.push({
       path: '/pdf-viewer',

@@ -96,7 +96,7 @@ useSeoMeta({
 const filterTopic = ref(route.query.topic || null)
 const filterAuthor = ref(route.query.author || null)
 const filterYear = ref(route.query.year || null)
-const filterSearch = ref(route.query.search || '')
+const filterSearch = ref(Array.isArray(route.query.search) ? route.query.search[0] ?? '' : route.query.search ?? '')
 const viewMode = ref('grid')
 const currentPage = ref(Number(route.query.page) || 1)
 const pageSize = 12
@@ -139,14 +139,17 @@ const availableYears = computed(() => {
 // Populated client-side once pagefind has loaded; empty otherwise so the page
 // still works during prerender / before the engine is ready.
 const pagefindResults = ref([])
+let pagefindSeq = 0
 
 const runPagefind = async (q) => {
   const trimmed = q.trim()
+  const seq = ++pagefindSeq
   if (!trimmed || !pagefindLoaded.value) {
     pagefindResults.value = []
     return
   }
-  pagefindResults.value = await pagefindSearch(trimmed)
+  const results = await pagefindSearch(trimmed)
+  if (seq === pagefindSeq) pagefindResults.value = results
 }
 
 // Re-run when the query changes OR when pagefind finishes loading

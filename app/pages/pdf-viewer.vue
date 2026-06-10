@@ -11,8 +11,13 @@
           @click="goBack"
         />
         <div class="flex-1 min-w-0">
-          <p class="font-medium text-sm truncate text-gray-900 dark:text-gray-100">{{ fileName }}</p>
-          <p v-if="searchQuery && !isLoading" class="text-xs text-gray-500 dark:text-gray-400">
+          <p class="font-medium text-sm truncate text-gray-900 dark:text-gray-100">
+            {{ fileName }}
+          </p>
+          <p
+            v-if="searchQuery && !isLoading"
+            class="text-xs text-gray-500 dark:text-gray-400"
+          >
             <span v-if="matchCount > 0">{{ currentMatchDisplay }} / {{ matchCount }} match{{ matchCount !== 1 ? 'es' : '' }} for "{{ searchQuery }}"</span>
             <span v-else-if="isRendering">Searching…</span>
             <span v-else>No matches for "{{ searchQuery }}"</span>
@@ -20,8 +25,24 @@
         </div>
         <div class="flex items-center gap-1 shrink-0">
           <template v-if="matchCount > 0">
-            <UButton icon="i-lucide-chevron-up" color="primary" variant="solid" size="sm" aria-label="Previous match" class="text-white" @click="prevMatch" />
-            <UButton icon="i-lucide-chevron-down" color="primary" variant="solid" size="sm" aria-label="Next match" class="text-white" @click="nextMatch" />
+            <UButton
+              icon="i-lucide-chevron-up"
+              color="primary"
+              variant="solid"
+              size="sm"
+              aria-label="Previous match"
+              class="text-white"
+              @click="prevMatch"
+            />
+            <UButton
+              icon="i-lucide-chevron-down"
+              color="primary"
+              variant="solid"
+              size="sm"
+              aria-label="Next match"
+              class="text-white"
+              @click="nextMatch"
+            />
           </template>
           <UButton
             icon="i-lucide-download"
@@ -35,15 +56,24 @@
     </div>
 
     <!-- Loading state -->
-    <div v-if="isLoading" class="flex items-center justify-center py-24">
+    <div
+      v-if="isLoading"
+      class="flex items-center justify-center py-24"
+    >
       <div class="text-center text-gray-500 dark:text-gray-400">
-        <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 mx-auto mb-3 animate-spin" />
+        <UIcon
+          name="i-heroicons-arrow-path"
+          class="w-8 h-8 mx-auto mb-3 animate-spin"
+        />
         <p>Loading PDF…</p>
       </div>
     </div>
 
     <!-- Error state -->
-    <div v-else-if="error" class="max-w-5xl mx-auto px-4 py-12">
+    <div
+      v-else-if="error"
+      class="max-w-5xl mx-auto px-4 py-12"
+    >
       <UAlert
         color="error"
         icon="i-lucide-triangle-alert"
@@ -51,17 +81,29 @@
         :description="error"
       />
       <div class="mt-4">
-        <UButton :to="fileUrl" target="_blank" icon="i-lucide-external-link" label="Open file directly" variant="outline" external />
+        <UButton
+          v-if="isFileUrlSafe"
+          :to="fileUrl"
+          target="_blank"
+          icon="i-lucide-external-link"
+          label="Open file directly"
+          variant="outline"
+          external
+        />
       </div>
     </div>
 
     <!-- PDF pages -->
-    <div v-else ref="containerRef" class="max-w-5xl mx-auto px-4 py-6">
+    <div
+      v-else
+      ref="containerRef"
+      class="max-w-5xl mx-auto px-4 py-6"
+    >
       <div
         v-for="pageNum in totalPages"
         :key="pageNum"
-        :data-page="pageNum"
         :ref="pageRefCb(pageNum)"
+        :data-page="pageNum"
         class="relative bg-white shadow-md mb-6 mx-auto overflow-hidden"
         :style="pageDimensions[pageNum]
           ? { width: pageDimensions[pageNum].width + 'px', height: pageDimensions[pageNum].height + 'px' }
@@ -100,7 +142,19 @@ definePageMeta({ ssr: false })
 const route = useRoute()
 const router = useRouter()
 
-const fileUrl = computed(() => String(route.query.file ?? ''))
+const fileUrl = computed(() => {
+  const raw = route.query.file
+  return Array.isArray(raw) ? (raw[0] ?? '') : String(raw ?? '')
+})
+
+const isFileUrlSafe = computed(() => {
+  try {
+    const { protocol } = new URL(fileUrl.value)
+    return protocol === 'http:' || protocol === 'https:'
+  } catch {
+    return false
+  }
+})
 
 // Highlight term comes from `?q=…` (preferred) or falls back to a `#search=…`
 // hash fragment so URLs shaped like Chromium's native viewer still highlight
@@ -125,32 +179,92 @@ const error = ref('')
 const totalPages = ref(0)
 
 // Per-page dimensions computed from the PDF (set before rendering, drives placeholder size)
-const pageDimensions = reactive<Record<number, { width: number; height: number; scale: number }>>({})
+const pageDimensions = reactive<Record<number, { width: number, height: number, scale: number }>>({})
 
 // Tracks which pages have been fully rendered
 const renderedPages = reactive(new Set<number>())
 
 // ─── Match navigation ─────────────────────────────────────────────────────────
-const matchEls = ref<Element[]>([])
-const currentMatch = ref(-1)
-const matchCount = computed(() => matchEls.value.length)
-const currentMatchDisplay = computed(() =>
-  matchEls.value.length > 0 ? currentMatch.value + 1 : 0
-)
+// pageMatchCounts[i] = match count on page i+1, pre-scanned from text (no rendering).
+// Gives accurate totals even before lazy pages are rendered.
+const pageMatchCounts = ref<number[]>([])
+const totalMatchCount = computed(() => pageMatchCounts.value.reduce((a, b) => a + b, 0))
 
-function nextMatch() {
-  if (!matchEls.value.length) return
-  currentMatch.value = (currentMatch.value + 1) % matchEls.value.length
-  matchEls.value[currentMatch.value]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+// DOM elements from rendered pages only. Type carries page number so navigation
+// can force-render a page when the target element doesn't exist yet.
+const matchEls = ref<{ el: Element, page: number }[]>([])
+const currentMatch = ref(-1)
+// Use pre-scanned total when available; fall back to rendered count while scanning.
+const matchCount = computed(() => totalMatchCount.value || matchEls.value.length)
+const currentMatchDisplay = computed(() => currentMatch.value >= 0 ? currentMatch.value + 1 : 0)
+
+function getMatchLocation(globalIdx: number): { page: number, localIndex: number } {
+  let remaining = globalIdx
+  for (let p = 0; p < pageMatchCounts.value.length; p++) {
+    if (remaining < pageMatchCounts.value[p]) return { page: p + 1, localIndex: remaining }
+    remaining -= pageMatchCounts.value[p]
+  }
+  return { page: -1, localIndex: -1 }
 }
-function prevMatch() {
-  if (!matchEls.value.length) return
-  currentMatch.value = (currentMatch.value - 1 + matchEls.value.length) % matchEls.value.length
-  matchEls.value[currentMatch.value]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+
+async function navigateTo(globalIdx: number) {
+  if (!matchCount.value) return
+  currentMatch.value = globalIdx
+  const { page, localIndex } = getMatchLocation(globalIdx)
+  if (page < 1) return
+
+  if (!renderedPages.has(page)) {
+    pageRefMap.get(page)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    await renderPage(page)
+    await nextTick()
+  }
+
+  const pageEls = matchEls.value.filter(m => m.page === page).map(m => m.el)
+  pageEls[localIndex]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+}
+
+async function nextMatch() {
+  const total = matchCount.value
+  if (!total) return
+  await navigateTo((currentMatch.value + 1) % total)
+}
+async function prevMatch() {
+  const total = matchCount.value
+  if (!total) return
+  await navigateTo((currentMatch.value - 1 + total) % total)
+}
+
+async function prescanSearchMatches(numPages: number) {
+  const q = searchQuery.value.trim()
+  if (!q || !_pdfDoc) return
+  const terms = q.split(/\s+/).filter(t => t.length > 1)
+  if (!terms.length) return
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const pdfDoc = _pdfDoc as any
+  const escRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const regex = new RegExp(`(${terms.map(escRe).join('|')})`, 'gi')
+  const counts: number[] = []
+
+  for (let i = 1; i <= numPages; i++) {
+    try {
+      const page = await pdfDoc.getPage(i)
+      const content = await page.getTextContent()
+      let count = 0
+      for (const item of content.items as Array<{ str?: string }>) {
+        if (typeof item.str === 'string') {
+          const m = item.str.match(regex)
+          if (m) count += m.length
+        }
+      }
+      counts.push(count)
+    } catch { counts.push(0) }
+  }
+  pageMatchCounts.value = counts
 }
 
 async function downloadFile() {
-  if (!fileUrl.value) return
+  if (!isFileUrlSafe.value) return
   const res = await fetch(fileUrl.value)
   const blob = await res.blob()
   const url = URL.createObjectURL(blob)
@@ -250,7 +364,7 @@ async function renderPage(pageNum: number) {
         const escRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
         const terms = searchQuery.value.trim().split(/\s+/).filter(t => t.length > 1)
-        const newMatches: Element[] = []
+        const newMatches: { el: Element, page: number }[] = []
 
         if (terms.length) {
           const regex = new RegExp(
@@ -264,17 +378,18 @@ async function renderPage(pageNum: number) {
             const marked = escaped.replace(regex, '<mark class="pdf-highlight">$1</mark>')
             if (marked === escaped) return
             span.innerHTML = marked
-            span.querySelectorAll<Element>('mark.pdf-highlight').forEach(m => newMatches.push(m))
+            span.querySelectorAll<Element>('mark.pdf-highlight').forEach(m => newMatches.push({ el: m, page: pageNum }))
           })
         }
 
         if (newMatches.length) {
-          matchEls.value = [...matchEls.value, ...newMatches]
-          // Auto-scroll to the first match found across the document
-          if (matchEls.value.length === newMatches.length) {
+          // Keep matchEls sorted by page so global index aligns with pageMatchCounts.
+          matchEls.value = [...matchEls.value, ...newMatches].sort((a, b) => a.page - b.page)
+          // Auto-scroll to the first match found across the whole document.
+          if (currentMatch.value < 0) {
             currentMatch.value = 0
             await nextTick()
-            newMatches[0]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            newMatches[0]?.el.scrollIntoView({ behavior: 'smooth', block: 'center' })
           }
         }
       }
@@ -289,8 +404,8 @@ async function renderPage(pageNum: number) {
 }
 
 onMounted(async () => {
-  if (!fileUrl.value) {
-    error.value = 'No file URL provided.'
+  if (!isFileUrlSafe.value) {
+    error.value = 'No valid file URL provided.'
     isLoading.value = false
     return
   }
@@ -347,6 +462,10 @@ onMounted(async () => {
       const el = pageRefMap.get(i)
       if (el) _observer.observe(el)
     }
+
+    // Background text-only scan: counts matches on all pages so the header
+    // shows the correct total before lazy rendering catches up.
+    if (searchQuery.value.trim()) prescanSearchMatches(pdfDoc.numPages)
   } catch (e: unknown) {
     error.value = e instanceof Error ? e.message : 'Failed to load PDF.'
     isLoading.value = false

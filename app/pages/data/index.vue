@@ -111,7 +111,7 @@ const activeTab = computed(() => resolvedTab.value)
 const filterTopic = ref(null)
 const filterAuthor = ref(null)
 const filterYear = ref(null)
-const filterSearch = ref(route.query.search || '')
+const filterSearch = ref(Array.isArray(route.query.search) ? route.query.search[0] ?? '' : route.query.search ?? '')
 const viewMode = ref('grid')
 const currentPage = ref(1)
 const pageSize = 12
