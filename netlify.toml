@@ -3,7 +3,13 @@
   publish = ".output/public"
 
 [build.environment]
-  NITRO_PRESET = "static"
+  NITRO_PRESET = "netlify"
   NODE_VERSION = "22"
   # VITE_API_BASE_URL and API_BEARER_TOKEN must be set in Netlify UI:
   # Site → Site configuration → Environment variables
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "frame-ancestors 'self' https://v2.hub.icjia-api.cloud"
+    X-Frame-Options = "ALLOW-FROM https://v2.hub.icjia-api.cloud"
