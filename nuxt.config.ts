@@ -40,10 +40,17 @@ export default defineNuxtConfig({
 
 
   runtimeConfig: {
-    apiToken: process.env.API_BEARER_TOKEN || '',
-    strapiUrl: process.env.VITE_API_BASE_URL || 'http://localhost:1338',
-    // Server-only. Set PREVIEW_SECRET in the environment (same value as VITE_PREVIEW_SECRET).
-    previewSecret: process.env.PREVIEW_SECRET || process.env.VITE_PREVIEW_SECRET || 'preview-secret',
+    // Defaults are intentionally empty/placeholder — never use process.env here.
+    // Nuxt inlines runtimeConfig defaults into the server bundle at build time,
+    // which would bake real secret values into the deployed function and trigger
+    // Netlify's secrets scanner. Provide real values at runtime via Netlify env
+    // vars using Nuxt's NUXT_* convention:
+    //   NUXT_API_TOKEN       ← same value as API_BEARER_TOKEN
+    //   NUXT_STRAPI_URL      ← same value as VITE_API_BASE_URL
+    //   NUXT_PREVIEW_SECRET  ← same value as PREVIEW_SECRET
+    apiToken: '',
+    strapiUrl: 'http://localhost:1338',
+    previewSecret: 'preview-secret',
     public: {}
   },
 
