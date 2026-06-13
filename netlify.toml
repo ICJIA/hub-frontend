@@ -3,10 +3,44 @@
   publish = ".output/public"
 
 [build.environment]
-  NITRO_PRESET = "netlify"
+  NITRO_PRESET = "static"
   NODE_VERSION = "22"
   # VITE_API_BASE_URL and API_BEARER_TOKEN must be set in Netlify UI:
   # Site → Site configuration → Environment variables
+
+# Preview routes are not pre-rendered (dynamic draft IDs + auth required).
+# These redirects serve index.html so Vue Router can take over client-side.
+# All preview pages use { server: false } and client-only middleware, so the
+# SPA fallback is the correct approach.
+[[redirects]]
+  from = "/preview/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/previewreadonly/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/appspreview/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/appspreviewreadonly/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/datasetpreview/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/datasetpreviewreadonly/*"
+  to = "/index.html"
+  status = 200
 
 [[headers]]
   for = "/*"

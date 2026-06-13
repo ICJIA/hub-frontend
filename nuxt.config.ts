@@ -2,12 +2,6 @@ import { defineNuxtConfig } from 'nuxt/config';
 
 export default defineNuxtConfig({
   nitro: {
-    // crawlLinks preserves the same link-following that the static preset did
-    // automatically: it discovers article/dataset/app slugs from pre-rendered
-    // index pages so pagefind can still index all content HTML.
-    prerender: {
-      crawlLinks: true,
-    },
     hooks: {
       async compiled(nitro: any) {
         const { writeFileSync, mkdirSync, existsSync } = await import('node:fs')
