@@ -56,7 +56,8 @@ export default defineEventHandler(async (event) => {
   }
 
   const qs = getRequestURL(event).search
-  const target = `${config.strapiUrl}/api/${path}${qs}`
+  const strapiUrl = process.env.VITE_API_BASE_URL || 'http://localhost:1338'
+  const target = `${strapiUrl}/api/${path}${qs}`
 
   return proxyRequest(event, target, {
     headers: { Authorization: `Bearer ${config.apiToken}` }
