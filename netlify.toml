@@ -9,37 +9,38 @@
   # Site → Site configuration → Environment variables
 
 # Preview routes are not pre-rendered (dynamic draft IDs + auth required).
-# These redirects serve index.html so Vue Router can take over client-side.
-# All preview pages use { server: false } and client-only middleware, so the
-# SPA fallback is the correct approach.
+# Redirect to 200.html — the clean SPA shell Nuxt generates for the static
+# preset. Unlike index.html (pre-rendered home page with embedded server
+# state), 200.html has no route-specific content so Vue Router initialises
+# cleanly at the real URL and the query string (token) is preserved correctly.
 [[redirects]]
   from = "/preview/*"
-  to = "/index.html"
+  to = "/200.html"
   status = 200
 
 [[redirects]]
   from = "/previewreadonly/*"
-  to = "/index.html"
+  to = "/200.html"
   status = 200
 
 [[redirects]]
   from = "/appspreview/*"
-  to = "/index.html"
+  to = "/200.html"
   status = 200
 
 [[redirects]]
   from = "/appspreviewreadonly/*"
-  to = "/index.html"
+  to = "/200.html"
   status = 200
 
 [[redirects]]
   from = "/datasetpreview/*"
-  to = "/index.html"
+  to = "/200.html"
   status = 200
 
 [[redirects]]
   from = "/datasetpreviewreadonly/*"
-  to = "/index.html"
+  to = "/200.html"
   status = 200
 
 [[headers]]
