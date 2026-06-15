@@ -3,45 +3,13 @@
   publish = ".output/public"
 
 [build.environment]
-  NITRO_PRESET = "static"
+  NITRO_PRESET = "netlify"
   NODE_VERSION = "22"
-  # VITE_API_BASE_URL and API_BEARER_TOKEN must be set in Netlify UI:
-  # Site → Site configuration → Environment variables
-
-# Preview routes are not pre-rendered (dynamic draft IDs + auth required).
-# Redirect to 200.html — the clean SPA shell Nuxt generates for the static
-# preset. Unlike index.html (pre-rendered home page with embedded server
-# state), 200.html has no route-specific content so Vue Router initialises
-# cleanly at the real URL and the query string (token) is preserved correctly.
-[[redirects]]
-  from = "/preview/*"
-  to = "/200.html"
-  status = 200
-
-[[redirects]]
-  from = "/previewreadonly/*"
-  to = "/200.html"
-  status = 200
-
-[[redirects]]
-  from = "/appspreview/*"
-  to = "/200.html"
-  status = 200
-
-[[redirects]]
-  from = "/appspreviewreadonly/*"
-  to = "/200.html"
-  status = 200
-
-[[redirects]]
-  from = "/datasetpreview/*"
-  to = "/200.html"
-  status = 200
-
-[[redirects]]
-  from = "/datasetpreviewreadonly/*"
-  to = "/200.html"
-  status = 200
+  # Required env vars — set in Netlify UI → Site configuration → Environment variables:
+  #   VITE_API_BASE_URL    public Strapi URL (also used by build scripts)
+  #   API_BEARER_TOKEN     Strapi bearer token (build scripts)
+  #   NUXT_API_TOKEN       same value as API_BEARER_TOKEN (Netlify Function runtime)
+  #   NUXT_PREVIEW_SECRET  same value as PREVIEW_SECRET (Netlify Function runtime)
 
 [[headers]]
   for = "/*"
