@@ -40,10 +40,10 @@ export default defineNuxtConfig({
     // Netlify's secrets scanner. Provide real values at runtime via Netlify env
     // vars using Nuxt's NUXT_* convention:
     //   NUXT_API_TOKEN       ← same value as API_BEARER_TOKEN
-    //   NUXT_STRAPI_URL      ← same value as VITE_API_BASE_URL
     //   NUXT_PREVIEW_SECRET  ← same value as PREVIEW_SECRET
+    // strapiUrl is intentionally absent: the server route reads VITE_API_BASE_URL
+    // directly from process.env at runtime (it's a public URL, not a secret).
     apiToken: '',
-    strapiUrl: 'http://localhost:1338',
     previewSecret: 'preview-secret',
     public: {}
   },
