@@ -26,8 +26,8 @@
           <div class="mb-6">
             <label class="field-label">Categories</label>
             <div class="flex flex-wrap gap-2 items-center">
-              <div v-for="(category, index) in editableArticle.Categories" :key="index" class="relative">
-                <UInput v-model="editableArticle.Categories[index]" @input="markChanged" size="sm" class="w-40 pr-7" />
+              <div v-for="(category, index) in editableArticle.categories" :key="index" class="relative">
+                <UInput v-model="editableArticle.categories[index]" @input="markChanged" size="sm" class="w-40 pr-7" />
                 <button class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" @click="removeCategory(index)">
                   <UIcon name="i-heroicons-x-mark" class="w-3 h-3" />
                 </button>
@@ -38,7 +38,7 @@
 
           <div class="mb-6">
             <label class="field-label">Title</label>
-            <UInput v-model="editableArticle.Title" @input="markChanged" placeholder="Article Title" />
+            <UInput v-model="editableArticle.title" @input="markChanged" placeholder="Article Title" />
           </div>
 
           <div class="mb-6">
@@ -49,8 +49,8 @@
           <div class="mb-6">
             <label class="field-label">Authors</label>
             <div class="flex flex-col gap-2">
-              <div v-for="(author, index) in editableArticle.Authors" :key="index" class="flex items-center gap-2">
-                <UInput v-model="editableArticle.Authors[index].title" @input="markChanged" size="sm" placeholder="Author name" class="flex-1" />
+              <div v-for="(author, index) in editableArticle.authors" :key="index" class="flex items-center gap-2">
+                <UInput v-model="editableArticle.authors[index].title" @input="markChanged" size="sm" placeholder="Author name" class="flex-1" />
                 <UButton icon="i-heroicons-x-mark" size="sm" variant="ghost" @click="removeAuthor(index)" />
               </div>
               <div><UButton size="sm" variant="soft" icon="i-heroicons-plus" @click="addAuthor">Add Author</UButton></div>
@@ -60,7 +60,7 @@
           <div class="mb-6">
             <label class="field-label">Splash Image</label>
             <div v-if="splashImageUrl" class="mb-3">
-              <img :src="splashImageUrl" :alt="editableArticle.Title" class="max-h-[200px] max-w-[350px] rounded mb-2 object-cover" />
+              <img :src="splashImageUrl" :alt="editableArticle.title" class="max-h-[200px] max-w-[350px] rounded mb-2 object-cover" />
               <UButton size="sm" color="error" variant="soft" @click="removeImage">Remove Image</UButton>
             </div>
             <input type="file" @change="handleImageUpload" accept="image/*" ref="imageInput" class="hidden" :disabled="uploading" />
@@ -71,7 +71,7 @@
 
           <div class="mb-6">
             <label class="field-label">Abstract / Summary</label>
-            <RichTextEditor v-model="editableArticle.Abstract" @update:modelValue="markChanged" :minHeight="150" :showAllTools="false" />
+            <RichTextEditor v-model="editableArticle.abstract" @update:modelValue="markChanged" :minHeight="150" :showAllTools="false" />
           </div>
 
           <div class="mb-6">
@@ -82,8 +82,8 @@
           <div class="mb-6">
             <label class="field-label">Tags</label>
             <div class="flex flex-wrap gap-2 items-center">
-              <div v-for="(tag, index) in editableArticle.Tags" :key="index" class="relative">
-                <UInput v-model="editableArticle.Tags[index]" @input="markChanged" size="sm" class="w-36 pr-7" />
+              <div v-for="(tag, index) in editableArticle.tags" :key="index" class="relative">
+                <UInput v-model="editableArticle.tags[index]" @input="markChanged" size="sm" class="w-36 pr-7" />
                 <button class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" @click="removeTag(index)">
                   <UIcon name="i-heroicons-x-mark" class="w-3 h-3" />
                 </button>
@@ -94,17 +94,17 @@
 
           <div class="mb-6">
             <label class="field-label">Funding</label>
-            <RichTextEditor v-model="editableArticle.Funding" @update:modelValue="markChanged" :minHeight="150" :showAllTools="false" />
+            <RichTextEditor v-model="editableArticle.funding" @update:modelValue="markChanged" :minHeight="150" :showAllTools="false" />
           </div>
 
           <div class="mb-6">
             <label class="field-label">Citation</label>
-            <RichTextEditor v-model="editableArticle.Citation" @update:modelValue="markChanged" :minHeight="150" :showAllTools="false" />
+            <RichTextEditor v-model="editableArticle.citation" @update:modelValue="markChanged" :minHeight="150" :showAllTools="false" />
           </div>
 
           <div class="mb-6">
             <label class="field-label">DOI</label>
-            <UInput v-model="editableArticle.Doi" @input="markChanged" placeholder="DOI..." />
+            <UInput v-model="editableArticle.doi" @input="markChanged" placeholder="DOI..." />
           </div>
         </template>
       </div>
@@ -171,15 +171,15 @@ const uploading = ref(false)
 const imageInput = ref(null)
 const mainEditorRef = ref(null)
 
-const splashImageUrl = computed(() => resolveImageUrl(editableArticle.value?.Splash))
-const formattedDate = makeFormattedDate(editableArticle, 'Date')
+const splashImageUrl = computed(() => resolveImageUrl(editableArticle.value?.splash))
+const formattedDate = makeFormattedDate(editableArticle, 'date')
 
-const addCategory = () => { if (!editableArticle.value.Categories) editableArticle.value.Categories = []; editableArticle.value.Categories.push(''); markChanged() }
-const removeCategory = (index) => { editableArticle.value.Categories.splice(index, 1); markChanged() }
-const addAuthor = () => { if (!editableArticle.value.Authors) editableArticle.value.Authors = []; editableArticle.value.Authors.push({ title: '' }); markChanged() }
-const removeAuthor = (index) => { editableArticle.value.Authors.splice(index, 1); markChanged() }
-const addTag = () => { if (!editableArticle.value.Tags) editableArticle.value.Tags = []; editableArticle.value.Tags.push(''); markChanged() }
-const removeTag = (index) => { editableArticle.value.Tags.splice(index, 1); markChanged() }
+const addCategory = () => { if (!editableArticle.value.categories) editableArticle.value.categories = []; editableArticle.value.categories.push(''); markChanged() }
+const removeCategory = (index) => { editableArticle.value.categories.splice(index, 1); markChanged() }
+const addAuthor = () => { if (!editableArticle.value.authors) editableArticle.value.authors = []; editableArticle.value.authors.push({ title: '' }); markChanged() }
+const removeAuthor = (index) => { editableArticle.value.authors.splice(index, 1); markChanged() }
+const addTag = () => { if (!editableArticle.value.tags) editableArticle.value.tags = []; editableArticle.value.tags.push(''); markChanged() }
+const removeTag = (index) => { editableArticle.value.tags.splice(index, 1); markChanged() }
 const triggerImageUpload = () => { imageInput.value.click() }
 
 const handleImageUpload = async (event) => {
@@ -187,7 +187,7 @@ const handleImageUpload = async (event) => {
   if (!file) return
   uploading.value = true
   try {
-    editableArticle.value.Splash = await uploadMedia(file)
+    editableArticle.value.splash = await uploadMedia(file)
     markChanged()
     toast.add({ title: 'Image uploaded successfully!', color: 'green' })
   } catch (err) {
@@ -195,20 +195,20 @@ const handleImageUpload = async (event) => {
   } finally { uploading.value = false }
 }
 
-const removeImage = () => { editableArticle.value.Splash = null; if (imageInput.value) imageInput.value.value = ''; markChanged() }
+const removeImage = () => { editableArticle.value.splash = null; if (imageInput.value) imageInput.value.value = ''; markChanged() }
 
 const saveArticle = async () => {
   saving.value = true
   try {
     const markdownContent = turndownService.turndown(editorContent.value || '')
     const dataToSave = {
-      Title: editableArticle.value.Title, Abstract: editableArticle.value.Abstract,
-      Markdown: markdownContent, Date: editableArticle.value.Date,
-      Categories: editableArticle.value.Categories?.filter(c => c.trim() !== ''),
-      Tags: editableArticle.value.Tags?.filter(t => t.trim() !== ''),
-      Authors: editableArticle.value.Authors?.filter(a => a.title?.trim() !== ''),
-      Funding: editableArticle.value.Funding, Citation: editableArticle.value.Citation,
-      Doi: editableArticle.value.Doi, Splash: editableArticle.value.Splash
+      title: editableArticle.value.title, abstract: editableArticle.value.abstract,
+      markdown: markdownContent, date: editableArticle.value.date,
+      categories: editableArticle.value.categories?.filter(c => c.trim() !== ''),
+      tags: editableArticle.value.tags?.filter(t => t.trim() !== ''),
+      authors: editableArticle.value.authors?.filter(a => a.title?.trim() !== ''),
+      funding: editableArticle.value.funding, citation: editableArticle.value.citation,
+      doi: editableArticle.value.doi, splash: editableArticle.value.splash
     }
     const updatedArticle = await updateArticle(route.params.id, dataToSave, 'draft')
     originalArticle.value = JSON.parse(JSON.stringify(updatedArticle))
@@ -239,7 +239,7 @@ const loadArticle = async () => {
     originalArticle.value = JSON.parse(JSON.stringify(data))
     editableArticle.value = data
     checkDraftStatus(data)
-    if (data.Markdown) editorContent.value = convertMarkdownToHtml(data.Markdown)
+    if (data.markdown) editorContent.value = convertMarkdownToHtml(data.markdown)
   } catch (err) {
     error.value = `Failed to load article: ${err.message}`
   } finally { loading.value = false }
