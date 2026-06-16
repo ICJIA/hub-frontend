@@ -237,7 +237,7 @@
 </template>
 
 <script setup>
-definePageMeta({ middleware: ['preview-access'] })
+definePageMeta({ middleware: ['preview-access'], layout: 'preview' })
 
 const { route, loading, saving, error, hasChanges, isModified, markChanged, openPreview, makeFormattedDate, checkDraftStatus } = usePreviewEditor('/datasetpreviewreadonly')
 const { formatFileSize } = usePreviewUtils()

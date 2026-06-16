@@ -113,7 +113,7 @@
 </template>
 
 <script setup>
-definePageMeta({ middleware: ['preview-access'] })
+definePageMeta({ middleware: ['preview-access'], layout: 'preview' })
 
 import TurndownService from 'turndown'
 import { marked } from 'marked'

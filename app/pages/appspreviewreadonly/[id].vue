@@ -191,7 +191,7 @@
 </template>
 
 <script setup>
-definePageMeta({ middleware: ['preview-access'] })
+definePageMeta({ middleware: ['preview-access'], layout: 'preview' })
 
 const { loading, error, viewMode, publishing, createPublishHandler } = usePreviewReadonly()
 const { formatDate, resolveImageUrl } = usePreviewUtils()
