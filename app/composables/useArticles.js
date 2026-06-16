@@ -57,8 +57,8 @@ export const useArticles = () => {
     const params = new URLSearchParams(window.location.search)
     const status = statusOverride || params.get('status')
     const dataToSend = { ...articleData }
-    if (dataToSend.Splash && typeof dataToSend.Splash === 'object' && dataToSend.Splash.id) {
-      dataToSend.Splash = dataToSend.Splash.id
+    if (dataToSend.splash && typeof dataToSend.splash === 'object' && dataToSend.splash.id) {
+      dataToSend.splash = dataToSend.splash.id
     }
     const queryParams = new URLSearchParams()
     if (status) queryParams.append('status', status)
