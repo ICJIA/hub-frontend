@@ -205,7 +205,7 @@
 </template>
 
 <script setup>
-definePageMeta({ middleware: ['preview-access'] })
+definePageMeta({ middleware: ['preview-access'], layout: 'preview' })
 
 import { marked } from 'marked'
 import markedFootnote from 'marked-footnote'
