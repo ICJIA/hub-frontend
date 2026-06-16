@@ -55,7 +55,18 @@ export default async (request) => {
   const previewSecret = process.env.NUXT_PREVIEW_SECRET || 'preview-secret'
   const token = request.headers.get('x-preview-token')
   if (!isValidPreviewToken(token, previewSecret)) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+    let reason = 'no-token'
+    if (token) {
+      const dot = token.indexOf('.')
+      if (dot === -1) reason = 'bad-format'
+      else {
+        const ts = parseInt(token.slice(0, dot), 10)
+        if (isNaN(ts)) reason = 'bad-timestamp'
+        else if (Date.now() - ts > TOKEN_TTL_MS) reason = 'expired'
+        else reason = 'hash-mismatch'
+      }
+    }
+    return new Response(JSON.stringify({ error: 'Unauthorized', reason }), {
       status: 401,
       headers: { 'Content-Type': 'application/json' }
     })
