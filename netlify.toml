@@ -3,21 +3,56 @@
   publish = ".output/public"
 
 [build.environment]
-  NITRO_PRESET = "netlify"
+  NITRO_PRESET = "static"
   NODE_VERSION = "22"
   # Required env vars — set in Netlify UI → Site configuration → Environment variables:
   #   VITE_API_BASE_URL    public Strapi URL (also used by build scripts)
   #   API_BEARER_TOKEN     Strapi bearer token (build scripts)
   #   NUXT_API_TOKEN       same value as API_BEARER_TOKEN (Netlify Function runtime)
   #   NUXT_PREVIEW_SECRET  preview token secret (Netlify Function runtime)
+  #
+  # Delete these if they exist — they trigger the secrets scanner:
+  #   NUXT_STRAPI_URL, VITE_PREVIEW_SECRET, VITE_API_BEARER_TOKEN
 
-# Nitro's netlify preset does not generate a _redirects file, so we add the
-# catch-all here. Netlify always serves a matching static file first (force is
-# false), so pre-rendered pages (index.html, articles/*, etc.) come from the
-# CDN — only unmatched routes (SSR pages, /api/strapi/*) hit the function.
+# Route Strapi API calls to our standalone Netlify Function.
+# Static files (pre-rendered pages) are always served from the CDN by Netlify
+# before any redirect is evaluated, so this only fires for /api/strapi/* paths.
 [[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/server"
+  from = "/api/strapi/*"
+  to = "/.netlify/functions/strapi"
+  status = 200
+
+# Preview routes are handled client-side by Vue Router + preview-access middleware.
+# Serve the SPA shell (200.html) so the router can take over without a flash of
+# the pre-rendered home page (which index.html would cause, breaking hydration).
+[[redirects]]
+  from = "/preview/*"
+  to = "/200.html"
+  status = 200
+
+[[redirects]]
+  from = "/previewreadonly/*"
+  to = "/200.html"
+  status = 200
+
+[[redirects]]
+  from = "/appspreview/*"
+  to = "/200.html"
+  status = 200
+
+[[redirects]]
+  from = "/appspreviewreadonly/*"
+  to = "/200.html"
+  status = 200
+
+[[redirects]]
+  from = "/datasetpreview/*"
+  to = "/200.html"
+  status = 200
+
+[[redirects]]
+  from = "/datasetpreviewreadonly/*"
+  to = "/200.html"
   status = 200
 
 [[headers]]

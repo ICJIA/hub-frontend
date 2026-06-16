@@ -2,12 +2,6 @@ import { defineNuxtConfig } from 'nuxt/config';
 
 export default defineNuxtConfig({
   nitro: {
-    // crawlLinks is needed with the netlify preset (unlike static, it doesn't
-    // crawl by default). This discovers article/dataset/app slugs from the
-    // pre-rendered index pages so pagefind can index all content HTML.
-    prerender: {
-      crawlLinks: true,
-    },
     hooks: {
       async compiled(nitro: any) {
         const { writeFileSync, mkdirSync, existsSync } = await import('node:fs')
