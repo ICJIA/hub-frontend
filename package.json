@@ -28,7 +28,7 @@
     "@vueup/vue-quill": "^1.2.0",
     "marked": "^17.0.1",
     "marked-footnote": "^1.4.0",
-    "nuxt": "^4.4.2",
+    "nuxt": "^4.4.7",
     "pdfjs-dist": "^6.0.227",
     "quill-better-table": "^1.2.10",
     "tailwindcss": "^4.2.1",
