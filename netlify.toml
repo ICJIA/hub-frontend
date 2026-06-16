@@ -9,7 +9,16 @@
   #   VITE_API_BASE_URL    public Strapi URL (also used by build scripts)
   #   API_BEARER_TOKEN     Strapi bearer token (build scripts)
   #   NUXT_API_TOKEN       same value as API_BEARER_TOKEN (Netlify Function runtime)
-  #   NUXT_PREVIEW_SECRET  same value as PREVIEW_SECRET (Netlify Function runtime)
+  #   NUXT_PREVIEW_SECRET  preview token secret (Netlify Function runtime)
+
+# Nitro's netlify preset does not generate a _redirects file, so we add the
+# catch-all here. Netlify always serves a matching static file first (force is
+# false), so pre-rendered pages (index.html, articles/*, etc.) come from the
+# CDN — only unmatched routes (SSR pages, /api/strapi/*) hit the function.
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/server"
+  status = 200
 
 [[headers]]
   for = "/*"
