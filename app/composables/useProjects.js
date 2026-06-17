@@ -42,7 +42,7 @@ export const useProjects = () => {
         icon: p.icon,
         headerBg: p.headerBg,
         bullets: p.bullets || [],
-        url: `/programs/${p.slug}`,
+        url: `/projects/${p.slug}`,
       }))
   }
 
