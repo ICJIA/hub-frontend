@@ -54,7 +54,7 @@
               <ul class="space-y-1.5">
                 <li v-for="project in allPrograms" :key="project.slug">
                   <NuxtLink
-                    :to="`/programs/${project.slug}`"
+                    :to="`/projects/${project.slug}`"
                     class="block text-sm leading-snug py-0.5 transition-colors"
                     :class="project.slug === currentSlug
                       ? 'text-primary-600 dark:text-primary-400 font-semibold'
@@ -146,14 +146,14 @@ const currentSlug = computed(() => route.params.slug)
 const { fetchProjects, fetchProjectBySlug } = useProjects()
 
 // ─── All projects for the sidebar nav ────────────────────────────────────────
-const { data: projectsData } = await useAsyncData('all-programs', fetchProjects)
+const { data: projectsData } = await useAsyncData('all-projects', fetchProjects)
 const allPrograms = computed(() =>
   (projectsData.value ?? []).map(p => ({ slug: p.slug, title: p.Title ?? p.title ?? '' }))
 )
 
 // ─── Active project from Strapi ───────────────────────────────────────────────
 const { data: projectData } = await useAsyncData(
-  () => `program-${currentSlug.value}`,
+  () => `project-${currentSlug.value}`,
   () => fetchProjectBySlug(currentSlug.value),
   { watch: [currentSlug] }
 )
@@ -191,9 +191,9 @@ function normalizeResources(resources) {
 
 const FALLBACK = {
   icon: 'i-lucide-folder',
-  title: 'Program Not Found',
+  title: 'Project Not Found',
   tagline: '',
-  body: ['This program page could not be found.'],
+  body: ['This project page could not be found.'],
   projectManager: null,
   publications: [],
   resources: [],
