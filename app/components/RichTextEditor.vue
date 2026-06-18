@@ -665,9 +665,34 @@ turndown.use(gfm)
     selection.removeAllRanges()
     if (savedSelection) selection.addRange(savedSelection)
     if (mediaDialogMode.value === 'image') {
-      document.execCommand('insertHTML', false, `<img src="${url}" alt="${file.name}" style="max-width:100%;">`)
+      const img = document.createElement('img')
+      img.src = url
+      img.alt = file.name
+      img.style.maxWidth = '100%'
+      const range = window.getSelection()?.getRangeAt(0)
+      if (range) {
+        range.deleteContents()
+        range.insertNode(img)
+        range.setStartAfter(img)
+        range.collapse(true)
+        window.getSelection()?.removeAllRanges()
+        window.getSelection()?.addRange(range)
+      }
     } else {
-      document.execCommand('insertHTML', false, `<a href="${url}" target="_blank" rel="noopener noreferrer">${file.name}</a>`)
+      const a = document.createElement('a')
+      a.href = url
+      a.target = '_blank'
+      a.rel = 'noopener noreferrer'
+      a.textContent = file.name
+      const range = window.getSelection()?.getRangeAt(0)
+      if (range) {
+        range.deleteContents()
+        range.insertNode(a)
+        range.setStartAfter(a)
+        range.collapse(true)
+        window.getSelection()?.removeAllRanges()
+        window.getSelection()?.addRange(range)
+      }
     }
     emitUpdate()
   }
