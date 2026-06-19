@@ -294,7 +294,7 @@ const loadNavigation = async () => {
     const status = params.get('status') || 'draft'
     const response = await fetch(
       `${STRAPI_PROXY}/articles?status=${status}&pagination[pageSize]=100&sort=date:desc`,
-      { headers: getHeadersWithAuth() }
+      { headers: await getHeadersWithAuth() }
     )
     if (!response.ok) return
     const data = await response.json()
@@ -318,7 +318,7 @@ const loadAuthorArticles = async () => {
     const status = params.get('status') || 'draft'
     const response = await fetch(
       `${STRAPI_PROXY}/articles?status=${status}&pagination[pageSize]=5&filters[authors][title][$containsi]=${encodeURIComponent(firstAuthor)}`,
-      { headers: getHeadersWithAuth() }
+      { headers: await getHeadersWithAuth() }
     )
     if (!response.ok) return
     const data = await response.json()

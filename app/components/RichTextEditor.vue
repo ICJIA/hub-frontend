@@ -371,6 +371,7 @@
 import TurndownService from 'turndown'
 import { gfm } from 'turndown-plugin-gfm'
 import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 
 const turndown = new TurndownService({
   headingStyle: 'atx',
@@ -458,6 +459,9 @@ turndown.use(gfm)
     }
   }
   
+  const PASTE_ALLOWED_TAGS = ['p', 'b', 'i', 'u', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'br', 'h2', 'h3', 'h4', 'blockquote', 'code', 'pre', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'img']
+  const PASTE_ALLOWED_ATTR = ['href', 'src', 'alt', 'target', 'rel', 'class']
+
   // Handle paste - clean up pasted content
   const onPaste = (e) => {
     e.preventDefault()
@@ -466,16 +470,10 @@ turndown.use(gfm)
 
     let content
     if (html) {
-      const temp = document.createElement('div')
-      temp.innerHTML = html
-      temp.querySelectorAll('script, style').forEach(el => el.remove())
-      // Unwrap span tags — keep their text content but drop the tag itself
-      temp.querySelectorAll('span').forEach(span => {
-        const parent = span.parentNode
-        while (span.firstChild) parent.insertBefore(span.firstChild, span)
-        parent.removeChild(span)
+      content = DOMPurify.sanitize(html, {
+        ALLOWED_TAGS: PASTE_ALLOWED_TAGS,
+        ALLOWED_ATTR: PASTE_ALLOWED_ATTR,
       })
-      content = temp.innerHTML
     } else {
       // Fall back to plain text, preserving newlines as <br>
       content = plain

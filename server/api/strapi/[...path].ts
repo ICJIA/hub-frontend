@@ -1,4 +1,5 @@
 import { defineEventHandler, getHeader, getRequestURL, proxyRequest, createError } from 'h3'
+import { createHmac, timingSafeEqual } from 'node:crypto'
 
 // Exact set of (method, path pattern) pairs the app uses — everything else is rejected.
 const ALLOWED: [string, RegExp][] = [
@@ -17,23 +18,20 @@ const ALLOWED: [string, RegExp][] = [
 
 const TOKEN_TTL_MS = 5 * 60 * 1000
 
-function djb2(str: string): string {
-  let h = 0
-  for (let i = 0; i < str.length; i++) {
-    h = (Math.imul(31, h) + str.charCodeAt(i)) | 0
-  }
-  return Math.abs(h).toString(36)
-}
-
 function isValidPreviewToken(token: string | undefined, secret: string): boolean {
   if (!token) return false
   const dot = token.indexOf('.')
   if (dot === -1) return false
   const tsStr = token.slice(0, dot)
-  const h = token.slice(dot + 1)
+  const mac = token.slice(dot + 1)
   const ts = parseInt(tsStr, 10)
   if (isNaN(ts) || Date.now() - ts > TOKEN_TTL_MS) return false
-  return h === djb2(`${ts}:${secret}`)
+  const expected = createHmac('sha256', secret).update(tsStr).digest('hex')
+  try {
+    return timingSafeEqual(Buffer.from(mac, 'hex'), Buffer.from(expected, 'hex'))
+  } catch {
+    return false
+  }
 }
 
 export default defineEventHandler(async (event) => {

@@ -24,11 +24,14 @@ declare const window: typeof globalThis & {
 const CustomEditorModal = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [documentId, setDocumentId] = useState<string | null>(null);
+  const [urlToken, setUrlToken] = useState<string>('');
 
   const EDITOR_URL = 'https://research-hub-dev.netlify.app/preview';
 
   useEffect(() => {
-    const handler = (e: CustomEvent<EditorEventDetail>) => {
+    const handler = async (e: CustomEvent<EditorEventDetail>) => {
+      const token = await generateToken();
+      setUrlToken(token);
       setDocumentId(e.detail.documentId);
       setIsOpen(true);
     };
@@ -82,7 +85,7 @@ const CustomEditorModal = () => {
         <Modal.Body style={{ padding: 0 }}>
           <Box style={{ height: '85vh' }}>
             <iframe
-              src={`${EDITOR_URL}/${documentId}?token=${generateToken()}`}
+              src={`${EDITOR_URL}/${documentId}?token=${urlToken}`}
               style={{
                 width: '100%',
                 height: '100%',

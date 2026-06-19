@@ -27,44 +27,44 @@ const PreviewButton = () => {
     return { contentType, id };
   };
 
-  const handlePreview = () => {
+  const handlePreview = async () => {
     const result = getContentTypeAndId();
     if (!result) return;
     const { contentType, id } = result;
-
-	console.log(result);
+    const token = await generateToken();
 
     if (contentType.includes('dataset')) {
       setTitle('Live Preview Mode');
-      setPreviewUrl(`https://research-hub-dev.netlify.app/datasetpreview/${id}?token=${generateToken()}`);
+      setPreviewUrl(`https://research-hub-dev.netlify.app/datasetpreview/${id}?token=${token}`);
       setIsOpen(true);
     } else if (contentType.includes('article')) {
       setTitle('Live Preview Mode');
-      setPreviewUrl(`https://research-hub-dev.netlify.app/preview/${id}?token=${generateToken()}`);
+      setPreviewUrl(`https://research-hub-dev.netlify.app/preview/${id}?token=${token}`);
       setIsOpen(true);
     } else if (contentType.includes('app')) {
       setTitle('Live Preview Mode');
-      setPreviewUrl(`https://research-hub-dev.netlify.app/appspreview/${id}?token=${generateToken()}`);
+      setPreviewUrl(`https://research-hub-dev.netlify.app/appspreview/${id}?token=${token}`);
       setIsOpen(true);
     }
   };
 
-  const handleReadonlyPreview = () => {
+  const handleReadonlyPreview = async () => {
     const result = getContentTypeAndId();
     if (!result) return;
     const { contentType, id } = result;
+    const token = await generateToken();
 
     if (contentType.includes('dataset')) {
       setTitle('Preview Mode');
-      setPreviewUrl(`https://research-hub-dev.netlify.app/datasetpreviewreadonly/${id}?token=${generateToken()}`);
+      setPreviewUrl(`https://research-hub-dev.netlify.app/datasetpreviewreadonly/${id}?token=${token}`);
       setIsOpen(true);
     } else if (contentType.includes('article')) {
       setTitle('Preview Mode');
-      setPreviewUrl(`https://research-hub-dev.netlify.app/previewreadonly/${id}?token=${generateToken()}`);
+      setPreviewUrl(`https://research-hub-dev.netlify.app/previewreadonly/${id}?token=${token}`);
       setIsOpen(true);
     } else if (contentType.includes('app')) {
       setTitle('Preview Mode');
-      setPreviewUrl(`https://research-hub-dev.netlify.app/appspreviewreadonly/${id}?token=${generateToken()}`);
+      setPreviewUrl(`https://research-hub-dev.netlify.app/appspreviewreadonly/${id}?token=${token}`);
       setIsOpen(true);
     }
   };

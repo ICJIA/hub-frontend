@@ -138,6 +138,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { marked } from 'marked'
 import { useSearchHighlight } from '~/composables/useSearchHighlight'
 import markedFootnote from 'marked-footnote'
+import DOMPurify from 'dompurify'
 
 if (!marked._footnotePluginAdded) {
   marked.use(markedFootnote())
@@ -260,10 +261,13 @@ const handleContentClick = (e) => {
   window.scrollTo({ top, behavior: 'smooth' })
 }
 
+const MARKED_ALLOWED_TAGS = ['p', 'b', 'i', 'u', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'code', 'pre', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'img', 'hr', 'sup', 'sub', 'section', 'div', 'span']
+const MARKED_ALLOWED_ATTR = ['href', 'src', 'alt', 'target', 'rel', 'id', 'class', 'title']
+
 const renderedMarkdown = computed(() => {
   if (!article.value?.markdown) return ''
   let md = fixFootnotes(article.value.markdown)
-  let html = marked(md)
+  let html = DOMPurify.sanitize(marked(md), { ALLOWED_TAGS: MARKED_ALLOWED_TAGS, ALLOWED_ATTR: MARKED_ALLOWED_ATTR })
   html = html.replace(/ title="_blank"/g, ' target="_blank" rel="noopener noreferrer"')
   html = html.replace(/<h2>(.*?)<\/h2>/g, (_, inner) => {
     const id = slugify(inner)

@@ -118,6 +118,7 @@ definePageMeta({ middleware: ['preview-access'], layout: 'preview' })
 import TurndownService from 'turndown'
 import { marked } from 'marked'
 import markedFootnote from 'marked-footnote'
+import DOMPurify from 'dompurify'
 
 const turndownService = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced', bulletListMarker: '-' })
 turndownService.addRule('span', {
@@ -223,10 +224,13 @@ const saveArticle = async () => {
 const convertMarkdownToHtml = (markdown) => {
   if (!markdown) return ''
   marked.use(markedFootnote())
-  marked.setOptions({ gfm: true, breaks: false, html: true })
+  marked.setOptions({ gfm: true, breaks: false })
   markdown = markdown.replace(/([^\n])\[\^(\d+)\]:/g, '$1\n\n[^$2]:')
   markdown = markdown.replace(/(\[\^\d+\]:[^\n]*)\n(?!\[\^\d+\]:|\s*$|\n)([^\n]+)/g, '$1 $2')
-  let html = marked(markdown)
+  let html = DOMPurify.sanitize(marked(markdown), {
+    ALLOWED_TAGS: ['p', 'b', 'i', 'u', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'code', 'pre', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'img', 'hr', 'sup', 'sub', 'section', 'div', 'span'],
+    ALLOWED_ATTR: ['href', 'src', 'alt', 'target', 'rel', 'id', 'class', 'title'],
+  })
   html = html.replace(/<li>\s*<p>([\s\S]*?)<\/p>\s*<\/li>/g, '<li>$1</li>')
   html = html.replace(/ title="_blank"/g, ' target="_blank" rel="noopener noreferrer"')
   return fixAssetUrls(html)

@@ -44,7 +44,7 @@ export default defineNuxtConfig({
     // strapiUrl is intentionally absent: the server route reads VITE_API_BASE_URL
     // directly from process.env at runtime (it's a public URL, not a secret).
     apiToken: '',
-    previewSecret: 'preview-secret',
+    previewSecret: '',
     public: {}
   },
 

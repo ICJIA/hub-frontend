@@ -1,15 +1,16 @@
-const SECRET = process.env.STRAPI_ADMIN_PREVIEW_SECRET || 'preview-secret'
-const VALIDITY_MS = 5 * 60 * 1000 // 5 minutes
+const SECRET = process.env.STRAPI_ADMIN_PREVIEW_SECRET || ''
 
-function hash(str: string): string {
-  let h = 0
-  for (let i = 0; i < str.length; i++) {
-    h = Math.imul(31, h) + str.charCodeAt(i) | 0
-  }
-  return Math.abs(h).toString(36)
+async function hmacSha256(secret: string, message: string): Promise<string> {
+  const enc = new TextEncoder()
+  const key = await crypto.subtle.importKey(
+    'raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  )
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(message))
+  return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('')
 }
 
-export function generateToken(): string {
+export async function generateToken(): Promise<string> {
   const ts = Date.now()
-  return `${ts}.${hash(`${ts}:${SECRET}`)}`
+  const mac = await hmacSha256(SECRET, String(ts))
+  return `${ts}.${mac}`
 }
