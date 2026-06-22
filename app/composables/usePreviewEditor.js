@@ -9,9 +9,9 @@ export const usePreviewEditor = (readonlyPreviewPath) => {
 
   const markChanged = () => { hasChanges.value = true }
 
-  const openPreview = () => {
+  const openPreview = async () => {
     const params = new URLSearchParams(window.location.search)
-    params.set('token', generateToken())
+    params.set('token', await generateToken())
     window.open(`${readonlyPreviewPath}/${route.params.id}?${params.toString()}`, '_blank')
   }
 

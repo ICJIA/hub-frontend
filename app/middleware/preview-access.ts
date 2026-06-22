@@ -3,11 +3,6 @@ const SESSION_KEY = 'preview_authorized'
 export default defineNuxtRouteMiddleware(async (to) => {
   if (import.meta.server) return
 
-  if (window.parent !== window) {
-    sessionStorage.setItem(SESSION_KEY, 'true')
-    return
-  }
-
   if (sessionStorage.getItem(SESSION_KEY) === 'true') return
 
   const token = to.query.token as string

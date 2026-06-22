@@ -43,8 +43,7 @@ const CustomEditorModal = () => {
   // Listen for messages from the iframe
   useEffect(() => {
     const messageHandler = (e: MessageEvent) => {
-      // Validate origin if using external URL
-      // if (e.origin !== 'https://your-editor-domain.com') return;
+      if (e.origin !== 'https://research-hub-dev.netlify.app') return;
 
       if (e.data?.type === 'EDITOR_CLOSE') {
         handleClose();

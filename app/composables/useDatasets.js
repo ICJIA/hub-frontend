@@ -44,7 +44,7 @@ export const useDatasets = () => {
     const queryParams = new URLSearchParams()
     queryParams.set('status', status)
     queryParams.append('populate', '*')
-    const response = await fetch(`${STRAPI_PROXY}/datasets/${id}?${queryParams}`, { headers: getHeadersWithAuth() })
+    const response = await fetch(`${STRAPI_PROXY}/datasets/${id}?${queryParams}`, { headers: await getHeadersWithAuth() })
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
     const data = await response.json()
     return data.data
@@ -77,7 +77,7 @@ export const useDatasets = () => {
     queryParams.append('populate', '*')
     const response = await fetch(`${STRAPI_PROXY}/datasets/${id}?${queryParams}`, {
       method: 'PUT',
-      headers: getHeadersWithAuth(),
+      headers: await getHeadersWithAuth(),
       body: JSON.stringify({ data: dataToSend })
     })
     if (!response.ok) {
@@ -92,7 +92,7 @@ export const useDatasets = () => {
     const queryParams = new URLSearchParams({ status: 'published' })
     const response = await fetch(`${STRAPI_PROXY}/datasets/${id}?${queryParams}`, {
       method: 'PUT',
-      headers: getHeadersWithAuth(),
+      headers: await getHeadersWithAuth(),
       body: JSON.stringify({ data: {} })
     })
     if (!response.ok) {
@@ -113,7 +113,7 @@ export const useDatasets = () => {
       'pagination[pageSize]': 50
     })
     if (search) params.append('filters[title][$containsi]', search)
-    const response = await fetch(`${STRAPI_PROXY}/datasets?${params}`, { headers: getHeadersWithAuth() })
+    const response = await fetch(`${STRAPI_PROXY}/datasets?${params}`, { headers: await getHeadersWithAuth() })
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
     const data = await response.json()
     return data.data || []

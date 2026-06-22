@@ -93,7 +93,7 @@ export default defineNuxtConfig({
   vite: {
     server: {
       headers: {
-        'Content-Security-Policy': 'frame-ancestors *'
+        'Content-Security-Policy': "frame-ancestors 'self' https://v2.hub.icjia-api.cloud"
       }
     },
     optimizeDeps: {
@@ -113,16 +113,16 @@ export default defineNuxtConfig({
   routeRules: {
     '/**': {
       headers: {
-        'Content-Security-Policy': 'frame-ancestors *'
+        'Content-Security-Policy': "frame-ancestors 'none'"
       },
     },
     '/': { prerender: true },
-    '/preview/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
-    '/appspreview/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
-    '/datasetpreview/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
-    '/previewreadonly/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
-    '/appspreviewreadonly/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
-    '/datasetpreviewreadonly/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
+    '/preview/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow', 'Content-Security-Policy': "frame-ancestors 'self' https://v2.hub.icjia-api.cloud" } },
+    '/appspreview/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow', 'Content-Security-Policy': "frame-ancestors 'self' https://v2.hub.icjia-api.cloud" } },
+    '/datasetpreview/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow', 'Content-Security-Policy': "frame-ancestors 'self' https://v2.hub.icjia-api.cloud" } },
+    '/previewreadonly/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow', 'Content-Security-Policy': "frame-ancestors 'self' https://v2.hub.icjia-api.cloud" } },
+    '/appspreviewreadonly/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow', 'Content-Security-Policy': "frame-ancestors 'self' https://v2.hub.icjia-api.cloud" } },
+    '/datasetpreviewreadonly/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow', 'Content-Security-Policy': "frame-ancestors 'self' https://v2.hub.icjia-api.cloud" } },
   },
   eslint: {
     config: {

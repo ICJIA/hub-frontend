@@ -46,7 +46,7 @@ export const useApps = () => {
     const queryParams = new URLSearchParams()
     queryParams.set('status', status)
     queryParams.append('populate', '*')
-    const response = await fetch(`${STRAPI_PROXY}/apps/${id}?${queryParams}`, { headers: getHeadersWithAuth() })
+    const response = await fetch(`${STRAPI_PROXY}/apps/${id}?${queryParams}`, { headers: await getHeadersWithAuth() })
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
     const data = await response.json()
     return data.data
@@ -76,7 +76,7 @@ export const useApps = () => {
     queryParams.append('populate', '*')
     const response = await fetch(`${STRAPI_PROXY}/apps/${id}?${queryParams}`, {
       method: 'PUT',
-      headers: getHeadersWithAuth(),
+      headers: await getHeadersWithAuth(),
       body: JSON.stringify({ data: dataToSend })
     })
     if (!response.ok) {
@@ -90,7 +90,7 @@ export const useApps = () => {
   const publishApp = async (id) => {
     const response = await fetch(`${STRAPI_PROXY}/apps/${id}?status=published&populate=*`, {
       method: 'PUT',
-      headers: getHeadersWithAuth(),
+      headers: await getHeadersWithAuth(),
       body: JSON.stringify({ data: {} })
     })
     if (!response.ok) {
@@ -104,7 +104,7 @@ export const useApps = () => {
   const fetchAppsBasic = async (search = '') => {
     const params = new URLSearchParams({ status: 'draft' })
     if (search) params.append('filters[title][$containsi]', search)
-    const response = await fetch(`${STRAPI_PROXY}/apps?${params}`, { headers: getHeadersWithAuth() })
+    const response = await fetch(`${STRAPI_PROXY}/apps?${params}`, { headers: await getHeadersWithAuth() })
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
     const data = await response.json()
     return data.data || []

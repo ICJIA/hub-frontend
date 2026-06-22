@@ -5,7 +5,7 @@ export const useMedia = () => {
     const response = await fetch(`${STRAPI_PROXY}/upload`, {
       method: 'POST',
       headers: {
-        ...getAuthHeader()
+        ...await getAuthHeader()
         // Note: Don't include Content-Type - browser sets it with boundary for FormData
       },
       body: formData
@@ -32,7 +32,7 @@ export const useMedia = () => {
     }
     if (search) params.append('filters[name][$contains]', search)
     const response = await fetch(`${STRAPI_PROXY}/upload/files?${params}`, {
-      headers: getAuthHeader()
+      headers: await getAuthHeader()
     })
     if (!response.ok) throw new Error(`Failed to fetch media: ${response.status}`)
     const data = await response.json()
