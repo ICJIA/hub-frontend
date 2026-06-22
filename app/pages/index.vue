@@ -51,7 +51,7 @@
 
       <!-- ══════════════════════════════════════════════════
            3. KEY STATISTICS — white section, navy cards
-      ═══════════════════════════════════════════════════ -->
+      ═══════════════════════════════════════════════════ 
       <div class="bg-[#1a3a5c] dark:bg-gray-900 py-8">
         <div class="max-w-[1400px] mx-auto px-4">
           <h2 class="text-xl font-bold mb-4 text-white">{{ currentPage.statisticsTitle }}</h2>
@@ -72,7 +72,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </div>-->
 
       <!-- ══════════════════════════════════════════════════
            4. CENTERS — light gray section, accordion list
