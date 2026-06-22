@@ -4,7 +4,12 @@
       :to="{ query: allQuery }"
       :class="chipClass(isAllActive)"
     >
-      All ({{ total }})
+      All
+      <span
+        v-if="total > 0"
+        class="ml-2 px-2 py-0.5 rounded-full text-xs font-bold"
+        :class="isAllActive ? 'bg-white text-primary-700' : 'bg-primary-600 text-white'"
+      >{{ total }}</span>
     </NuxtLink>
     <NuxtLink
       v-for="cat in categories"
@@ -12,7 +17,12 @@
       :to="{ query: { ...baseQuery, topic: cat.label } }"
       :class="chipClass(activeCategory === cat.label)"
     >
-      {{ cat.label }} ({{ cat.count }})
+      {{ cat.label }}
+      <span
+        v-if="cat.count > 0"
+        class="ml-2 px-2 py-0.5 rounded-full text-xs font-bold"
+        :class="activeCategory === cat.label ? 'bg-white text-primary-700' : 'bg-primary-600 text-white'"
+      >{{ cat.count }}</span>
     </NuxtLink>
   </div>
 </template>

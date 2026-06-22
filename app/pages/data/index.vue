@@ -5,19 +5,29 @@
         :class="activeTab === 'datasets'
           ? 'bg-primary-600 text-white'
           : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'"
-        class="px-5 py-2 rounded-full text-sm font-semibold transition-colors"
+        class="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold transition-colors"
         @click="setTab('datasets')"
       >
         Datasets
+        <span
+          v-if="datasetsCount > 0"
+          class="px-2 py-0.5 rounded-full text-xs font-bold"
+          :class="activeTab === 'datasets' ? 'bg-white text-primary-700' : 'bg-primary-600 text-white'"
+        >{{ datasetsCount }}</span>
       </button>
       <button
         :class="activeTab === 'apps'
           ? 'bg-primary-600 text-white'
           : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'"
-        class="px-5 py-2 rounded-full text-sm font-semibold transition-colors"
+        class="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold transition-colors"
         @click="setTab('apps')"
       >
         Apps
+        <span
+          v-if="appsCount > 0"
+          class="px-2 py-0.5 rounded-full text-xs font-bold"
+          :class="activeTab === 'apps' ? 'bg-white text-primary-700' : 'bg-primary-600 text-white'"
+        >{{ appsCount }}</span>
       </button>
     </div>
 
@@ -135,6 +145,9 @@ watch(resolvedTab, () => {
 })
 
 const contentType = computed(() => activeTab.value === 'datasets' ? 'dataset' : 'app')
+
+const datasetsCount = computed(() => getByType('dataset').length)
+const appsCount = computed(() => getByType('app').length)
 
 const allItems = computed(() => getByType(contentType.value))
 
