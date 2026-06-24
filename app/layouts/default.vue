@@ -7,6 +7,7 @@
           <UButton variant="ghost" to="/articles" size="sm">Articles</UButton>
           <UButton variant="ghost" to="/data" size="sm">Data</UButton>
           <UButton variant="ghost" to="/projects" size="sm">Projects</UButton>
+          <UButton variant="ghost" to="/centers" size="sm">Centers</UButton>
         </nav>
         <UColorModeButton />
       </div>
