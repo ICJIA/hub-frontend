@@ -60,5 +60,50 @@ export const useProjects = () => {
     }
   }
 
-  return { fetchProjects, fetchProjectBySlug, fetchProjectsForCarousel, fetchProjectHome }
+  const fetchProjectPreviewById = async (id) => {
+    const params = new URLSearchParams(window.location.search)
+    const status = params.get('status') || 'draft'
+    const queryParams = new URLSearchParams()
+    queryParams.set('status', status)
+    queryParams.append('populate', '*')
+    const response = await fetch(`${STRAPI_PROXY}/projects/${id}?${queryParams}`, { headers: getHeadersWithAuth() })
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    const data = await response.json()
+    return data.data
+  }
+
+  const updateProject = async (id, projectData, statusOverride) => {
+    const params = new URLSearchParams(window.location.search)
+    const status = statusOverride || params.get('status')
+    const queryParams = new URLSearchParams()
+    if (status) queryParams.append('status', status)
+    queryParams.append('populate', '*')
+    const response = await fetch(`${STRAPI_PROXY}/projects/${id}?${queryParams}`, {
+      method: 'PUT',
+      headers: getHeadersWithAuth(),
+      body: JSON.stringify({ data: projectData })
+    })
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`)
+    }
+    const data = await response.json()
+    return data.data
+  }
+
+  const publishProject = async (id) => {
+    const response = await fetch(`${STRAPI_PROXY}/projects/${id}?status=published&populate=*`, {
+      method: 'PUT',
+      headers: getHeadersWithAuth(),
+      body: JSON.stringify({ data: {} })
+    })
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`)
+    }
+    const data = await response.json()
+    return data.data
+  }
+
+  return { fetchProjects, fetchProjectBySlug, fetchProjectsForCarousel, fetchProjectHome, fetchProjectPreviewById, updateProject, publishProject }
 }
