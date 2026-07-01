@@ -55,6 +55,16 @@
   to = "/200.html"
   status = 200
 
+[[redirects]]
+  from = "/projectspreview/*"
+  to = "/200.html"
+  status = 200
+
+[[redirects]]
+  from = "/projectspreviewreadonly/*"
+  to = "/200.html"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]
