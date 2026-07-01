@@ -123,6 +123,8 @@ export default defineNuxtConfig({
     '/previewreadonly/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
     '/appspreviewreadonly/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
     '/datasetpreviewreadonly/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
+    '/projectspreview/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
+    '/projectspreviewreadonly/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
   },
   eslint: {
     config: {
