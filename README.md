@@ -90,6 +90,19 @@ The project is pre-configured for Netlify static hosting with a serverless funct
 | `NUXT_API_TOKEN` | Netlify Function (API proxy at runtime) |
 | `NUXT_PREVIEW_SECRET` | Netlify Function (preview token verification) |
 
+### Content changes require a redeploy
+
+The Pagefind search index and the metadata index (`search-index.json`, `file-parents.json`) are built **at deploy time** by crawling the Strapi API. They are baked into the static output and are not updated at runtime.
+
+This means:
+
+- Publishing a new article, dataset, app, or project in Strapi will **not** appear in search results until a new Netlify deploy runs.
+- Editing or deleting existing content (title, body, attached files) likewise requires a redeploy to take effect in search.
+
+**To trigger a redeploy**, go to the Netlify dashboard → **Deploys** → **Trigger deploy** → **Deploy site**. The build will re-fetch all content from Strapi and regenerate both indices.
+
+> If you want content updates to trigger deploys automatically, configure a [Netlify Build Hook](https://docs.netlify.com/configure-builds/build-hooks/) and call it from a Strapi lifecycle hook or webhook on publish events.
+
 ### Netlify Function proxy
 
 All mutating API calls are routed through a Netlify Function (`/.netlify/functions/strapi`) that injects the bearer token server-side. Preview routes are served from the SPA shell (`200.html`) so Vue Router's client-side middleware can handle auth without a full page reload.
