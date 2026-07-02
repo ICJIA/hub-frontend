@@ -16,6 +16,9 @@ const ALLOWED = [
   ['GET',  /^apps$/],
   ['GET',  /^apps\/[^/]+$/],
   ['PUT',  /^apps\/[^/]+$/],
+  ['GET',  /^projects$/],
+  ['GET',  /^projects\/[^/]+$/],
+  ['PUT',  /^projects\/[^/]+$/],
   ['POST', /^upload$/],
   ['GET',  /^upload\/files$/],
 ]
