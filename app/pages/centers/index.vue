@@ -73,13 +73,13 @@
 
           <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div
-              v-for="(center, index) in centers"
+              v-for="center in centers"
               :key="center.id"
               class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col"
             >
               <!-- Image with overlay label -->
               <div class="relative h-44 shrink-0">
-                <div class="w-full h-full" :style="{ background: placeholderBgs[index % placeholderBgs.length] }" />
+                <div class="w-full h-full bg-cover bg-center" style="background-image: url('https://v2.hub.icjia-api.cloud/uploads/bground_center_d679833583.png')" />
                 <!-- Name + manager overlay at bottom of image -->
                 <div class="absolute bottom-0 left-0 right-0 bg-[#1a3a5c]/80 px-3 py-2">
                   <span class="text-white text-sm font-semibold leading-snug block">{{ center.name }}</span>
@@ -131,11 +131,6 @@ const FALLBACK = {
   sectionTitle: 'Centers in Research & Analysis',
 }
 
-const placeholderBgs = [
-  'linear-gradient(135deg, #2d4a6e 0%, #1a3a5c 100%)',
-  'linear-gradient(135deg, #3a5a7e 0%, #1a3a5c 100%)',
-  'linear-gradient(135deg, #4a6a8e 0%, #1a3a5c 100%)',
-]
 
 const { fetchCenterHome, fetchCenters } = useCenters()
 
