@@ -1,56 +1,54 @@
 <template>
   <div class="min-h-screen flex flex-col">
-    <header class="sticky top-0 z-50 bg-[#1a1a2e] h-14 flex items-center px-4 shadow-lg">
-      <div class="flex items-center justify-center gap-5 flex-wrap w-full">
-        <span class="text-xs text-gray-400 uppercase font-medium tracking-wide">Edit Mode</span>
-        <UBadge v-if="isModified" color="warning" variant="solid">Modified</UBadge>
-        <span v-if="hasChanges" class="text-xs text-amber-400 font-medium">Unsaved changes</span>
+    <header class="sticky top-0 z-50 bg-[#1a1a2e] h-14 flex items-center px-4 shadow-lg gap-5">
+      <span class="text-white text-sm font-semibold">Live Preview Mode</span>
+      <span class="text-xs text-gray-400 uppercase font-medium tracking-wide">Edit Mode</span>
+      <UBadge v-if="isModified" color="warning" variant="solid">Modified</UBadge>
+      <span v-if="hasChanges" class="text-xs text-amber-400 font-medium">Unsaved changes</span>
+      <div class="ml-auto flex items-center gap-3">
         <UButton variant="outline" size="sm" icon="i-heroicons-arrow-top-right-on-square" class="text-white border-white/30 hover:bg-white/10" @click="openPreview">Preview</UButton>
         <UButton color="primary" size="sm" :loading="saving" @click="saveProject">Save Changes</UButton>
       </div>
     </header>
 
-    <main class="flex-1">
-      <div class="max-w-[900px] mx-auto px-4 py-6">
-        <div v-if="loading" class="flex flex-col items-center py-16">
-          <UIcon name="i-heroicons-arrow-path" class="w-10 h-10 animate-spin text-primary-500" />
-          <p class="mt-4 text-gray-500">Loading project...</p>
-        </div>
+    <main class="flex-1 flex flex-col overflow-hidden">
+      <div v-if="loading" class="flex flex-col items-center py-16">
+        <UIcon name="i-heroicons-arrow-path" class="w-10 h-10 animate-spin text-primary-500" />
+        <p class="mt-4 text-gray-500">Loading project...</p>
+      </div>
 
-        <div v-else-if="error" class="text-center py-16">
-          <UAlert color="error" :description="error" class="mb-4" />
-          <UButton variant="outline" @click="loadProject">Retry</UButton>
-        </div>
+      <div v-else-if="error" class="text-center py-16 px-4">
+        <UAlert color="error" :description="error" class="mb-4" />
+        <UButton variant="outline" @click="loadProject">Retry</UButton>
+      </div>
 
-        <template v-else-if="editableProject">
+      <div v-else-if="editableProject" class="flex flex-1 overflow-hidden">
+        <!-- Left sidebar: metadata -->
+        <div class="w-72 flex-shrink-0 border-r border-gray-200 bg-gray-50 overflow-y-auto p-4">
+          <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Metadata</p>
 
-          <div class="mb-6">
+          <div class="mb-4">
             <label class="field-label">Title</label>
             <UInput v-model="editableProject.Title" @input="markChanged" placeholder="Project title" />
           </div>
 
-          <div class="mb-6">
+          <div class="mb-4">
             <label class="field-label">Subtitle / Tagline</label>
             <UInput v-model="editableProject.SubTitle" @input="markChanged" placeholder="Short tagline…" />
           </div>
 
-          <div class="mb-6">
+          <div class="mb-4">
             <label class="field-label">Slug</label>
             <UInput v-model="editableProject.slug" @input="markChanged" placeholder="project-slug" />
           </div>
 
-          <div class="mb-6">
+          <div class="mb-4">
             <label class="field-label">Icon</label>
             <UInput v-model="editableProject.Icon" @input="markChanged" placeholder="i-lucide-folder" />
             <p class="text-xs text-gray-400 mt-1">Nuxt icon name, e.g. <code>i-lucide-folder</code></p>
           </div>
 
-          <div class="mb-6">
-            <label class="field-label">Body</label>
-            <UTextarea v-model="editableProject.Body" @input="markChanged" :rows="10" placeholder="Project body content. Separate paragraphs with a blank line." />
-          </div>
-
-          <div class="mb-6">
+          <div class="mb-4">
             <label class="field-label">Authors / Project Managers</label>
             <div class="flex flex-col gap-2">
               <div v-for="(author, index) in editableProject.Authors" :key="index" class="flex items-center gap-2">
@@ -59,6 +57,14 @@
               </div>
               <div><UButton size="sm" variant="soft" icon="i-heroicons-plus" @click="addAuthor">Add Author</UButton></div>
             </div>
+          </div>
+        </div>
+
+        <!-- Right content area -->
+        <div class="flex-1 overflow-y-auto p-6">
+          <div class="mb-6">
+            <label class="field-label">Body</label>
+            <UTextarea v-model="editableProject.Body" @input="markChanged" :rows="10" placeholder="Project body content. Separate paragraphs with a blank line." />
           </div>
 
           <div class="mb-6">
@@ -120,8 +126,7 @@
             </div>
             <UButton size="sm" variant="soft" icon="i-heroicons-plus" class="mt-3" @click="addResource">Add Resource</UButton>
           </div>
-
-        </template>
+        </div>
       </div>
     </main>
   </div>

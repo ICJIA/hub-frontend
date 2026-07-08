@@ -1,66 +1,34 @@
 <template>
   <div class="min-h-screen flex flex-col">
-    <header class="sticky top-0 z-50 bg-[#1a1a2e] h-14 flex items-center px-4 shadow-lg">
-      <div class="flex items-center justify-center gap-5 flex-wrap w-full">
-        <span class="text-xs text-gray-400 uppercase font-medium tracking-wide">Edit Mode</span>
-        <UBadge v-if="isModified" color="warning" variant="solid">Modified</UBadge>
-        <span v-if="hasChanges" class="text-xs text-amber-400 font-medium">Unsaved changes</span>
+    <header class="sticky top-0 z-50 bg-[#1a1a2e] h-14 flex items-center px-4 shadow-lg gap-5">
+      <span class="text-white text-sm font-semibold">Live Preview Mode</span>
+      <span class="text-xs text-gray-400 uppercase font-medium tracking-wide">Edit Mode</span>
+      <UBadge v-if="isModified" color="warning" variant="solid">Modified</UBadge>
+      <span v-if="hasChanges" class="text-xs text-amber-400 font-medium">Unsaved changes</span>
+      <div class="ml-auto flex items-center gap-3">
         <UButton variant="outline" size="sm" icon="i-heroicons-arrow-top-right-on-square" class="text-white border-white/30 hover:bg-white/10" @click="openPreview">Preview</UButton>
         <UButton color="primary" size="sm" :loading="saving" @click="saveArticle">Save Changes</UButton>
       </div>
     </header>
 
-    <main class="flex-1">
-      <div class="max-w-[900px] mx-auto px-4 py-6">
-        <div v-if="loading" class="flex flex-col items-center py-16">
-          <UIcon name="i-heroicons-arrow-path" class="w-10 h-10 animate-spin text-primary-500" />
-          <p class="mt-4 text-gray-500">Loading article...</p>
-        </div>
+    <main class="flex-1 flex flex-col overflow-hidden">
+      <div v-if="loading" class="flex flex-col items-center py-16">
+        <UIcon name="i-heroicons-arrow-path" class="w-10 h-10 animate-spin text-primary-500" />
+        <p class="mt-4 text-gray-500">Loading article...</p>
+      </div>
 
-        <div v-else-if="error" class="text-center py-16">
-          <UAlert color="error" :description="error" class="mb-4" />
-          <UButton variant="outline" @click="loadArticle">Retry</UButton>
-        </div>
+      <div v-else-if="error" class="text-center py-16 px-4">
+        <UAlert color="error" :description="error" class="mb-4" />
+        <UButton variant="outline" @click="loadArticle">Retry</UButton>
+      </div>
 
-        <template v-else-if="editableArticle">
-          <div class="mb-6">
-            <label class="field-label">Categories</label>
-            <div class="flex flex-wrap gap-2 items-center">
-              <div v-for="(category, index) in editableArticle.categories" :key="index" class="relative">
-                <UInput v-model="editableArticle.categories[index]" @input="markChanged" size="sm" class="w-40 pr-7" />
-                <button class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" @click="removeCategory(index)">
-                  <UIcon name="i-heroicons-x-mark" class="w-3 h-3" />
-                </button>
-              </div>
-              <UButton size="sm" variant="soft" icon="i-heroicons-plus" @click="addCategory">Add Category</UButton>
-            </div>
-          </div>
-
-          <div class="mb-6">
-            <label class="field-label">Title</label>
-            <UInput v-model="editableArticle.title" @input="markChanged" placeholder="Article Title" />
-          </div>
-
-          <div class="mb-6">
-            <label class="field-label">Date</label>
-            <UInput v-model="formattedDate" type="date" @input="markChanged" class="max-w-[220px]" />
-          </div>
-
-          <div class="mb-6">
-            <label class="field-label">Authors</label>
-            <div class="flex flex-col gap-2">
-              <div v-for="(author, index) in editableArticle.authors" :key="index" class="flex items-center gap-2">
-                <UInput v-model="editableArticle.authors[index].title" @input="markChanged" size="sm" placeholder="Author name" class="flex-1" />
-                <UButton icon="i-heroicons-x-mark" size="sm" variant="ghost" @click="removeAuthor(index)" />
-              </div>
-              <div><UButton size="sm" variant="soft" icon="i-heroicons-plus" @click="addAuthor">Add Author</UButton></div>
-            </div>
-          </div>
-
-          <div class="mb-6">
+      <div v-else-if="editableArticle" class="flex flex-1 overflow-hidden">
+        <!-- Left sidebar: image + metadata -->
+        <div class="w-72 flex-shrink-0 border-r border-gray-200 bg-gray-50 overflow-y-auto p-4">
+          <div class="mb-5">
             <label class="field-label">Splash Image</label>
             <div v-if="splashImageUrl" class="mb-3">
-              <img :src="splashImageUrl" :alt="editableArticle.title" class="max-h-[200px] max-w-[350px] rounded mb-2 object-cover" />
+              <img :src="splashImageUrl" :alt="editableArticle.title" class="w-full rounded mb-2 object-cover" />
               <UButton size="sm" color="error" variant="soft" @click="removeImage">Remove Image</UButton>
             </div>
             <input type="file" @change="handleImageUpload" accept="image/*" ref="imageInput" class="hidden" :disabled="uploading" />
@@ -69,6 +37,60 @@
             </UButton>
           </div>
 
+          <div class="border-t border-gray-200 pt-4">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Metadata</p>
+
+            <div class="mb-4">
+              <label class="field-label">Title</label>
+              <UInput v-model="editableArticle.title" @input="markChanged" placeholder="Article Title" />
+            </div>
+
+            <div class="mb-4">
+              <label class="field-label">Categories</label>
+              <div class="flex flex-wrap gap-2 items-center">
+                <div v-for="(category, index) in editableArticle.categories" :key="index" class="relative">
+                  <UInput v-model="editableArticle.categories[index]" @input="markChanged" size="sm" class="w-36 pr-7" />
+                  <button class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" @click="removeCategory(index)">
+                    <UIcon name="i-heroicons-x-mark" class="w-3 h-3" />
+                  </button>
+                </div>
+                <UButton size="sm" variant="soft" icon="i-heroicons-plus" @click="addCategory">Add</UButton>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="field-label">Date</label>
+              <UInput v-model="formattedDate" type="date" @input="markChanged" />
+            </div>
+
+            <div class="mb-4">
+              <label class="field-label">Authors</label>
+              <div class="flex flex-col gap-2">
+                <div v-for="(author, index) in editableArticle.authors" :key="index" class="flex items-center gap-2">
+                  <UInput v-model="editableArticle.authors[index].title" @input="markChanged" size="sm" placeholder="Author name" class="flex-1" />
+                  <UButton icon="i-heroicons-x-mark" size="sm" variant="ghost" @click="removeAuthor(index)" />
+                </div>
+                <div><UButton size="sm" variant="soft" icon="i-heroicons-plus" @click="addAuthor">Add Author</UButton></div>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="field-label">Tags</label>
+              <div class="flex flex-wrap gap-2 items-center">
+                <div v-for="(tag, index) in editableArticle.tags" :key="index" class="relative">
+                  <UInput v-model="editableArticle.tags[index]" @input="markChanged" size="sm" class="w-28 pr-7" />
+                  <button class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" @click="removeTag(index)">
+                    <UIcon name="i-heroicons-x-mark" class="w-3 h-3" />
+                  </button>
+                </div>
+                <UButton size="sm" variant="soft" icon="i-heroicons-plus" @click="addTag">Add</UButton>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right content area: editors -->
+        <div class="flex-1 overflow-y-auto p-6">
           <div class="mb-6">
             <label class="field-label">Abstract / Summary</label>
             <RichTextEditor v-model="editableArticle.abstract" @update:modelValue="markChanged" :minHeight="150" :showAllTools="false" />
@@ -77,19 +99,6 @@
           <div class="mb-6">
             <label class="field-label">Article Content</label>
             <RichTextEditor ref="mainEditorRef" v-model="editorContent" @update:modelValue="markChanged" :minHeight="400" :showAllTools="true" :markdown="true" />
-          </div>
-
-          <div class="mb-6">
-            <label class="field-label">Tags</label>
-            <div class="flex flex-wrap gap-2 items-center">
-              <div v-for="(tag, index) in editableArticle.tags" :key="index" class="relative">
-                <UInput v-model="editableArticle.tags[index]" @input="markChanged" size="sm" class="w-36 pr-7" />
-                <button class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" @click="removeTag(index)">
-                  <UIcon name="i-heroicons-x-mark" class="w-3 h-3" />
-                </button>
-              </div>
-              <UButton size="sm" variant="soft" icon="i-heroicons-plus" @click="addTag">Add Tag</UButton>
-            </div>
           </div>
 
           <div class="mb-6">
@@ -106,7 +115,7 @@
             <label class="field-label">DOI</label>
             <UInput v-model="editableArticle.doi" @input="markChanged" placeholder="DOI..." />
           </div>
-        </template>
+        </div>
       </div>
     </main>
   </div>

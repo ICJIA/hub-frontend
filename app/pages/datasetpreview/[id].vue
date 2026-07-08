@@ -1,120 +1,141 @@
 <template>
   <div class="min-h-screen flex flex-col">
-    <header class="sticky top-0 z-50 bg-[#1a1a2e] h-14 flex items-center px-4 shadow-lg">
-      <div class="flex items-center justify-center gap-5 flex-wrap w-full">
-        <span class="text-xs text-gray-400 uppercase font-medium tracking-wide">Edit Mode</span>
-        <UBadge v-if="isModified" color="warning" variant="solid">Modified</UBadge>
-        <span v-if="hasChanges" class="text-xs text-amber-400 font-medium">Unsaved changes</span>
+    <header class="sticky top-0 z-50 bg-[#1a1a2e] h-14 flex items-center px-4 shadow-lg gap-5">
+      <span class="text-white text-sm font-semibold">Live Preview Mode</span>
+      <span class="text-xs text-gray-400 uppercase font-medium tracking-wide">Edit Mode</span>
+      <UBadge v-if="isModified" color="warning" variant="solid">Modified</UBadge>
+      <span v-if="hasChanges" class="text-xs text-amber-400 font-medium">Unsaved changes</span>
+      <div class="ml-auto flex items-center gap-3">
         <UButton variant="outline" size="sm" icon="i-heroicons-arrow-top-right-on-square" class="text-white border-white/30 hover:bg-white/10" @click="openPreview">Preview</UButton>
         <UButton color="primary" size="sm" :loading="saving" @click="saveDataset">Save Changes</UButton>
       </div>
     </header>
 
-    <main class="flex-1">
-      <div class="max-w-[900px] mx-auto px-4 py-6">
-        <div v-if="loading" class="flex flex-col items-center py-16">
-          <UIcon name="i-heroicons-arrow-path" class="w-10 h-10 animate-spin text-primary-500" />
-          <p class="mt-4 text-gray-500">Loading dataset...</p>
-        </div>
+    <main class="flex-1 flex flex-col overflow-hidden">
+      <div v-if="loading" class="flex flex-col items-center py-16">
+        <UIcon name="i-heroicons-arrow-path" class="w-10 h-10 animate-spin text-primary-500" />
+        <p class="mt-4 text-gray-500">Loading dataset...</p>
+      </div>
 
-        <div v-else-if="error" class="text-center py-16">
-          <UAlert color="error" :description="error" class="mb-4" />
-          <UButton variant="outline" @click="loadDataset">Retry</UButton>
-        </div>
+      <div v-else-if="error" class="text-center py-16 px-4">
+        <UAlert color="error" :description="error" class="mb-4" />
+        <UButton variant="outline" @click="loadDataset">Retry</UButton>
+      </div>
 
-        <template v-else-if="editableDataset">
-          <div class="mb-6">
+      <div v-else-if="editableDataset" class="flex flex-1 overflow-hidden">
+        <!-- Left sidebar: metadata -->
+        <div class="w-72 flex-shrink-0 border-r border-gray-200 bg-gray-50 overflow-y-auto p-4">
+          <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Metadata</p>
+
+          <div class="mb-4">
             <label class="field-label">Title</label>
             <UInput v-model="editableDataset.title" @input="markChanged" placeholder="Dataset title" />
           </div>
 
-          <div class="mb-6">
+          <div class="mb-4">
             <label class="field-label">Slug</label>
             <UInput v-model="editableDataset.slug" @input="markChanged" placeholder="dataset-slug" />
           </div>
 
-          <div class="mb-6">
+          <div class="mb-4">
             <label class="field-label">Date</label>
-            <UInput v-model="formattedDate" type="date" @input="markChanged" class="max-w-[220px]" />
+            <UInput v-model="formattedDate" type="date" @input="markChanged" />
           </div>
 
-          <div class="mb-6">
+          <div class="mb-4">
             <label class="field-label">Flags</label>
-            <div class="flex gap-4">
+            <div class="flex flex-col gap-2">
               <UCheckbox v-model="editableDataset.external" @change="markChanged" label="External" />
               <UCheckbox v-model="editableDataset.project" @change="markChanged" label="Project" />
             </div>
           </div>
 
-          <div class="mb-6">
+          <div class="mb-4">
             <label class="field-label">Categories</label>
             <div class="flex flex-wrap gap-2 items-center">
               <div v-for="(_, index) in editableDataset.categories" :key="index" class="relative">
-                <UInput v-model="editableDataset.categories[index]" @input="markChanged" size="sm" class="w-40 pr-7" />
+                <UInput v-model="editableDataset.categories[index]" @input="markChanged" size="sm" class="w-36 pr-7" />
                 <button class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" @click="removeCategory(index)">
                   <UIcon name="i-heroicons-x-mark" class="w-3 h-3" />
                 </button>
               </div>
-              <UButton size="sm" variant="soft" icon="i-heroicons-plus" @click="addCategory">Add Category</UButton>
+              <UButton size="sm" variant="soft" icon="i-heroicons-plus" @click="addCategory">Add</UButton>
             </div>
           </div>
 
-          <div class="mb-6">
+          <div class="mb-4">
             <label class="field-label">Tags</label>
             <div class="flex flex-wrap gap-2 items-center">
               <div v-for="(_, index) in editableDataset.tags" :key="index" class="relative">
-                <UInput v-model="editableDataset.tags[index]" @input="markChanged" size="sm" class="w-36 pr-7" />
+                <UInput v-model="editableDataset.tags[index]" @input="markChanged" size="sm" class="w-28 pr-7" />
                 <button class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" @click="removeTag(index)">
                   <UIcon name="i-heroicons-x-mark" class="w-3 h-3" />
                 </button>
               </div>
-              <UButton size="sm" variant="soft" icon="i-heroicons-plus" @click="addTag">Add Tag</UButton>
+              <UButton size="sm" variant="soft" icon="i-heroicons-plus" @click="addTag">Add</UButton>
             </div>
           </div>
 
-          <div class="mb-6">
+          <div class="mb-4">
             <label class="field-label">Unit</label>
             <UInput v-model="editableDataset.unit" @input="markChanged" placeholder="e.g. state, county, city" />
           </div>
 
-          <div class="mb-6">
+          <div class="mb-4">
             <label class="field-label">Time Period</label>
-            <div class="flex flex-wrap gap-4">
+            <div class="flex flex-col gap-2">
               <div>
                 <label class="sub-label">Year Type</label>
-                <UInput v-model="editableDataset.timeperiod.yeartype" @input="markChanged" size="sm" placeholder="e.g. calendar, fiscal" class="w-[200px]" />
+                <UInput v-model="editableDataset.timeperiod.yeartype" @input="markChanged" size="sm" placeholder="e.g. calendar, fiscal" />
               </div>
               <div>
                 <label class="sub-label">Year Min</label>
-                <UInput v-model="editableDataset.timeperiod.yearmin" @input="markChanged" size="sm" placeholder="e.g. 2019" class="w-[140px]" />
+                <UInput v-model="editableDataset.timeperiod.yearmin" @input="markChanged" size="sm" placeholder="e.g. 2019" />
               </div>
               <div>
                 <label class="sub-label">Year Max</label>
-                <UInput v-model="editableDataset.timeperiod.yearmax" @input="markChanged" size="sm" placeholder="e.g. 2024" class="w-[140px]" />
+                <UInput v-model="editableDataset.timeperiod.yearmax" @input="markChanged" size="sm" placeholder="e.g. 2024" />
               </div>
             </div>
           </div>
 
-          <div class="mb-6">
+          <div class="mb-4">
             <label class="field-label">Sources</label>
             <div class="flex flex-col gap-3">
-              <div v-for="(source, index) in editableDataset.sources" :key="index" class="border border-gray-200 rounded-lg p-3">
-                <div class="flex flex-wrap gap-3 items-start">
-                  <div class="flex-1">
+              <div v-for="(source, index) in editableDataset.sources" :key="index" class="border border-gray-200 rounded-lg p-3 bg-white">
+                <div class="flex flex-col gap-2">
+                  <div>
                     <label class="sub-label">Title</label>
                     <UInput v-model="source.title" @input="markChanged" size="sm" placeholder="Source title" />
                   </div>
-                  <div class="flex-1">
+                  <div>
                     <label class="sub-label">URL</label>
                     <UInput v-model="source.url" @input="markChanged" size="sm" placeholder="https://..." />
                   </div>
-                  <UButton icon="i-heroicons-x-mark" size="sm" variant="ghost" color="error" @click="removeSource(index)" class="mt-5" />
+                  <UButton icon="i-heroicons-x-mark" size="xs" variant="ghost" color="error" @click="removeSource(index)">Remove</UButton>
                 </div>
               </div>
               <div><UButton size="sm" variant="soft" icon="i-heroicons-plus" @click="addSource">Add Source</UButton></div>
             </div>
           </div>
 
+          <div class="mb-4">
+            <label class="field-label">Data Files</label>
+            <div class="flex flex-col gap-2 mb-3">
+              <div v-for="(file, index) in editableDataset.datafile" :key="file.id || index" class="flex items-center gap-2">
+                <UIcon name="i-heroicons-document" class="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <span class="text-sm truncate flex-1">{{ file.name || `File ${index + 1}` }}</span>
+                <span v-if="file.size" class="text-xs text-gray-400 flex-shrink-0">({{ formatFileSize(file.size) }})</span>
+                <UButton icon="i-heroicons-x-mark" size="xs" variant="ghost" color="error" @click="removeDatafile(index)" />
+              </div>
+            </div>
+            <input type="file" ref="datafileInput" @change="handleDatafileUpload" class="hidden" :disabled="uploading" />
+            <UButton size="sm" variant="outline" icon="i-heroicons-arrow-up-tray" :loading="uploading" @click="triggerDatafileUpload">Upload File</UButton>
+          </div>
+        </div>
+
+        <!-- Right content area -->
+        <div class="flex-1 overflow-y-auto p-6">
           <div class="mb-6">
             <label class="field-label">Description</label>
             <UTextarea v-model="editableDataset.description" @input="markChanged" :rows="8" placeholder="Dataset description..." />
@@ -187,10 +208,10 @@
               <span v-if="!editableDataset.apps.length" class="text-xs text-gray-400">No apps linked</span>
             </div>
             <div class="flex gap-2 mb-2">
-              <UInput v-model="appSearch" @keyup.enter="searchApps" size="sm" placeholder="Search apps by title..." class="max-w-[400px]" />
+              <UInput v-model="appSearch" @keyup.enter="searchApps" size="sm" placeholder="Search apps by title..." class="flex-1" />
               <UButton size="sm" variant="soft" :loading="searchingApps" @click="searchApps">Search</UButton>
             </div>
-            <div v-if="appResults.length" class="border border-gray-200 rounded-lg overflow-hidden max-w-[400px]">
+            <div v-if="appResults.length" class="border border-gray-200 rounded-lg overflow-hidden">
               <div v-for="app in filteredAppResults" :key="app.documentId || app.id" class="px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0" @click="addApp(app)">{{ app.Title || app.title || app.id }}</div>
               <div v-if="!filteredAppResults.length" class="px-3 py-2 text-sm text-gray-400">All results already added</div>
             </div>
@@ -207,30 +228,15 @@
               <span v-if="!editableDataset.articles.length" class="text-xs text-gray-400">No articles linked</span>
             </div>
             <div class="flex gap-2 mb-2">
-              <UInput v-model="articleSearch" @keyup.enter="searchArticles" size="sm" placeholder="Search articles by title..." class="max-w-[400px]" />
+              <UInput v-model="articleSearch" @keyup.enter="searchArticles" size="sm" placeholder="Search articles by title..." class="flex-1" />
               <UButton size="sm" variant="soft" :loading="searchingArticles" @click="searchArticles">Search</UButton>
             </div>
-            <div v-if="articleResults.length" class="border border-gray-200 rounded-lg overflow-hidden max-w-[400px]">
+            <div v-if="articleResults.length" class="border border-gray-200 rounded-lg overflow-hidden">
               <div v-for="article in filteredArticleResults" :key="article.documentId || article.id" class="px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0" @click="addArticle(article)">{{ article.Title || article.title || article.id }}</div>
               <div v-if="!filteredArticleResults.length" class="px-3 py-2 text-sm text-gray-400">All results already added</div>
             </div>
           </div>
-
-          <!-- Data Files -->
-          <div class="mb-6">
-            <label class="field-label">Data Files</label>
-            <div class="flex flex-col gap-2 mb-3">
-              <div v-for="(file, index) in editableDataset.datafile" :key="file.id || index" class="flex items-center gap-2">
-                <UIcon name="i-heroicons-document" class="w-4 h-4 text-gray-400" />
-                <span class="text-sm">{{ file.name || `File ${index + 1}` }}</span>
-                <span v-if="file.size" class="text-xs text-gray-400">({{ formatFileSize(file.size) }})</span>
-                <UButton icon="i-heroicons-x-mark" size="xs" variant="ghost" color="error" @click="removeDatafile(index)" />
-              </div>
-            </div>
-            <input type="file" ref="datafileInput" @change="handleDatafileUpload" class="hidden" :disabled="uploading" />
-            <UButton size="sm" variant="outline" icon="i-heroicons-arrow-up-tray" :loading="uploading" @click="triggerDatafileUpload">Upload File</UButton>
-          </div>
-        </template>
+        </div>
       </div>
     </main>
   </div>

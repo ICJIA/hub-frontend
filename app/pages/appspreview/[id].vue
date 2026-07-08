@@ -1,100 +1,36 @@
 <template>
   <div class="min-h-screen flex flex-col">
-    <header class="sticky top-0 z-50 bg-[#1a1a2e] h-14 flex items-center px-4 shadow-lg">
-      <div class="flex items-center justify-center gap-5 flex-wrap w-full">
-        <span class="text-xs text-gray-400 uppercase font-medium tracking-wide">Edit Mode</span>
-        <UBadge v-if="isModified" color="warning" variant="solid">Modified</UBadge>
-        <span v-if="hasChanges" class="text-xs text-amber-400 font-medium">Unsaved changes</span>
+    <header class="sticky top-0 z-50 bg-[#1a1a2e] h-14 flex items-center px-4 shadow-lg gap-5">
+      <span class="text-white text-sm font-semibold">Live Preview Mode</span>
+      <span class="text-xs text-gray-400 uppercase font-medium tracking-wide">Edit Mode</span>
+      <UBadge v-if="isModified" color="warning" variant="solid">Modified</UBadge>
+      <span v-if="hasChanges" class="text-xs text-amber-400 font-medium">Unsaved changes</span>
+      <div class="ml-auto flex items-center gap-3">
         <UButton variant="outline" size="sm" icon="i-heroicons-arrow-top-right-on-square" class="text-white border-white/30 hover:bg-white/10" @click="openPreview">Preview</UButton>
         <UButton color="primary" size="sm" :loading="saving" @click="saveApp">Save Changes</UButton>
       </div>
     </header>
 
-    <main class="flex-1">
-      <div class="max-w-[900px] mx-auto px-4 py-6">
-        <div v-if="loading" class="flex flex-col items-center py-16">
-          <UIcon name="i-heroicons-arrow-path" class="w-10 h-10 animate-spin text-primary-500" />
-          <p class="mt-4 text-gray-500">Loading app...</p>
-        </div>
+    <main class="flex-1 flex flex-col overflow-hidden">
+      <div v-if="loading" class="flex flex-col items-center py-16">
+        <UIcon name="i-heroicons-arrow-path" class="w-10 h-10 animate-spin text-primary-500" />
+        <p class="mt-4 text-gray-500">Loading app...</p>
+      </div>
 
-        <div v-else-if="error" class="text-center py-16">
-          <UAlert color="error" :description="error" class="mb-4" />
-          <UButton variant="outline" @click="loadApp">Retry</UButton>
-        </div>
+      <div v-else-if="error" class="text-center py-16 px-4">
+        <UAlert color="error" :description="error" class="mb-4" />
+        <UButton variant="outline" @click="loadApp">Retry</UButton>
+      </div>
 
-        <template v-else-if="editableApp">
-          <h2 class="text-xl font-bold mb-6">App Editor</h2>
-
-          <div class="mb-6">
-            <label class="field-label">Title</label>
-            <UInput v-model="editableApp.title" @input="markChanged" placeholder="App title" />
-          </div>
-
-          <div class="mb-6">
-            <label class="field-label">Slug</label>
-            <UInput v-model="editableApp.slug" @input="markChanged" placeholder="app-slug" />
-          </div>
-
-          <div class="mb-6">
-            <label class="field-label">Date</label>
-            <UInput v-model="formattedDate" type="date" @input="markChanged" class="max-w-[220px]" />
-          </div>
-
-          <div class="mb-6">
-            <label class="field-label">Flags</label>
-            <UCheckbox v-model="editableApp.external" label="External" @change="markChanged" />
-          </div>
-
-          <div class="mb-6">
-            <label class="field-label">URL</label>
-            <UInput v-model="editableApp.url" @input="markChanged" placeholder="https://..." />
-          </div>
-
-          <div class="mb-6">
-            <label class="field-label">Categories</label>
-            <div class="flex flex-wrap gap-2 items-center">
-              <div v-for="(cat, index) in editableApp.categories" :key="index" class="relative">
-                <UInput v-model="editableApp.categories[index]" @input="markChanged" size="sm" class="w-40 pr-7" />
-                <button class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" @click="removeCategory(index)">
-                  <UIcon name="i-heroicons-x-mark" class="w-3 h-3" />
-                </button>
-              </div>
-              <UButton size="sm" variant="soft" icon="i-heroicons-plus" @click="addCategory">Add Category</UButton>
-            </div>
-          </div>
-
-          <div class="mb-6">
-            <label class="field-label">Tags</label>
-            <div class="flex flex-wrap gap-2 items-center">
-              <div v-for="(tag, index) in editableApp.tags" :key="index" class="relative">
-                <UInput v-model="editableApp.tags[index]" @input="markChanged" size="sm" class="w-36 pr-7" />
-                <button class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" @click="removeTag(index)">
-                  <UIcon name="i-heroicons-x-mark" class="w-3 h-3" />
-                </button>
-              </div>
-              <UButton size="sm" variant="soft" icon="i-heroicons-plus" @click="addTag">Add Tag</UButton>
-            </div>
-          </div>
-
-          <div class="mb-6">
-            <label class="field-label">Contributors</label>
-            <div class="flex flex-col gap-2">
-              <div v-for="(contributor, index) in editableApp.contributors" :key="index" class="flex items-center gap-2">
-                <UInput v-model="contributor.title" @input="markChanged" size="sm" placeholder="Contributor title" class="flex-1" />
-                <UButton icon="i-heroicons-x-mark" size="sm" variant="ghost" @click="removeContributor(index)" />
-              </div>
-              <div><UButton size="sm" variant="soft" icon="i-heroicons-plus" @click="addContributor">Add Contributor</UButton></div>
-            </div>
-          </div>
-
-          <div class="mb-6">
+      <div v-else-if="editableApp" class="flex flex-1 overflow-hidden">
+        <!-- Left sidebar: image + metadata -->
+        <div class="w-72 flex-shrink-0 border-r border-gray-200 bg-gray-50 overflow-y-auto p-4">
+          <div class="mb-5">
             <label class="field-label">Image</label>
-            <div v-if="editableApp.image" class="flex items-center gap-3 mb-3">
-              <img :src="imageUrl(editableApp.image)" alt="App image" class="max-h-[120px] max-w-[180px] rounded object-cover flex-shrink-0" />
-              <div>
-                <div class="text-sm mb-1">{{ editableApp.image.name }}</div>
-                <UButton size="sm" color="error" variant="soft" @click="removeImage">Remove</UButton>
-              </div>
+            <div v-if="editableApp.image" class="mb-3">
+              <img :src="imageUrl(editableApp.image)" alt="App image" class="w-full rounded mb-2 object-cover" />
+              <div class="text-xs text-gray-500 mb-2 truncate">{{ editableApp.image.name }}</div>
+              <UButton size="sm" color="error" variant="soft" @click="removeImage">Remove</UButton>
             </div>
             <div v-else class="text-sm text-gray-500 mb-2">No image selected</div>
             <input type="file" ref="imageInput" @change="handleImageUpload" class="hidden" accept="image/*" :disabled="uploadingImage" />
@@ -103,6 +39,75 @@
             </UButton>
           </div>
 
+          <div class="border-t border-gray-200 pt-4">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Metadata</p>
+
+            <div class="mb-4">
+              <label class="field-label">Title</label>
+              <UInput v-model="editableApp.title" @input="markChanged" placeholder="App title" />
+            </div>
+
+            <div class="mb-4">
+              <label class="field-label">Slug</label>
+              <UInput v-model="editableApp.slug" @input="markChanged" placeholder="app-slug" />
+            </div>
+
+            <div class="mb-4">
+              <label class="field-label">Date</label>
+              <UInput v-model="formattedDate" type="date" @input="markChanged" />
+            </div>
+
+            <div class="mb-4">
+              <label class="field-label">Flags</label>
+              <UCheckbox v-model="editableApp.external" label="External" @change="markChanged" />
+            </div>
+
+            <div class="mb-4">
+              <label class="field-label">URL</label>
+              <UInput v-model="editableApp.url" @input="markChanged" placeholder="https://..." />
+            </div>
+
+            <div class="mb-4">
+              <label class="field-label">Categories</label>
+              <div class="flex flex-wrap gap-2 items-center">
+                <div v-for="(cat, index) in editableApp.categories" :key="index" class="relative">
+                  <UInput v-model="editableApp.categories[index]" @input="markChanged" size="sm" class="w-36 pr-7" />
+                  <button class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" @click="removeCategory(index)">
+                    <UIcon name="i-heroicons-x-mark" class="w-3 h-3" />
+                  </button>
+                </div>
+                <UButton size="sm" variant="soft" icon="i-heroicons-plus" @click="addCategory">Add</UButton>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="field-label">Tags</label>
+              <div class="flex flex-wrap gap-2 items-center">
+                <div v-for="(tag, index) in editableApp.tags" :key="index" class="relative">
+                  <UInput v-model="editableApp.tags[index]" @input="markChanged" size="sm" class="w-28 pr-7" />
+                  <button class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" @click="removeTag(index)">
+                    <UIcon name="i-heroicons-x-mark" class="w-3 h-3" />
+                  </button>
+                </div>
+                <UButton size="sm" variant="soft" icon="i-heroicons-plus" @click="addTag">Add</UButton>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="field-label">Contributors</label>
+              <div class="flex flex-col gap-2">
+                <div v-for="(contributor, index) in editableApp.contributors" :key="index" class="flex items-center gap-2">
+                  <UInput v-model="contributor.title" @input="markChanged" size="sm" placeholder="Contributor title" class="flex-1" />
+                  <UButton icon="i-heroicons-x-mark" size="sm" variant="ghost" @click="removeContributor(index)" />
+                </div>
+                <div><UButton size="sm" variant="soft" icon="i-heroicons-plus" @click="addContributor">Add Contributor</UButton></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right content area -->
+        <div class="flex-1 overflow-y-auto p-6">
           <div class="mb-6">
             <label class="field-label">Description</label>
             <UTextarea v-model="editableApp.description" @input="markChanged" :rows="6" placeholder="App description..." />
@@ -179,7 +184,7 @@
               <div v-if="!filteredDatasetResults.length" class="px-3 py-2 text-sm text-gray-400">All results already added</div>
             </div>
           </div>
-        </template>
+        </div>
       </div>
     </main>
   </div>
